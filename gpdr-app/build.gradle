@@ -30,8 +30,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // Database
-    runtimeOnly 'com.h2database:h2' // Pour le développement
-    // runtimeOnly 'org.postgresql:postgresql' // Pour la production (décommentez si nécessaire)
+
+     runtimeOnly 'org.postgresql:postgresql' // Pour la production (décommentez si nécessaire)
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
