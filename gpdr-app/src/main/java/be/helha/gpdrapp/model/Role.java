@@ -21,11 +21,11 @@ public class Role {
     @Column(name = "role", length = 10, nullable = false, unique = true)
     private String role;
 
-    // Relation simple avec les utilisateurs
+    // Simple relation with users
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
-    private List<Utilisateur> utilisateurs;
+    private List<User> users;
 
-    // Constructeur pour faciliter la création
+    // Constructor for easy creation
     public Role(String role) {
         this.role = role;
     }
