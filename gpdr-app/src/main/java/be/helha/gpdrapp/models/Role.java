@@ -1,4 +1,4 @@
-package be.helha.gpdrapp.model;
+package be.helha.gpdrapp.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
