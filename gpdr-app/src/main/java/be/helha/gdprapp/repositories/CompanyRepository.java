@@ -1,6 +1,6 @@
-package be.helha.gpdrapp.repositories;
+package be.helha.gdprapp.repositories;
 
-import be.helha.gpdrapp.models.Company;
+import be.helha.gdprapp.models.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package be.helha.gpdrapp.models;
+package be.helha.gdprapp.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,8 +1,8 @@
-package be.helha.gpdrapp.repositories;
+package be.helha.gdprapp.repositories;
 
-import be.helha.gpdrapp.models.GDPRRequest;
-import be.helha.gpdrapp.models.User;
-import be.helha.gpdrapp.models.Company;
+import be.helha.gdprapp.models.GDPRRequest;
+import be.helha.gdprapp.models.User;
+import be.helha.gdprapp.models.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
