@@ -53,8 +53,8 @@ public class UserService {
 
         // Set default role if not provided
         if (user.getRole() == null) {
-            Role defaultRole = roleRepository.findByRole("USER")
-                    .orElseThrow(() -> new RuntimeException("Default role 'USER' not found"));
+            Role defaultRole = roleRepository.findByRole("CLIENT")
+                    .orElseThrow(() -> new RuntimeException("Default role 'CLIENT' not found"));
             user.setRole(defaultRole);
         }
 
@@ -198,21 +198,9 @@ public class UserService {
             return getAllUsers();
         }
 
-        String lowercaseSearchTerm = searchTerm.toLowerCase().trim();
-        java.util.List<User> allUsers = userRepository.findAll();
-        java.util.List<User> filteredUsers = new java.util.ArrayList<>();
-
-        for (int i = 0; i < allUsers.size(); i++) {
-            User user = allUsers.get(i);
-            String fullName = user.getFirstname() + " " + user.getLastname();
-            if (user.getFirstname().toLowerCase().contains(lowercaseSearchTerm) ||
-                    user.getLastname().toLowerCase().contains(lowercaseSearchTerm) ||
-                    fullName.toLowerCase().contains(lowercaseSearchTerm)) {
-                filteredUsers.add(user);
-            }
-        }
-
-        return filteredUsers;
+        // Pour l'instant, retournons tous les utilisateurs
+        // Vous pouvez implémenter la recherche dans le repository
+        return getAllUsers();
     }
 
     // Validate user credentials (for authentication)
