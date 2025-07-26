@@ -3,6 +3,8 @@ package be.helha.gdprapp.repositories;
 import be.helha.gdprapp.models.Role;
 import be.helha.gdprapp.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Repository;
 
@@ -27,5 +29,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     // Find users by role name (alternative method)
     List<User> findByRoleRole(String roleName);
 
-    UserDetails loadUserByUsername(String username);
+    // Custom query for UserDetailsService - assuming email is used as username
+    @Query("SELECT u FROM User u WHERE u.email = :username")
+    Optional<User> findByUsername(@Param("username") String username);
 }
