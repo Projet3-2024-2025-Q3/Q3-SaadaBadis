@@ -70,14 +70,29 @@ public class SpringSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+// Dans votre SpringSecurityConfig.java, remplacez la méthode corsConfigurationSource par :
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:4200")); // Angular frontend
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        // Autoriser toutes les origines pour les tests (à modifier en production)
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+
+        // Autoriser tous les headers
         configuration.setAllowedHeaders(Arrays.asList("*"));
+
+        // Autoriser toutes les méthodes HTTP
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
+        // Autoriser les credentials
         configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+
+        // Exposer les headers d'autorisation
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+
+        // Configurer le cache preflight
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
