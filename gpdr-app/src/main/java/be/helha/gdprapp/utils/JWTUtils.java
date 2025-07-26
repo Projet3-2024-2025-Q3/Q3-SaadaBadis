@@ -33,14 +33,14 @@ public class JWTUtils {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // Generate token with UserDetails (for compatibility with controllers)
+    // Generate token with UserDetails (for Spring Security)
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", userDetails.getAuthorities().toString());
         return createToken(claims, userDetails.getUsername(), expirationToken);
     }
 
-    // Generate token with User entity
+    // Generate token with our User entity
     public String generateToken(be.helha.gdprapp.models.User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", user.getRole().getRole());
@@ -49,24 +49,14 @@ public class JWTUtils {
         return createToken(claims, user.getEmail(), expirationToken);
     }
 
-    // Generate access token with Spring Security User
-    public String generateAccessToken(org.springframework.security.core.userdetails.User user) {
-        return generateToken(user, expirationToken);
-    }
-
-    // Generate refresh token with Spring Security User
-    public String generateRefreshToken(org.springframework.security.core.userdetails.User user) {
-        return generateToken(user, expirationRefreshToken);
-    }
-
-    // Private method to generate token with Spring Security User
-    private String generateToken(org.springframework.security.core.userdetails.User user, long expiration) {
+    // Generate token with email and role (simple version)
+    public String generateToken(String email, String role) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", user.getAuthorities().toString());
-        return createToken(claims, user.getUsername(), expiration);
+        claims.put("roles", role);
+        return createToken(claims, email, expirationToken);
     }
 
-    // Create token with claims, subject and expiration (JJWT 0.12.x API)
+    // Create token with claims, subject and expiration
     private String createToken(Map<String, Object> claims, String subject, long expiration) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
@@ -96,7 +86,7 @@ public class JWTUtils {
         return claimsResolver.apply(claims);
     }
 
-    // Extract all claims from token (JJWT 0.12.x API)
+    // Extract all claims from token
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -130,7 +120,7 @@ public class JWTUtils {
         }
     }
 
-    // Parse token and return claims (JJWT 0.12.x API)
+    // Parse token and return claims
     public Claims parseToken(String token) throws JwtException {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -167,20 +157,5 @@ public class JWTUtils {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    // Get remaining time before token expires (in milliseconds)
-    public long getTokenRemainingTime(String token) {
-        try {
-            Date expiration = extractExpiration(token);
-            return expiration.getTime() - System.currentTimeMillis();
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
-    // Check if token needs refresh (expires in less than 1 hour)
-    public boolean shouldRefreshToken(String token) {
-        return getTokenRemainingTime(token) < 3600000; // 1 hour in milliseconds
     }
 }

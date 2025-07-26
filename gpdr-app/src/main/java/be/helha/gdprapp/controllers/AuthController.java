@@ -30,18 +30,26 @@ public class AuthController {
     // Register new user
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
+        System.out.println("=== REGISTER REQUEST RECEIVED ===");
+        System.out.println("Request: " + registerRequest);
+
         try {
             // Check if email already exists
             if (authService.existsByEmail(registerRequest.getEmail())) {
+                System.out.println("Email already exists: " + registerRequest.getEmail());
                 return ResponseEntity.badRequest()
                         .body(new MessageResponse("Error: Email is already in use!"));
             }
 
             // Create new user
+            System.out.println("Creating new user...");
             User user = authService.registerUser(registerRequest);
+            System.out.println("User created successfully: " + user.getEmail());
 
             return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
         } catch (Exception e) {
+            System.out.println("Error during registration: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest()
                     .body(new MessageResponse("Error: " + e.getMessage()));
         }
@@ -58,13 +66,11 @@ public class AuthController {
                             loginRequest.getPassword())
             );
 
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-            // Generate JWT token
-            String jwt = jwtUtils.generateToken(userDetails);
-
-            // Get user information
+            // Get user information from our service
             User user = authService.getUserByEmail(loginRequest.getEmail());
+
+            // Generate JWT token using our User entity
+            String jwt = jwtUtils.generateToken(user);
 
             return ResponseEntity.ok(new JwtResponse(jwt,
                     user.getIdUser(),
@@ -195,6 +201,17 @@ public class AuthController {
         public void setPassword(String password) { this.password = password; }
         public Integer getRoleId() { return roleId; }
         public void setRoleId(Integer roleId) { this.roleId = roleId; }
+
+        @Override
+        public String toString() {
+            return "RegisterRequest{" +
+                    "firstname='" + firstname + '\'' +
+                    ", lastname='" + lastname + '\'' +
+                    ", email='" + email + '\'' +
+                    ", password='[HIDDEN]'" +
+                    ", roleId=" + roleId +
+                    '}';
+        }
     }
 
     public static class ChangePasswordRequest {
