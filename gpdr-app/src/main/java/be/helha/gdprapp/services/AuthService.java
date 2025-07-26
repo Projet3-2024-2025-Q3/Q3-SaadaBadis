@@ -33,14 +33,14 @@ public class AuthService {
             throw new RuntimeException("Email is already in use: " + registerRequest.getEmail());
         }
 
-        // Get role (default to USER if not specified)
+        // Get role (default to CLIENT if not specified)
         Role role;
         if (registerRequest.getRoleId() != null) {
             role = roleRepository.findById(registerRequest.getRoleId())
                     .orElseThrow(() -> new RuntimeException("Role not found with id: " + registerRequest.getRoleId()));
         } else {
-            role = roleRepository.findByRole("USER")
-                    .orElseThrow(() -> new RuntimeException("Default role 'USER' not found"));
+            role = roleRepository.findByRole("CLIENT")
+                    .orElseThrow(() -> new RuntimeException("Default role 'CLIENT' not found"));
         }
 
         // Create new user
@@ -197,14 +197,16 @@ public class AuthService {
         long activeUsers = userRepository.findByActiveTrue().size();
         long inactiveUsers = totalUsers - activeUsers;
         long adminUsers = userRepository.findByRoleRole("ADMIN").size();
-        long regularUsers = userRepository.findByRoleRole("USER").size();
+        long clientUsers = userRepository.findByRoleRole("CLIENT").size();
+        long gerantUsers = userRepository.findByRoleRole("GERANT").size();
 
         UserAuthStatistics stats = new UserAuthStatistics();
         stats.setTotalUsers(totalUsers);
         stats.setActiveUsers(activeUsers);
         stats.setInactiveUsers(inactiveUsers);
         stats.setAdminUsers(adminUsers);
-        stats.setRegularUsers(regularUsers);
+        stats.setClientUsers(clientUsers);
+        stats.setGerantUsers(gerantUsers);
 
         // Calculate percentages
         if (totalUsers > 0) {
@@ -308,7 +310,8 @@ public class AuthService {
         private long activeUsers;
         private long inactiveUsers;
         private long adminUsers;
-        private long regularUsers;
+        private long clientUsers;
+        private long gerantUsers;
         private double activeUserPercentage;
         private double adminUserPercentage;
 
@@ -325,8 +328,11 @@ public class AuthService {
         public long getAdminUsers() { return adminUsers; }
         public void setAdminUsers(long adminUsers) { this.adminUsers = adminUsers; }
 
-        public long getRegularUsers() { return regularUsers; }
-        public void setRegularUsers(long regularUsers) { this.regularUsers = regularUsers; }
+        public long getClientUsers() { return clientUsers; }
+        public void setClientUsers(long clientUsers) { this.clientUsers = clientUsers; }
+
+        public long getGerantUsers() { return gerantUsers; }
+        public void setGerantUsers(long gerantUsers) { this.gerantUsers = gerantUsers; }
 
         public double getActiveUserPercentage() { return activeUserPercentage; }
         public void setActiveUserPercentage(double activeUserPercentage) { this.activeUserPercentage = activeUserPercentage; }
