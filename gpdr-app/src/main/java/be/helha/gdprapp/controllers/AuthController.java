@@ -3,6 +3,9 @@ package be.helha.gdprapp.controllers;
 import be.helha.gdprapp.models.User;
 import be.helha.gdprapp.services.AuthService;
 import be.helha.gdprapp.utils.JWTUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
+@Tag(name = "Authentication", description = "Authentication management APIs")
 public class AuthController {
 
     @Autowired
@@ -29,6 +33,7 @@ public class AuthController {
 
     // Register new user
     @PostMapping("/register")
+    @Operation(summary = "Register a new user", description = "Create a new user account")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
         System.out.println("=== REGISTER REQUEST RECEIVED ===");
         System.out.println("Request: " + registerRequest);
@@ -57,6 +62,7 @@ public class AuthController {
 
     // Login user
     @PostMapping("/login")
+    @Operation(summary = "Login user", description = "Authenticate user and return JWT token")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
         try {
             // Authenticate user
@@ -147,9 +153,17 @@ public class AuthController {
 
     // Change password
     @PostMapping("/change-password")
+    @Operation(summary = "Change user password", description = "Change the current user's password",
+            security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request,
                                             Authentication authentication) {
         try {
+            // Vérifier que l'authentification n'est pas null
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new MessageResponse("Error: Not authenticated"));
+            }
+
             String userEmail = authentication.getName();
             authService.changePassword(userEmail, request.getOldPassword(), request.getNewPassword());
             return ResponseEntity.ok(new MessageResponse("Password changed successfully!"));
