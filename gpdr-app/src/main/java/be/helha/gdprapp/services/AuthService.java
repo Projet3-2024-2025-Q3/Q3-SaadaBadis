@@ -23,6 +23,12 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private PasswordGeneratorService passwordGeneratorService;
+
+    @Autowired
+    private EmailService emailService;
+
     // Register new user
     public User registerUser(RegisterRequest registerRequest) {
         // Validate registration data
@@ -83,22 +89,93 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    // Request password reset (basic implementation)
+    // Request password reset (generate new password and send by email)
     public void requestPasswordReset(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
         if (!user.getActive()) {
-            throw new RuntimeException("Account is deactivated");
+            throw new RuntimeException("Account is deactivated. Please contact support.");
         }
 
-        // In a real implementation, you would:
-        // 1. Generate a reset token
-        // 2. Store it in database with expiration
-        // 3. Send email with reset link
-        // For now, we'll just log it
-        System.out.println("Password reset requested for user: " + email);
-        // TODO: Implement actual password reset functionality
+        // DEBUG: Afficher les informations de l'utilisateur
+        System.out.println("=== USER DEBUG INFO ===");
+        System.out.println("User ID: " + user.getIdUser());
+        System.out.println("User Email: " + user.getEmail());
+        System.out.println("User Firstname: '" + user.getFirstname() + "'");
+        System.out.println("User Lastname: '" + user.getLastname() + "'");
+        System.out.println("User Active: " + user.getActive());
+        if (user.getRole() != null) {
+            System.out.println("User Role: " + user.getRole().getRole());
+        } else {
+            System.out.println("User Role: NULL");
+        }
+        System.out.println("=======================");
+
+        // Generate new random password
+        String newPassword = passwordGeneratorService.generateRandomPassword(12);
+
+        // Update user password in database
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Send email with new password
+        sendPasswordResetEmail(user, newPassword);
+
+        System.out.println("Password reset completed for user: " + email);
+    }
+
+    // Send password reset email with new password
+    private void sendPasswordResetEmail(User user, String newPassword) {
+        try {
+            // DEBUG: Vérifier les données avant l'envoi d'email
+            System.out.println("=== EMAIL DEBUG INFO ===");
+            System.out.println("Sending email to: " + user.getEmail());
+
+            String firstName = user.getFirstname();
+            String lastName = user.getLastname();
+
+            System.out.println("First name: '" + firstName + "' (length: " + (firstName != null ? firstName.length() : "null") + ")");
+            System.out.println("Last name: '" + lastName + "' (length: " + (lastName != null ? lastName.length() : "null") + ")");
+            System.out.println("New password: " + newPassword);
+
+            // Gérer les noms null ou vides
+            String displayName;
+            if (firstName != null && !firstName.trim().isEmpty()) {
+                displayName = firstName.trim();
+                if (lastName != null && !lastName.trim().isEmpty()) {
+                    displayName += " " + lastName.trim();
+                }
+            } else {
+                displayName = "User"; // Nom par défaut
+            }
+
+            System.out.println("Display name: '" + displayName + "'");
+            System.out.println("========================");
+
+            // Envoyer un email texte simple avec vérification
+            String emailText = "Hello " + displayName + ",\n\n" +
+                    "Your password has been reset for your GDPR Application account.\n\n" +
+                    "Email: " + user.getEmail() + "\n" +
+                    "New temporary password: " + newPassword + "\n\n" +
+                    "IMPORTANT INSTRUCTIONS:\n" +
+                    "1. Login with this new password\n" +
+                    "2. Change your password immediately after login\n" +
+                    "3. Do not share this password with anyone\n\n" +
+                    "Login URL: http://localhost:8080/login\n\n" +
+                    "Best regards,\n" +
+                    "GDPR Application Team";
+
+            String subject = "Password Reset - New Password for GDPR Application";
+            emailService.sendSimpleEmail(user.getEmail(), subject, emailText);
+
+            System.out.println("Email sent successfully!");
+
+        } catch (Exception e) {
+            System.err.println("Failed to send password reset email: " + e.getMessage());
+            e.printStackTrace();
+            // Ne pas lever d'exception pour ne pas bloquer le processus
+        }
     }
 
     // Reset password with token (basic implementation)

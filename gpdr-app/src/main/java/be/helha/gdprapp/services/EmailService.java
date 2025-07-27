@@ -1,8 +1,8 @@
 package be.helha.gdprapp.services;
 
+import be.helha.gdprapp.models.User;
 import be.helha.gdprapp.models.Company;
 import be.helha.gdprapp.models.GDPRRequest;
-import be.helha.gdprapp.models.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,16 +84,17 @@ public class EmailService {
         sendHtmlEmail(user.getEmail(), subject, "welcome-email", context);
     }
 
-    // Send password reset email
-    public void sendPasswordResetEmail(User user, String resetToken) {
+    // Send password reset email with new password
+    public void sendPasswordResetWithNewPassword(User user, String newPassword) {
         Context context = new Context();
         context.setVariable("user", user);
-        context.setVariable("resetToken", resetToken);
+        context.setVariable("newPassword", newPassword);
         context.setVariable("appName", appName);
-        context.setVariable("resetUrl", appUrl + "/reset-password?token=" + resetToken);
-        context.setVariable("expirationTime", "24 hours");
+        context.setVariable("loginUrl", appUrl + "/login");
+        context.setVariable("supportEmail", fromEmail);
+        context.setVariable("resetDate", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
 
-        String subject = "Password Reset Request - " + appName;
+        String subject = "Password Reset - New Password for " + appName;
         sendHtmlEmail(user.getEmail(), subject, "password-reset-email", context);
     }
 
