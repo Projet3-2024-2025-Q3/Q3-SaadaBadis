@@ -37,13 +37,29 @@ public class User {
     @JoinColumn(name = "id_role", nullable = false)
     private Role role;
 
-    // Constructor for convenience
+    // Optional relation with Company (for GERANT users)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_company", nullable = true)
+    private Company company;
+
+    // Constructor for convenience (without company)
     public User(String firstname, String lastname, String email, String password, Role role) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.active = true;
+    }
+
+    // Constructor with company
+    public User(String firstname, String lastname, String email, String password, Role role, Company company) {
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.company = company;
         this.active = true;
     }
 }
