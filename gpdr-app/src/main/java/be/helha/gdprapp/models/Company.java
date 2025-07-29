@@ -25,7 +25,7 @@ public class Company {
     @Column(name = "email", length = 50, nullable = false)
     private String email;
 
-    
+
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<User> managers;
