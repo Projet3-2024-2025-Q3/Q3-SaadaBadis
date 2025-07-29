@@ -1,4 +1,4 @@
-package be.helha.gpdrapp;
+package be.helha.gdprapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
