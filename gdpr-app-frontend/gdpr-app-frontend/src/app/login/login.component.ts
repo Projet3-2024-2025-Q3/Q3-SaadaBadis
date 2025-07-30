@@ -1,3 +1,4 @@
+// src/app/login/login.component.ts - Version mise à jour
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +13,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+
+// Services
+import { AuthService, LoginRequest } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +31,8 @@ import { MatDividerModule } from '@angular/material/divider';
     MatIconModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
-    MatDividerModule
+    MatDividerModule,
+    MatSnackBarModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
@@ -42,7 +48,16 @@ export class LoginComponent {
   errorMessage: string = '';
   isLoading: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private snackBar: MatSnackBar
+  ) {
+    // Rediriger si déjà connecté
+    if (this.authService.isAuthenticated()) {
+      this.redirectToDashboard();
+    }
+  }
 
   /**
    * Gestionnaire de soumission du formulaire de connexion
@@ -51,32 +66,48 @@ export class LoginComponent {
     // Empêcher les soumissions multiples
     if (this.isLoading) return;
 
+    // Validation côté client
+    if (!this.isFormValid()) {
+      this.showError('Veuillez remplir tous les champs correctement');
+      return;
+    }
+
     // Réinitialiser l'état
     this.isLoading = true;
     this.errorMessage = '';
 
-    console.log('Tentative de connexion:', {
-      email: this.email,
-      password: '***',
-      rememberMe: this.rememberMe
-    });
+    const loginData: LoginRequest = {
+      email: this.email.trim(),
+      password: this.password
+    };
 
-    // TODO: Remplacer par l'appel au service d'authentification
-    // Simulation d'une requête d'authentification
-    setTimeout(() => {
-      this.isLoading = false;
-      
-      // Simulation d'une validation simple (à remplacer par votre logique)
-      if (this.email === 'admin@gdpr.com' && this.password === 'admin123') {
-        console.log('Connexion réussie !');
-        // TODO: Sauvegarder le token d'authentification
-        // TODO: Rediriger vers le dashboard
-        // this.router.navigate(['/dashboard']);
-        this.showSuccessMessage();
-      } else {
-        this.errorMessage = 'Email ou mot de passe incorrect. Essayez admin@gdpr.com / admin123';
+    console.log('Tentative de connexion pour:', loginData.email);
+
+    // Appel au service d'authentification
+    this.authService.login(loginData).subscribe({
+      next: (response) => {
+        console.log('Connexion réussie:', response);
+        this.showSuccess(`Bienvenue ${response.firstname} !`);
+        
+        // Gérer "Se souvenir de moi"
+        if (this.rememberMe) {
+          // TODO: Implémenter la persistance du token
+          console.log('Option "Se souvenir de moi" activée');
+        }
+
+        // Rediriger selon le rôle
+        this.redirectBasedOnRole(response.role);
+      },
+      error: (error) => {
+        console.error('Erreur de connexion:', error);
+        this.isLoading = false;
+        this.errorMessage = error.message || 'Erreur de connexion';
+        this.showError(this.errorMessage);
+      },
+      complete: () => {
+        this.isLoading = false;
       }
-    }, 2000);
+    });
   }
 
   /**
@@ -84,11 +115,10 @@ export class LoginComponent {
    */
   onForgotPassword(): void {
     console.log('Redirection vers la page mot de passe oublié');
-    // TODO: Implémenter la navigation vers la page de récupération
+    // TODO: Créer le composant forgot-password
     // this.router.navigate(['/forgot-password']);
     
-    // Pour le moment, afficher une notification Material
-    this.showInfoMessage('Fonctionnalité "Mot de passe oublié" - À implémenter');
+    this.showInfo('Fonctionnalité "Mot de passe oublié" - À implémenter');
   }
 
   /**
@@ -96,11 +126,10 @@ export class LoginComponent {
    */
   onRegister(): void {
     console.log('Redirection vers la page d\'inscription');
-    // TODO: Implémenter la navigation vers la page d'inscription
+    // TODO: Créer le composant register
     // this.router.navigate(['/register']);
     
-    // Pour le moment, afficher une notification Material
-    this.showInfoMessage('Fonctionnalité "S\'inscrire" - À implémenter');
+    this.showInfo('Fonctionnalité "S\'inscrire" - À implémenter');
   }
 
   /**
@@ -131,7 +160,7 @@ export class LoginComponent {
    */
   isEmailValid(): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(this.email);
+    return emailRegex.test(this.email.trim());
   }
 
   /**
@@ -149,26 +178,82 @@ export class LoginComponent {
   }
 
   /**
-   * Afficher un message de succès
-   */
-  private showSuccessMessage(): void {
-    // TODO: Implémenter avec MatSnackBar pour un meilleur UX
-    alert('Connexion réussie ! Redirection vers le dashboard...');
-  }
-
-  /**
-   * Afficher un message d'information
-   */
-  private showInfoMessage(message: string): void {
-    // TODO: Implémenter avec MatSnackBar pour un meilleur UX
-    alert(message);
-  }
-
-  /**
    * Pré-remplir les champs pour les tests
    */
   fillDemoCredentials(): void {
     this.email = 'admin@gdpr.com';
     this.password = 'admin123';
+  }
+
+  // ================== MÉTHODES PRIVÉES ==================
+
+  /**
+   * Rediriger selon le rôle utilisateur
+   */
+  private redirectBasedOnRole(role: string): void {
+    // Délai pour permettre à l'utilisateur de voir le message de succès
+    setTimeout(() => {
+      switch (role) {
+        case 'ADMIN':
+          this.router.navigate(['/admin/dashboard']);
+          break;
+        case 'GERANT':
+          this.router.navigate(['/manager/dashboard']);
+          break;
+        case 'CLIENT':
+          this.router.navigate(['/client/dashboard']);
+          break;
+        default:
+          this.router.navigate(['/dashboard']);
+      }
+    }, 1500);
+  }
+
+  /**
+   * Redirection par défaut vers dashboard
+   */
+  private redirectToDashboard(): void {
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.redirectBasedOnRole(user.role);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
+  }
+
+  /**
+   * Afficher un message de succès
+   */
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 3000,
+      panelClass: ['success-snackbar'],
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
+  }
+
+  /**
+   * Afficher un message d'erreur
+   */
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 5000,
+      panelClass: ['error-snackbar'],
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
+  }
+
+  /**
+   * Afficher un message d'information
+   */
+  private showInfo(message: string): void {
+    this.snackBar.open(message, 'Fermer', {
+      duration: 3000,
+      panelClass: ['info-snackbar'],
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
   }
 }
