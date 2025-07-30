@@ -3,10 +3,31 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
+// Angular Material Imports
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
+
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule,
+    MatDividerModule
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -51,9 +72,9 @@ export class LoginComponent {
         // TODO: Sauvegarder le token d'authentification
         // TODO: Rediriger vers le dashboard
         // this.router.navigate(['/dashboard']);
-        alert('Connexion réussie ! (simulation)');
+        this.showSuccessMessage();
       } else {
-        this.errorMessage = 'Email ou mot de passe incorrect';
+        this.errorMessage = 'Email ou mot de passe incorrect. Essayez admin@gdpr.com / admin123';
       }
     }, 2000);
   }
@@ -66,8 +87,8 @@ export class LoginComponent {
     // TODO: Implémenter la navigation vers la page de récupération
     // this.router.navigate(['/forgot-password']);
     
-    // Pour le moment, afficher une alerte
-    alert('Fonctionnalité "Mot de passe oublié" - À implémenter\n\nVous serez redirigé vers la page de récupération.');
+    // Pour le moment, afficher une notification Material
+    this.showInfoMessage('Fonctionnalité "Mot de passe oublié" - À implémenter');
   }
 
   /**
@@ -78,8 +99,8 @@ export class LoginComponent {
     // TODO: Implémenter la navigation vers la page d'inscription
     // this.router.navigate(['/register']);
     
-    // Pour le moment, afficher une alerte
-    alert('Fonctionnalité "S\'inscrire" - À implémenter\n\nVous serez redirigé vers la page d\'inscription.');
+    // Pour le moment, afficher une notification Material
+    this.showInfoMessage('Fonctionnalité "S\'inscrire" - À implémenter');
   }
 
   /**
@@ -125,5 +146,29 @@ export class LoginComponent {
    */
   isFormValid(): boolean {
     return this.isEmailValid() && this.isPasswordValid();
+  }
+
+  /**
+   * Afficher un message de succès
+   */
+  private showSuccessMessage(): void {
+    // TODO: Implémenter avec MatSnackBar pour un meilleur UX
+    alert('Connexion réussie ! Redirection vers le dashboard...');
+  }
+
+  /**
+   * Afficher un message d'information
+   */
+  private showInfoMessage(message: string): void {
+    // TODO: Implémenter avec MatSnackBar pour un meilleur UX
+    alert(message);
+  }
+
+  /**
+   * Pré-remplir les champs pour les tests
+   */
+  fillDemoCredentials(): void {
+    this.email = 'admin@gdpr.com';
+    this.password = 'admin123';
   }
 }
