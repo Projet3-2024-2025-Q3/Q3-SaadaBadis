@@ -30,7 +30,7 @@ public class GDPRRequest {
     @Column(name = "request_content", length = 150)
     private String requestContent;
 
-    // Simple relations with foreign keys
+    // Simple relations with foreign keys - GARDÉES (pas de problème circulaire)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user", nullable = false)
     private User user;

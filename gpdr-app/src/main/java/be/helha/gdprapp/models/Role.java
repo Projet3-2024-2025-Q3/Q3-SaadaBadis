@@ -1,5 +1,6 @@
 package be.helha.gdprapp.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,8 +22,9 @@ public class Role {
     @Column(name = "role", length = 10, nullable = false, unique = true)
     private String role;
 
-    // Simple relation with users
+    // Simple relation with users - IGNORÉ pour éviter la référence circulaire
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<User> users;
 
     // Constructor for easy creation
