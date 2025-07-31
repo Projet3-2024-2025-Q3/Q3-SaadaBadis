@@ -79,14 +79,7 @@ export class SignupComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Check if user is already authenticated
-    this.authService.isLoggedIn$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(isLoggedIn => {
-        if (isLoggedIn) {
-          this.router.navigate(['/dashboard']);
-        }
-      });
+    
   }
 
   ngOnDestroy(): void {

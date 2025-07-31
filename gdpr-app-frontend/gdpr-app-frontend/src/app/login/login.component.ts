@@ -2,7 +2,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common'; // Provides common directives like *ngIf, *ngFor
 import { FormsModule } from '@angular/forms'; // Enables template-driven forms with ngModel
-import { Router } from '@angular/router'; // For programmatic navigation
+import { Router, RouterLink } from '@angular/router'; // For programmatic navigation
 
 // Angular Material Imports - UI component library
 import { MatCardModule } from '@angular/material/card'; // Card container component
@@ -33,7 +33,8 @@ import { AuthService, LoginRequest } from '../services/auth.service';
    MatCheckboxModule,
    MatProgressSpinnerModule,
    MatDividerModule,
-   MatSnackBarModule
+   MatSnackBarModule,
+   RouterLink
  ],
  templateUrl: './login.component.html', // External template file
  styleUrls: ['./login.component.css'] // External stylesheet
@@ -135,10 +136,7 @@ export class LoginComponent {
   */
  onRegister(): void {
    console.log('Redirection vers la page d\'inscription');
-   // TODO: Create register component and uncomment below
-   // this.router.navigate(['/register']);
-   
-   this.showInfo('Fonctionnalité "S\'inscrire" - À implémenter');
+   this.router.navigate(['signup']);
  }
 
  /**
