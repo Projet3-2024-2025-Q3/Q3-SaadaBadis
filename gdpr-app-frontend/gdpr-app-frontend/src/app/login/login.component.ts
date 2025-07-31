@@ -1,259 +1,281 @@
-// src/app/login/login.component.ts - Version mise à jour
+// Import core Angular modules for component functionality
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common'; // Provides common directives like *ngIf, *ngFor
+import { FormsModule } from '@angular/forms'; // Enables template-driven forms with ngModel
+import { Router } from '@angular/router'; // For programmatic navigation
 
-// Angular Material Imports
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+// Angular Material Imports - UI component library
+import { MatCardModule } from '@angular/material/card'; // Card container component
+import { MatFormFieldModule } from '@angular/material/form-field'; // Form field wrapper
+import { MatInputModule } from '@angular/material/input'; // Input field styling
+import { MatButtonModule } from '@angular/material/button'; // Button components
+import { MatIconModule } from '@angular/material/icon'; // Icon system
+import { MatCheckboxModule } from '@angular/material/checkbox'; // Checkbox component
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; // Loading spinner
+import { MatDividerModule } from '@angular/material/divider'; // Visual divider line
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar'; // Toast notifications
 
-// Services
+// Custom services
 import { AuthService, LoginRequest } from '../services/auth.service';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCheckboxModule,
-    MatProgressSpinnerModule,
-    MatDividerModule,
-    MatSnackBarModule
-  ],
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+ selector: 'app-login', // HTML tag to use this component
+ standalone: true, // Modern Angular 17+ approach - no need for NgModule
+ imports: [
+   // List all dependencies this standalone component needs
+   CommonModule,
+   FormsModule,
+   MatCardModule,
+   MatFormFieldModule,
+   MatInputModule,
+   MatButtonModule,
+   MatIconModule,
+   MatCheckboxModule,
+   MatProgressSpinnerModule,
+   MatDividerModule,
+   MatSnackBarModule
+ ],
+ templateUrl: './login.component.html', // External template file
+ styleUrls: ['./login.component.css'] // External stylesheet
 })
 export class LoginComponent {
-  // Propriétés du formulaire
-  email: string = '';
-  password: string = '';
-  rememberMe: boolean = false;
-  showPassword: boolean = false;
-  
-  // États du composant
-  errorMessage: string = '';
-  isLoading: boolean = false;
+ 
+ // ========== FORM DATA PROPERTIES ==========
+ email: string = ''; // Two-way bound to email input field
+ password: string = ''; // Two-way bound to password field
+ rememberMe: boolean = false; // Checkbox state for persistent login
+ showPassword: boolean = false; // Toggle password visibility
+ 
+ // ========== UI STATE PROPERTIES ==========
+ errorMessage: string = ''; // Global error message display
+ isLoading: boolean = false; // Loading state for async operations
 
-  constructor(
-    private router: Router,
-    private authService: AuthService,
-    private snackBar: MatSnackBar
-  ) {
-    // Rediriger si déjà connecté
-    if (this.authService.isAuthenticated()) {
-      this.redirectToDashboard();
-    }
-  }
+ constructor(
+   private router: Router, // Inject router for navigation
+   private authService: AuthService, // Inject custom auth service
+   private snackBar: MatSnackBar // Inject Material snackbar service
+ ) {
+   // Guard against double login - redirect if already authenticated
+   if (this.authService.isAuthenticated()) {
+     this.redirectToDashboard();
+   }
+ }
 
-  /**
-   * Gestionnaire de soumission du formulaire de connexion
-   */
-  onSubmit(): void {
-    // Empêcher les soumissions multiples
-    if (this.isLoading) return;
+ /**
+  * Main form submission handler
+  * Called when user clicks login button or presses Enter
+  */
+ onSubmit(): void {
+   // Prevent multiple simultaneous submissions
+   if (this.isLoading) return;
 
-    // Validation côté client
-    if (!this.isFormValid()) {
-      this.showError('Veuillez remplir tous les champs correctement');
-      return;
-    }
+   // Client-side validation before API call
+   if (!this.isFormValid()) {
+     this.showError('Veuillez remplir tous les champs correctement');
+     return;
+   }
 
-    // Réinitialiser l'état
-    this.isLoading = true;
-    this.errorMessage = '';
+   // Set loading state and clear previous errors
+   this.isLoading = true;
+   this.errorMessage = '';
 
-    const loginData: LoginRequest = {
-      email: this.email.trim(),
-      password: this.password
-    };
+   // Create request object with sanitized data
+   const loginData: LoginRequest = {
+     email: this.email.trim(), // Remove whitespace
+     password: this.password
+   };
 
-    console.log('Tentative de connexion pour:', loginData.email);
+   console.log('Tentative de connexion pour:', loginData.email);
 
-    // Appel au service d'authentification
-    this.authService.login(loginData).subscribe({
-      next: (response) => {
-        console.log('Connexion réussie:', response);
-        this.showSuccess(`Bienvenue ${response.firstname} !`);
-        
-        // Gérer "Se souvenir de moi"
-        if (this.rememberMe) {
-          // TODO: Implémenter la persistance du token
-          console.log('Option "Se souvenir de moi" activée');
-        }
+   // Make HTTP request via AuthService
+   this.authService.login(loginData).subscribe({
+     // Success callback
+     next: (response) => {
+       console.log('Connexion réussie:', response);
+       this.showSuccess(`Bienvenue ${response.firstname} !`);
+       
+       // Handle "Remember Me" functionality
+       if (this.rememberMe) {
+         // TODO: Implement token persistence logic
+         console.log('Option "Se souvenir de moi" activée');
+       }
 
-        // Rediriger selon le rôle
-        this.redirectBasedOnRole(response.role);
-      },
-      error: (error) => {
-        console.error('Erreur de connexion:', error);
-        this.isLoading = false;
-        this.errorMessage = error.message || 'Erreur de connexion';
-        this.showError(this.errorMessage);
-      },
-      complete: () => {
-        this.isLoading = false;
-      }
-    });
-  }
+       // Navigate based on user role
+       this.redirectBasedOnRole(response.role);
+     },
+     // Error callback
+     error: (error) => {
+       console.error('Erreur de connexion:', error);
+       this.isLoading = false; // Reset loading state
+       this.errorMessage = error.message || 'Erreur de connexion';
+       this.showError(this.errorMessage);
+     },
+     // Completion callback (runs after success or error)
+     complete: () => {
+       this.isLoading = false;
+     }
+   });
+ }
 
-  /**
-   * Gestionnaire pour le mot de passe oublié
-   */
-  onForgotPassword(): void {
-    console.log('Redirection vers la page mot de passe oublié');
-    // TODO: Créer le composant forgot-password
-    // this.router.navigate(['/forgot-password']);
-    
-    this.showInfo('Fonctionnalité "Mot de passe oublié" - À implémenter');
-  }
+ /**
+  * Handler for forgot password link
+  * Currently shows placeholder message
+  */
+ onForgotPassword(): void {
+   console.log('Redirection vers la page mot de passe oublié');
+   // TODO: Create forgot-password component and uncomment below
+   // this.router.navigate(['/forgot-password']);
+   
+   this.showInfo('Fonctionnalité "Mot de passe oublié" - À implémenter');
+ }
 
-  /**
-   * Gestionnaire pour l'inscription
-   */
-  onRegister(): void {
-    console.log('Redirection vers la page d\'inscription');
-    // TODO: Créer le composant register
-    // this.router.navigate(['/register']);
-    
-    this.showInfo('Fonctionnalité "S\'inscrire" - À implémenter');
-  }
+ /**
+  * Handler for registration link
+  * Currently shows placeholder message
+  */
+ onRegister(): void {
+   console.log('Redirection vers la page d\'inscription');
+   // TODO: Create register component and uncomment below
+   // this.router.navigate(['/register']);
+   
+   this.showInfo('Fonctionnalité "S\'inscrire" - À implémenter');
+ }
 
-  /**
-   * Basculer la visibilité du mot de passe
-   */
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
-  }
+ /**
+  * Toggle password field visibility
+  * Changes input type between 'password' and 'text'
+  */
+ togglePasswordVisibility(): void {
+   this.showPassword = !this.showPassword;
+ }
 
-  /**
-   * Nettoyer le message d'erreur
-   */
-  clearError(): void {
-    this.errorMessage = '';
-  }
+ /**
+  * Utility method to clear error messages
+  */
+ clearError(): void {
+   this.errorMessage = '';
+ }
 
-  /**
-   * Gestionnaire pour la touche Entrée dans les champs
-   */
-  onKeyPress(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      this.onSubmit();
-    }
-  }
+ /**
+  * Handle Enter key press in form fields
+  * Triggers form submission
+  */
+ onKeyPress(event: KeyboardEvent): void {
+   if (event.key === 'Enter') {
+     this.onSubmit();
+   }
+ }
 
-  /**
-   * Validation côté client de l'email
-   */
-  isEmailValid(): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(this.email.trim());
-  }
+ // ========== CLIENT-SIDE VALIDATION METHODS ==========
 
-  /**
-   * Validation côté client du mot de passe
-   */
-  isPasswordValid(): boolean {
-    return this.password.length >= 6;
-  }
+ /**
+  * Validate email format using regex
+  * Basic email pattern validation
+  */
+ isEmailValid(): boolean {
+   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+   return emailRegex.test(this.email.trim());
+ }
 
-  /**
-   * Vérifie si le formulaire est valide
-   */
-  isFormValid(): boolean {
-    return this.isEmailValid() && this.isPasswordValid();
-  }
+ /**
+  * Validate password length
+  * Minimum 6 characters required
+  */
+ isPasswordValid(): boolean {
+   return this.password.length >= 6;
+ }
 
-  /**
-   * Pré-remplir les champs pour les tests
-   */
-  fillDemoCredentials(): void {
-    this.email = 'admin@gdpr.com';
-    this.password = 'admin123';
-  }
+ /**
+  * Overall form validation
+  * Combines all validation rules
+  */
+ isFormValid(): boolean {
+   return this.isEmailValid() && this.isPasswordValid();
+ }
 
-  // ================== MÉTHODES PRIVÉES ==================
+ /**
+  * Development helper method
+  * Pre-fills form with test credentials
+  */
+ fillDemoCredentials(): void {
+   this.email = 'admin@gdpr.com';
+   this.password = 'admin123';
+ }
 
-  /**
-   * Rediriger selon le rôle utilisateur
-   */
-  private redirectBasedOnRole(role: string): void {
-    // Délai pour permettre à l'utilisateur de voir le message de succès
-    setTimeout(() => {
-      switch (role) {
-        case 'ADMIN':
-          this.router.navigate(['/admin/dashboard']);
-          break;
-        case 'GERANT':
-          this.router.navigate(['/manager/dashboard']);
-          break;
-        case 'CLIENT':
-          this.router.navigate(['/client/dashboard']);
-          break;
-        default:
-          this.router.navigate(['/dashboard']);
-      }
-    }, 1500);
-  }
+ // ========== PRIVATE HELPER METHODS ==========
 
-  /**
-   * Redirection par défaut vers dashboard
-   */
-  private redirectToDashboard(): void {
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      this.redirectBasedOnRole(user.role);
-    } else {
-      this.router.navigate(['/dashboard']);
-    }
-  }
+ /**
+  * Navigate user to appropriate dashboard based on their role
+  * Uses setTimeout to let user see success message
+  */
+ private redirectBasedOnRole(role: string): void {
+   // Delay navigation to show success message
+   setTimeout(() => {
+     switch (role) {
+       case 'ADMIN':
+         this.router.navigate(['/admin/dashboard']);
+         break;
+       case 'GERANT': // Manager role
+         this.router.navigate(['/manager/dashboard']);
+         break;
+       case 'CLIENT':
+         this.router.navigate(['/client/dashboard']);
+         break;
+       default:
+         this.router.navigate(['/dashboard']); // Fallback route
+     }
+   }, 1500); // 1.5 second delay
+ }
 
-  /**
-   * Afficher un message de succès
-   */
-  private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Fermer', {
-      duration: 3000,
-      panelClass: ['success-snackbar'],
-      horizontalPosition: 'center',
-      verticalPosition: 'top'
-    });
-  }
+ /**
+  * Default redirect for already authenticated users
+  * Checks current user and redirects accordingly
+  */
+ private redirectToDashboard(): void {
+   const user = this.authService.getCurrentUser();
+   if (user) {
+     this.redirectBasedOnRole(user.role);
+   } else {
+     this.router.navigate(['/dashboard']);
+   }
+ }
 
-  /**
-   * Afficher un message d'erreur
-   */
-  private showError(message: string): void {
-    this.snackBar.open(message, 'Fermer', {
-      duration: 5000,
-      panelClass: ['error-snackbar'],
-      horizontalPosition: 'center',
-      verticalPosition: 'top'
-    });
-  }
+ /**
+  * Display success notification using Material Snackbar
+  * Green styling with auto-dismiss
+  */
+ private showSuccess(message: string): void {
+   this.snackBar.open(message, 'Fermer', {
+     duration: 3000, // Auto-close after 3 seconds
+     panelClass: ['success-snackbar'], // CSS class for styling
+     horizontalPosition: 'center',
+     verticalPosition: 'top'
+   });
+ }
 
-  /**
-   * Afficher un message d'information
-   */
-  private showInfo(message: string): void {
-    this.snackBar.open(message, 'Fermer', {
-      duration: 3000,
-      panelClass: ['info-snackbar'],
-      horizontalPosition: 'center',
-      verticalPosition: 'top'
-    });
-  }
+ /**
+  * Display error notification using Material Snackbar
+  * Red styling with longer duration
+  */
+ private showError(message: string): void {
+   this.snackBar.open(message, 'Fermer', {
+     duration: 5000, // Longer duration for errors
+     panelClass: ['error-snackbar'],
+     horizontalPosition: 'center',
+     verticalPosition: 'top'
+   });
+ }
+
+ /**
+  * Display info notification using Material Snackbar
+  * Blue styling for informational messages
+  */
+ private showInfo(message: string): void {
+   this.snackBar.open(message, 'Fermer', {
+     duration: 3000,
+     panelClass: ['info-snackbar'],
+     horizontalPosition: 'center',
+     verticalPosition: 'top'
+   });
+ }
 }
