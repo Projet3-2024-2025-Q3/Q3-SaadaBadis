@@ -47,12 +47,9 @@ export class SignupComponent implements OnInit, OnDestroy {
   firstName: string = '';
   lastName: string = '';
   email: string = '';
-  company: string = '';
-  role: string = '';
   password: string = '';
   confirmPassword: string = '';
   agreeTerms: boolean = false;
-  newsletterOptIn: boolean = false;
 
   // UI state properties
   isLoading: boolean = false;
@@ -60,15 +57,15 @@ export class SignupComponent implements OnInit, OnDestroy {
   showConfirmPassword: boolean = false;
   errorMessage: string = '';
 
-  // Role options for select dropdown
-  roleOptions = [
-    { value: 'dpo', label: 'Data Protection Officer' },
-    { value: 'legal', label: 'Legal Counsel' },
-    { value: 'compliance', label: 'Compliance Manager' },
-    { value: 'it', label: 'IT Manager' },
-    { value: 'security', label: 'Security Officer' },
-    { value: 'other', label: 'Other' }
-  ];
+  // Role options for select dropdown (not used anymore but kept for future)
+  // roleOptions = [
+  //   { value: 'dpo', label: 'Data Protection Officer' },
+  //   { value: 'legal', label: 'Legal Counsel' },
+  //   { value: 'compliance', label: 'Compliance Manager' },
+  //   { value: 'it', label: 'IT Manager' },
+  //   { value: 'security', label: 'Security Officer' },
+  //   { value: 'other', label: 'Other' }
+  // ];
 
   // Subject for component cleanup
   private destroy$ = new Subject<void>();
@@ -79,7 +76,14 @@ export class SignupComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    
+    // Check if user is already authenticated
+    this.authService.isLoggedIn$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isLoggedIn => {
+        if (isLoggedIn) {
+          this.router.navigate(['/dashboard']);
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -116,9 +120,7 @@ export class SignupComponent implements OnInit, OnDestroy {
       firstname: this.firstName.trim(),
       lastname: this.lastName.trim(),
       email: this.email.trim().toLowerCase(),
-      password: this.password,
-      // Map role string to roleId if needed by your backend
-      roleId: this.getRoleId(this.role)
+      password: this.password
     };
 
     // Start loading state
@@ -222,16 +224,6 @@ export class SignupComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    if (!this.company.trim()) {
-      this.errorMessage = 'Company name is required';
-      return false;
-    }
-
-    if (!this.role) {
-      this.errorMessage = 'Please select your role';
-      return false;
-    }
-
     if (!this.password) {
       this.errorMessage = 'Password is required';
       return false;
@@ -259,28 +251,28 @@ export class SignupComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Map role string to roleId (adapt based on your backend requirements)
+   * Map role string to roleId (not used anymore)
    */
-  private getRoleId(role: string): number | undefined {
-    const roleMapping: { [key: string]: number } = {
-      'dpo': 1,
-      'legal': 2,
-      'compliance': 3,
-      'it': 4,
-      'security': 5,
-      'other': 6
-    };
-    
-    return roleMapping[role];
-  }
+  // private getRoleId(role: string): number | undefined {
+  //   const roleMapping: { [key: string]: number } = {
+  //     'dpo': 1,
+  //     'legal': 2,
+  //     'compliance': 3,
+  //     'it': 4,
+  //     'security': 5,
+  //     'other': 6
+  //   };
+  //   
+  //   return roleMapping[role];
+  // }
 
   /**
-   * Get role label for display
+   * Get role label for display (not used anymore)
    */
-  getRoleLabel(roleValue: string): string {
-    const role = this.roleOptions.find(r => r.value === roleValue);
-    return role ? role.label : roleValue;
-  }
+  // getRoleLabel(roleValue: string): string {
+  //   const role = this.roleOptions.find(r => r.value === roleValue);
+  //   return role ? role.label : roleValue;
+  // }
 
   /**
    * Check if form is valid for submission
@@ -291,8 +283,6 @@ export class SignupComponent implements OnInit, OnDestroy {
       this.lastName.trim() &&
       this.email.trim() &&
       this.isValidEmail(this.email) &&
-      this.company.trim() &&
-      this.role &&
       this.password &&
       this.password.length >= 8 &&
       this.confirmPassword &&
