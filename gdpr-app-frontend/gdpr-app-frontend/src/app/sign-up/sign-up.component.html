@@ -75,49 +75,6 @@
           </mat-error>
         </mat-form-field>
 
-        <!-- Company and role row -->
-        <div class="form-row">
-          <!-- Company field -->
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Company</mat-label>
-            <input 
-              matInput 
-              type="text" 
-              name="company"
-              [(ngModel)]="company"
-              required
-              #companyInput="ngModel"
-              placeholder="Your Company"
-            >
-            <mat-icon matPrefix>business</mat-icon>
-            <mat-error *ngIf="companyInput.hasError('required')">
-              Company name is required
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Role field -->
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Role</mat-label>
-            <mat-select 
-              name="role"
-              [(ngModel)]="role"
-              required
-              #roleInput="ngModel"
-            >
-              <mat-option value="dpo">Data Protection Officer</mat-option>
-              <mat-option value="legal">Legal Counsel</mat-option>
-              <mat-option value="compliance">Compliance Manager</mat-option>
-              <mat-option value="it">IT Manager</mat-option>
-              <mat-option value="security">Security Officer</mat-option>
-              <mat-option value="other">Other</mat-option>
-            </mat-select>
-            <mat-icon matPrefix>work</mat-icon>
-            <mat-error *ngIf="roleInput.hasError('required')">
-              Please select your role
-            </mat-error>
-          </mat-form-field>
-        </div>
-
         <!-- Password field -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Password</mat-label>
@@ -192,15 +149,6 @@
             <a href="#" class="terms-link" (click)="showTerms($event)">Terms of Service</a> 
             and 
             <a href="#" class="terms-link" (click)="showPrivacy($event)">Privacy Policy</a>
-          </mat-checkbox>
-          
-          <mat-checkbox 
-            [(ngModel)]="newsletterOptIn" 
-            name="newsletterOptIn"
-            color="primary"
-            class="newsletter-checkbox"
-          >
-            I would like to receive updates and newsletters about GDPR compliance
           </mat-checkbox>
         </div>
 
