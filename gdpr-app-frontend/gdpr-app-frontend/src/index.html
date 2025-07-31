@@ -5,7 +5,22 @@
   <title>GdprAppFrontend</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  
+  <!-- Favicon moderne avec support SVG -->
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/app-icon.svg">
+  <!-- Fallback pour les navigateurs qui ne supportent pas les SVG -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  
+  <!-- Icônes pour mobile et PWA -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+  
+  <!-- Meta pour PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1976d2">
+  
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>

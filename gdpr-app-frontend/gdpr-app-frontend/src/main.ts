@@ -9,8 +9,8 @@ import { routes } from './app/app.routes';
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(routes),
-    provideHttpClient(), // Provider HttpClient pour toute l'application
-    provideAnimations(), // Pour Angular Material
-    // Autres providers globaux
+    provideHttpClient(), 
+    provideAnimations(), 
+    
   ]
 }).catch(err => console.error(err));
