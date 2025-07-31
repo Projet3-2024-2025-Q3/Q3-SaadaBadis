@@ -1,4 +1,4 @@
-/* Container principal */
+/* Main container */
 .login-container {
   min-height: 100vh;
   display: flex;
@@ -10,7 +10,7 @@
   overflow: hidden;
 }
 
-/* Carte de connexion Material */
+/* Material login card */
 .login-card {
   width: 100%;
   max-width: 450px;
@@ -35,7 +35,7 @@
   }
 }
 
-/* Header personnalisé */
+/* Custom header */
 .login-header {
   background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
   color: white !important;
@@ -77,12 +77,12 @@
   height: 32px !important;
 }
 
-/* Contenu de la carte */
+/* Card content */
 .login-content {
   padding: 32px 24px 24px 24px !important;
 }
 
-/* Formulaire */
+/* Form */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -93,7 +93,7 @@
   width: 100%;
 }
 
-/* Personnalisation des champs Material */
+/* Material field customization */
 .mat-mdc-form-field {
   font-size: 16px;
 }
@@ -114,7 +114,7 @@
   color: #2196F3 !important;
 }
 
-/* Icônes des champs */
+/* Field icons */
 .mat-icon {
   color: rgba(0, 0, 0, 0.54) !important;
 }
@@ -123,7 +123,7 @@
   color: #2196F3 !important;
 }
 
-/* Options du formulaire */
+/* Form options */
 .form-options {
   margin: 8px 0;
   display: flex;
@@ -135,7 +135,7 @@
   color: rgba(0, 0, 0, 0.87) !important;
 }
 
-/* Message d'erreur global */
+/* Global error message */
 .global-error {
   display: flex !important;
   align-items: center;
@@ -156,7 +156,7 @@
   height: 20px !important;
 }
 
-/* Bouton principal */
+/* Primary button */
 .login-button {
   height: 48px !important;
   font-size: 16px !important;
@@ -183,7 +183,7 @@
   margin-right: 8px;
 }
 
-/* Animation spinner */
+/* Spinner animation */
 .spinning {
   animation: spin 2s linear infinite;
 }
@@ -193,7 +193,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* Actions de la carte */
+/* Card actions */
 .login-actions {
   padding: 16px 24px !important;
   display: flex !important;
@@ -216,7 +216,7 @@
   height: 18px !important;
 }
 
-/* Footer de la carte */
+/* Card footer */
 .login-footer {
   padding: 20px 24px !important;
   text-align: center;
@@ -241,7 +241,7 @@
   text-decoration: underline;
 }
 
-/* Overlay de chargement */
+/* Loading overlay */
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -260,7 +260,7 @@
   --mdc-circular-progress-active-indicator-color: #2196F3;
 }
 
-/* Motif de fond décoratif */
+/* Decorative background pattern */
 .background-pattern {
   position: absolute;
   top: 0;
@@ -279,7 +279,7 @@
   50% { transform: translateY(-20px) rotate(5deg); }
 }
 
-/* Personnalisation des couleurs Material */
+/* Material color customization */
 .mat-mdc-card {
   --mdc-elevated-card-container-color: #ffffff;
 }
@@ -335,14 +335,14 @@
   }
 }
 
-/* Améliorations pour l'accessibilité */
+/* Accessibility improvements */
 .login-button:focus,
 .secondary-button:focus {
   outline: 2px solid #2196F3;
   outline-offset: 2px;
 }
 
-/* Animations supplémentaires */
+/* Additional animations */
 .mat-mdc-form-field {
   transition: all 0.3s ease;
 }
