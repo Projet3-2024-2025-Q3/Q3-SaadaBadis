@@ -56,6 +56,7 @@ export class SignupComponent implements OnInit, OnDestroy {
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
   errorMessage: string = '';
+  successMessage: string = '';
 
   // Role options for select dropdown (not used anymore but kept for future)
   // roleOptions = [
@@ -88,8 +89,9 @@ export class SignupComponent implements OnInit, OnDestroy {
    * Handle form submission
    */
   onSubmit(): void {
-    // Clear previous error message
+    // Clear previous messages
     this.errorMessage = '';
+    this.successMessage = '';
 
     // Validate form before submission
     if (!this.validateForm()) {
@@ -126,21 +128,21 @@ export class SignupComponent implements OnInit, OnDestroy {
         next: (response) => {
           this.isLoading = false;
           
-          // Show success message - you can implement a simple alert or toast
-          alert('Account created successfully! Please check your email for verification.');
+          // Show success message
+          this.successMessage = '🎉 Account created successfully! Redirecting to login...';
 
-          // Navigate to login page after a short delay
+          // Navigate to login page after showing success message
           setTimeout(() => {
             this.router.navigate(['/login'], {
               queryParams: { email: this.email, registered: 'true' }
             });
-          }, 2000);
+          }, 2500); // 2.5 seconds to read the message
         },
         error: (error) => {
           this.isLoading = false;
           this.errorMessage = error.message || 'Registration failed. Please try again.';
           
-          // Simple console log for now - you can implement proper error handling
+          // Simple console log for debugging
           console.error('Registration error:', this.errorMessage);
         }
       });
@@ -285,11 +287,14 @@ export class SignupComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handle input changes to clear error messages
+   * Handle input changes to clear messages
    */
   onInputChange(): void {
     if (this.errorMessage) {
       this.errorMessage = '';
+    }
+    if (this.successMessage) {
+      this.successMessage = '';
     }
   }
 

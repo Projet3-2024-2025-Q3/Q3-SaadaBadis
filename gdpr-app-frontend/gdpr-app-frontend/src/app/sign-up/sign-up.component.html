@@ -158,6 +158,12 @@
           {{ errorMessage }}
         </mat-error>
 
+        <!-- Success message -->
+        <div class="success-message" *ngIf="successMessage">
+          <mat-icon>check_circle</mat-icon>
+          {{ successMessage }}
+        </div>
+
         <!-- Registration button -->
         <button 
           mat-raised-button 
