@@ -1,13 +1,44 @@
+// src/app/components/signup/signup.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+
+// Angular Material Imports
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
+
 import { AuthService, RegisterRequest } from '../services/auth.service';
 
 @Component({
   selector: 'app-signup',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatSelectModule,
+    MatProgressSpinnerModule,
+    MatDividerModule,
+    MatSnackBarModule,
+    MatDialogModule
+  ],
   templateUrl: './sign-up.component.html',
   styleUrls: ['./sign-up.component.scss']
 })
@@ -44,9 +75,7 @@ export class SignupComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private router: Router,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -109,15 +138,8 @@ export class SignupComponent implements OnInit, OnDestroy {
         next: (response) => {
           this.isLoading = false;
           
-          // Show success message
-          this.snackBar.open(
-            'Account created successfully! Please check your email for verification.',
-            'Close',
-            {
-              duration: 5000,
-              panelClass: ['success-snackbar']
-            }
-          );
+          // Show success message - you can implement a simple alert or toast
+          alert('Account created successfully! Please check your email for verification.');
 
           // Navigate to login page after a short delay
           setTimeout(() => {
@@ -130,15 +152,8 @@ export class SignupComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.errorMessage = error.message || 'Registration failed. Please try again.';
           
-          // Show error snackbar
-          this.snackBar.open(
-            this.errorMessage,
-            'Close',
-            {
-              duration: 5000,
-              panelClass: ['error-snackbar']
-            }
-          );
+          // Simple console log for now - you can implement proper error handling
+          console.error('Registration error:', this.errorMessage);
         }
       });
   }
@@ -177,7 +192,7 @@ export class SignupComponent implements OnInit, OnDestroy {
   showTerms(event: Event): void {
     event.preventDefault();
     // TODO: Implement terms modal or navigate to terms page
-    this.snackBar.open('Terms of Service modal would open here', 'Close', { duration: 3000 });
+    alert('Terms of Service modal would open here');
   }
 
   /**
@@ -186,7 +201,7 @@ export class SignupComponent implements OnInit, OnDestroy {
   showPrivacy(event: Event): void {
     event.preventDefault();
     // TODO: Implement privacy modal or navigate to privacy page
-    this.snackBar.open('Privacy Policy modal would open here', 'Close', { duration: 3000 });
+    alert('Privacy Policy modal would open here');
   }
 
   /**
