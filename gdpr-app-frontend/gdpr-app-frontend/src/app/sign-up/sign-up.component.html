@@ -1,1 +1,262 @@
-<p>sign-up works!</p>
+<div class="signup-container">
+  <!-- Main card with Material Design -->
+  <mat-card class="signup-card">
+    <!-- Header with logo and title -->
+    <mat-card-header class="signup-header">
+      <div mat-card-avatar class="signup-avatar">
+        <mat-icon class="logo-icon">security</mat-icon>
+      </div>
+      <mat-card-title class="app-title">GDPR Manager</mat-card-title>
+      <mat-card-subtitle class="app-subtitle">Create your account</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content class="signup-content">
+      <!-- Registration form -->
+      <form class="signup-form" (ngSubmit)="onSubmit()" #signupForm="ngForm">
+        
+        <!-- Name fields row -->
+        <div class="form-row">
+          <!-- First name field -->
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>First Name</mat-label>
+            <input 
+              matInput 
+              type="text" 
+              name="firstName"
+              [(ngModel)]="firstName"
+              required
+              #firstNameInput="ngModel"
+              placeholder="John"
+            >
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-error *ngIf="firstNameInput.hasError('required')">
+              First name is required
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Last name field -->
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Last Name</mat-label>
+            <input 
+              matInput 
+              type="text" 
+              name="lastName"
+              [(ngModel)]="lastName"
+              required
+              #lastNameInput="ngModel"
+              placeholder="Doe"
+            >
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-error *ngIf="lastNameInput.hasError('required')">
+              Last name is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Email field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email Address</mat-label>
+          <input 
+            matInput 
+            type="email" 
+            name="email"
+            [(ngModel)]="email"
+            required 
+            email
+            #emailInput="ngModel"
+            placeholder="your.email@company.com"
+          >
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error *ngIf="emailInput.hasError('required')">
+            Email address is required
+          </mat-error>
+          <mat-error *ngIf="emailInput.hasError('email')">
+            Please enter a valid email address
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Company and role row -->
+        <div class="form-row">
+          <!-- Company field -->
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Company</mat-label>
+            <input 
+              matInput 
+              type="text" 
+              name="company"
+              [(ngModel)]="company"
+              required
+              #companyInput="ngModel"
+              placeholder="Your Company"
+            >
+            <mat-icon matPrefix>business</mat-icon>
+            <mat-error *ngIf="companyInput.hasError('required')">
+              Company name is required
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Role field -->
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Role</mat-label>
+            <mat-select 
+              name="role"
+              [(ngModel)]="role"
+              required
+              #roleInput="ngModel"
+            >
+              <mat-option value="dpo">Data Protection Officer</mat-option>
+              <mat-option value="legal">Legal Counsel</mat-option>
+              <mat-option value="compliance">Compliance Manager</mat-option>
+              <mat-option value="it">IT Manager</mat-option>
+              <mat-option value="security">Security Officer</mat-option>
+              <mat-option value="other">Other</mat-option>
+            </mat-select>
+            <mat-icon matPrefix>work</mat-icon>
+            <mat-error *ngIf="roleInput.hasError('required')">
+              Please select your role
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Password field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input 
+            matInput 
+            [type]="showPassword ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            required
+            minlength="8"
+            #passwordInput="ngModel"
+            placeholder="••••••••"
+          >
+          <mat-icon matPrefix>lock</mat-icon>
+          <button 
+            type="button" 
+            mat-icon-button 
+            matSuffix
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="'Show password'"
+          >
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="passwordInput.hasError('required')">
+            Password is required
+          </mat-error>
+          <mat-error *ngIf="passwordInput.hasError('minlength')">
+            Password must be at least 8 characters
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Confirm password field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input 
+            matInput 
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            required
+            #confirmPasswordInput="ngModel"
+            placeholder="••••••••"
+          >
+          <mat-icon matPrefix>lock</mat-icon>
+          <button 
+            type="button" 
+            mat-icon-button 
+            matSuffix
+            (click)="toggleConfirmPasswordVisibility()"
+            [attr.aria-label]="'Show confirm password'"
+          >
+            <mat-icon>{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="confirmPasswordInput.hasError('required')">
+            Please confirm your password
+          </mat-error>
+          <mat-error *ngIf="password && confirmPassword && password !== confirmPassword">
+            Passwords do not match
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Form options -->
+        <div class="form-options">
+          <mat-checkbox 
+            [(ngModel)]="agreeTerms" 
+            name="agreeTerms"
+            color="primary"
+            required
+            class="terms-checkbox"
+          >
+            I agree to the 
+            <a href="#" class="terms-link" (click)="showTerms($event)">Terms of Service</a> 
+            and 
+            <a href="#" class="terms-link" (click)="showPrivacy($event)">Privacy Policy</a>
+          </mat-checkbox>
+          
+          <mat-checkbox 
+            [(ngModel)]="newsletterOptIn" 
+            name="newsletterOptIn"
+            color="primary"
+            class="newsletter-checkbox"
+          >
+            I would like to receive updates and newsletters about GDPR compliance
+          </mat-checkbox>
+        </div>
+
+        <!-- Global error message -->
+        <mat-error class="global-error" *ngIf="errorMessage">
+          <mat-icon>error</mat-icon>
+          {{ errorMessage }}
+        </mat-error>
+
+        <!-- Registration button -->
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit"
+          class="signup-button"
+          [disabled]="signupForm.invalid || isLoading || !passwordsMatch()"
+        >
+          <mat-icon *ngIf="isLoading" class="spinning">sync</mat-icon>
+          <mat-icon *ngIf="!isLoading">person_add</mat-icon>
+          <span>{{ isLoading ? 'Creating Account...' : 'Create Account' }}</span>
+        </button>
+
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions class="signup-actions">
+      <!-- Login link -->
+      <button 
+        mat-stroked-button 
+        color="primary" 
+        (click)="goToLogin()"
+        class="login-link"
+      >
+        <mat-icon>login</mat-icon>
+        Already have an account? Sign In
+      </button>
+    </mat-card-actions>
+
+    <!-- Footer -->
+    <mat-card-footer class="signup-footer">
+      <mat-divider></mat-divider>
+      <p class="footer-text">
+        By creating an account, you agree to our 
+        <a href="#" class="footer-link" (click)="showTerms($event)">terms of service</a> 
+        and 
+        <a href="#" class="footer-link" (click)="showPrivacy($event)">privacy policy</a>
+      </p>
+    </mat-card-footer>
+
+  </mat-card>
+
+  <!-- Global loading indicator -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  <!-- Decorative background -->
+  <div class="background-pattern"></div>
+</div>
