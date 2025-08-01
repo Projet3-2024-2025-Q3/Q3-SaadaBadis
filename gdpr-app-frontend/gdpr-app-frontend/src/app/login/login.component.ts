@@ -123,11 +123,7 @@ export class LoginComponent {
   * Currently shows placeholder message
   */
  onForgotPassword(): void {
-   console.log('Redirection vers la page mot de passe oublié');
-   // TODO: Create forgot-password component and uncomment below
-   // this.router.navigate(['/forgot-password']);
-   
-   this.showInfo('Fonctionnalité "Mot de passe oublié" - À implémenter');
+  this.router.navigate(['forgot']);
  }
 
  /**
