@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"be.helha.gdprapp"},{"l":"be.helha.gdprapp.configuration"},{"l":"be.helha.gdprapp.controllers"},{"l":"be.helha.gdprapp.models"},{"l":"be.helha.gdprapp.repositories"},{"l":"be.helha.gdprapp.security"},{"l":"be.helha.gdprapp.services"},{"l":"be.helha.gdprapp.utils"}];updateSearchResults();

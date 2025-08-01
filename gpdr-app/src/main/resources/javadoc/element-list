@@ -1,0 +1,8 @@
+be.helha.gdprapp
+be.helha.gdprapp.configuration
+be.helha.gdprapp.controllers
+be.helha.gdprapp.models
+be.helha.gdprapp.repositories
+be.helha.gdprapp.security
+be.helha.gdprapp.services
+be.helha.gdprapp.utils

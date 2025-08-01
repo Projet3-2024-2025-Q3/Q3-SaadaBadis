@@ -1,0 +1,147 @@
+<div class="login-container">
+  <!-- Main card with Material Design -->
+  <mat-card class="login-card">
+    <!-- Header with logo and title -->
+    <mat-card-header class="login-header">
+      <div mat-card-avatar class="login-avatar">
+        <mat-icon class="logo-icon">security</mat-icon>
+      </div>
+      <mat-card-title class="app-title">GDPR Manager</mat-card-title>
+      <mat-card-subtitle class="app-subtitle">Personal Data Management</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content class="login-content">
+      <!-- Login form -->
+      <form class="login-form" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+        
+        <!-- Email field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email Address</mat-label>
+          <input 
+            matInput 
+            type="email" 
+            name="email"
+            [(ngModel)]="email"
+            required 
+            email
+            #emailInput="ngModel"
+            placeholder="your.email@company.com"
+          >
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error *ngIf="emailInput.hasError('required')">
+            Email address is required
+          </mat-error>
+          <mat-error *ngIf="emailInput.hasError('email')">
+            Invalid email format
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Password field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input 
+            matInput 
+            [type]="showPassword ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            required
+            minlength="6"
+            #passwordInput="ngModel"
+            placeholder="••••••••"
+          >
+          <mat-icon matPrefix>lock</mat-icon>
+          <button 
+            type="button" 
+            mat-icon-button 
+            matSuffix
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="'Show password'"
+          >
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="passwordInput.hasError('required')">
+            Password is required
+          </mat-error>
+          <mat-error *ngIf="passwordInput.hasError('minlength')">
+            Minimum 6 characters required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Options -->
+        <div class="form-options">
+          <mat-checkbox 
+            [(ngModel)]="rememberMe" 
+            name="rememberMe"
+            color="primary"
+          >
+            Remember me
+          </mat-checkbox>
+        </div>
+
+        <!-- Global error message -->
+        <mat-error class="global-error" *ngIf="errorMessage">
+          <mat-icon>error</mat-icon>
+          {{ errorMessage }}
+        </mat-error>
+
+        <!-- Login button -->
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit"
+          class="login-button"
+          [disabled]="loginForm.invalid || isLoading"
+        >
+          <mat-icon *ngIf="isLoading" class="spinning">sync</mat-icon>
+          <mat-icon *ngIf="!isLoading">login</mat-icon>
+          <span>{{ isLoading ? 'Logging in...' : 'Sign In' }}</span>
+        </button>
+
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions class="login-actions">
+      <!-- Secondary buttons -->
+      <button 
+        mat-button 
+        color="primary" 
+        (click)="onForgotPassword()"
+        class="secondary-button"
+      >
+        <mat-icon>help_outline</mat-icon>
+        Forgot password?
+      </button>
+
+      <button 
+        mat-stroked-button 
+        color="accent" 
+        type="button"
+        routerLink="/signup"
+        class="secondary-button"
+      >
+        <mat-icon>person_add</mat-icon>
+        Sign Up
+      </button>
+    </mat-card-actions>
+
+    <!-- Footer -->
+    <mat-card-footer class="login-footer">
+      <mat-divider></mat-divider>
+      <p class="footer-text">
+        By signing in, you agree to our 
+        <a href="#" class="footer-link">terms of service</a> 
+        and 
+        <a href="#" class="footer-link">privacy policy</a>
+      </p>
+    </mat-card-footer>
+
+  </mat-card>
+
+  <!-- Global loading indicator -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  
+  <div class="background-pattern"></div>
+</div>
