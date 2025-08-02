@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 
-import { AuthService, UserInfo } from '../services/auth.service';
+import { AuthService, UserInfo } from '..//services/auth.service';
 
 @Component({
   selector: 'app-client-navbar',
@@ -55,7 +55,7 @@ export class ClientNavbarComponent implements OnInit, OnDestroy {
     // Track current route for active state
     this.router.events
       .pipe(
-        filter(event => event instanceof NavigationEnd),
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         takeUntil(this.destroy$)
       )
       .subscribe((event: NavigationEnd) => {
