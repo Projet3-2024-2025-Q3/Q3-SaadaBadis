@@ -75,207 +75,83 @@
           </mat-card-content>
         </mat-card>
 
-        <!-- Data Downloads Card -->
-        <mat-card class="stat-card downloads">
-          <mat-card-content>
-            <div class="stat-content">
-              <div class="stat-icon">
-                <mat-icon>download</mat-icon>
-              </div>
-              <div class="stat-details">
-                <div class="stat-number">{{ dashboardStats.dataDownloads }}</div>
-                <div class="stat-label">Downloads</div>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
       </div>
     </div>
 
-    <!-- Main Content Grid -->
-    <div class="main-content-grid">
-      
-      <!-- Recent Requests Section -->
-      <div class="content-section recent-requests-section">
-        <mat-card class="section-card">
-          <mat-card-header>
-            <mat-card-title>
-              <mat-icon>history</mat-icon>
-              Recent Requests
-            </mat-card-title>
-            <div class="header-actions">
-              <button 
-                mat-button 
-                color="primary" 
-                (click)="viewAllRequests()"
-              >
-                View All
-              </button>
-            </div>
-          </mat-card-header>
-          
-          <mat-card-content>
-            <div class="requests-list" *ngIf="recentRequests.length > 0; else noRequests">
-              <div 
-                class="request-item" 
-                *ngFor="let request of recentRequests"
-                (click)="viewRequestDetails(request.id)"
-              >
-                <div class="request-icon">
-                  <mat-icon [class]="getRequestIconClass(request.type)">
-                    {{ getRequestIcon(request.type) }}
-                  </mat-icon>
-                </div>
-                <div class="request-details">
-                  <div class="request-title">{{ request.title }}</div>
-                  <div class="request-meta">
-                    <span class="request-type">{{ request.type }}</span>
-                    <span class="request-date">{{ formatDate(request.createdAt) }}</span>
-                  </div>
-                </div>
-                <div class="request-status">
-                  <span class="status-badge" [class]="getStatusClass(request.status)">
-                    {{ request.status }}
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            <ng-template #noRequests>
-              <div class="empty-state">
-                <mat-icon>assignment_outlined</mat-icon>
-                <h3>No requests yet</h3>
-                <p>Start by creating your first GDPR request</p>
-                <button 
-                  mat-raised-button 
-                  color="primary" 
-                  (click)="createNewRequest()"
-                >
-                  Create Request
-                </button>
-              </div>
-            </ng-template>
-          </mat-card-content>
-        </mat-card>
-      </div>
-
-      <!-- Quick Actions Section -->
-      <div class="content-section quick-actions-section">
-        <mat-card class="section-card">
-          <mat-card-header>
-            <mat-card-title>
-              <mat-icon>flash_on</mat-icon>
-              Quick Actions
-            </mat-card-title>
-          </mat-card-header>
-          
-          <mat-card-content>
-            <div class="quick-actions-grid">
-              
-              <!-- Data Access Request -->
-              <button 
-                mat-stroked-button 
-                class="quick-action-item"
-                (click)="createDataAccessRequest()"
-              >
-                <div class="action-icon">
-                  <mat-icon>visibility</mat-icon>
-                </div>
-                <div class="action-content">
-                  <div class="action-title">Data Access</div>
-                  <div class="action-description">Request access to your personal data</div>
-                </div>
-              </button>
-
-              <!-- Data Deletion Request -->
-              <button 
-                mat-stroked-button 
-                class="quick-action-item"
-                (click)="createDataDeletionRequest()"
-              >
-                <div class="action-icon">
-                  <mat-icon>delete_outline</mat-icon>
-                </div>
-                <div class="action-content">
-                  <div class="action-title">Data Deletion</div>
-                  <div class="action-description">Request deletion of your data</div>
-                </div>
-              </button>
-
-              <!-- Data Portability Request -->
-              <button 
-                mat-stroked-button 
-                class="quick-action-item"
-                (click)="createDataPortabilityRequest()"
-              >
-                <div class="action-icon">
-                  <mat-icon>import_export</mat-icon>
-                </div>
-                <div class="action-content">
-                  <div class="action-title">Data Portability</div>
-                  <div class="action-description">Export your data in portable format</div>
-                </div>
-              </button>
-
-              <!-- Data Correction Request -->
-              <button 
-                mat-stroked-button 
-                class="quick-action-item"
-                (click)="createDataCorrectionRequest()"
-              >
-                <div class="action-icon">
-                  <mat-icon>edit</mat-icon>
-                </div>
-                <div class="action-content">
-                  <div class="action-title">Data Correction</div>
-                  <div class="action-description">Request correction of inaccurate data</div>
-                </div>
-              </button>
-
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-
-    </div>
-
-    <!-- Recent Activity Section -->
-    <div class="activity-section">
+    <!-- Quick Actions Section -->
+    <div class="quick-actions-section">
       <mat-card class="section-card">
         <mat-card-header>
           <mat-card-title>
-            <mat-icon>timeline</mat-icon>
-            Recent Activity
+            <mat-icon>flash_on</mat-icon>
+            Quick Actions
           </mat-card-title>
         </mat-card-header>
         
         <mat-card-content>
-          <div class="activity-timeline" *ngIf="recentActivities.length > 0; else noActivity">
-            <div 
-              class="activity-item" 
-              *ngFor="let activity of recentActivities"
+          <div class="quick-actions-grid">
+            
+            <!-- Data Access Request -->
+            <button 
+              mat-stroked-button 
+              class="quick-action-item"
+              (click)="createDataAccessRequest()"
             >
-              <div class="activity-icon">
-                <mat-icon [class]="getActivityIconClass(activity.type)">
-                  {{ getActivityIcon(activity.type) }}
-                </mat-icon>
+              <div class="action-icon">
+                <mat-icon>visibility</mat-icon>
               </div>
-              <div class="activity-content">
-                <div class="activity-title">{{ activity.title }}</div>
-                <div class="activity-description">{{ activity.description }}</div>
-                <div class="activity-time">{{ formatDateTime(activity.timestamp) }}</div>
+              <div class="action-content">
+                <div class="action-title">Data Access</div>
+                <div class="action-description">Request access to your personal data</div>
               </div>
-            </div>
+            </button>
+
+            <!-- Data Deletion Request -->
+            <button 
+              mat-stroked-button 
+              class="quick-action-item"
+              (click)="createDataDeletionRequest()"
+            >
+              <div class="action-icon">
+                <mat-icon>delete_outline</mat-icon>
+              </div>
+              <div class="action-content">
+                <div class="action-title">Data Deletion</div>
+                <div class="action-description">Request deletion of your data</div>
+              </div>
+            </button>
+
+            <!-- Data Portability Request -->
+            <button 
+              mat-stroked-button 
+              class="quick-action-item"
+              (click)="createDataPortabilityRequest()"
+            >
+              <div class="action-icon">
+                <mat-icon>import_export</mat-icon>
+              </div>
+              <div class="action-content">
+                <div class="action-title">Data Portability</div>
+                <div class="action-description">Export your data in portable format</div>
+              </div>
+            </button>
+
+            <!-- Data Correction Request -->
+            <button 
+              mat-stroked-button 
+              class="quick-action-item"
+              (click)="createDataCorrectionRequest()"
+            >
+              <div class="action-icon">
+                <mat-icon>edit</mat-icon>
+              </div>
+              <div class="action-content">
+                <div class="action-title">Data Correction</div>
+                <div class="action-description">Request correction of inaccurate data</div>
+              </div>
+            </button>
+
           </div>
-          
-          <ng-template #noActivity>
-            <div class="empty-state">
-              <mat-icon>timeline</mat-icon>
-              <h3>No recent activity</h3>
-              <p>Your activity will appear here once you start making requests</p>
-            </div>
-          </ng-template>
         </mat-card-content>
       </mat-card>
     </div>
