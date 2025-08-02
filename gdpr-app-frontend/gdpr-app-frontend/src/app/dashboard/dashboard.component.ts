@@ -99,18 +99,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load dashboard statistics
+   * Load dashboard statistics from API
    */
   private loadDashboardStats(): void {
     this.isLoading = true;
 
-    // TODO: Replace with real API call
-    // For now, simulate loading
+    // TODO: Replace with real API call to get user's request statistics
+    // Example API call:
+    // this.requestService.getUserRequestStats(this.currentUser.id).subscribe(stats => {
+    //   this.dashboardStats = stats;
+    //   this.isLoading = false;
+    // });
+
+    // For now, simulate API call with real-looking data
     setTimeout(() => {
       this.dashboardStats = {
-        totalRequests: 5,
-        pendingRequests: 2,
-        completedRequests: 3
+        totalRequests: 0, // Will be loaded from API
+        pendingRequests: 0, // Will be loaded from API
+        completedRequests: 0 // Will be loaded from API
       };
       this.isLoading = false;
     }, 500);
@@ -121,32 +127,5 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   createNewRequest(): void {
     this.router.navigate(['/create-request']);
-  }
-
-  /**
-   * Quick action methods for specific request types
-   */
-  createDataAccessRequest(): void {
-    this.router.navigate(['/create-request'], { 
-      queryParams: { type: 'data-access' } 
-    });
-  }
-
-  createDataDeletionRequest(): void {
-    this.router.navigate(['/create-request'], { 
-      queryParams: { type: 'data-deletion' } 
-    });
-  }
-
-  createDataPortabilityRequest(): void {
-    this.router.navigate(['/create-request'], { 
-      queryParams: { type: 'data-portability' } 
-    });
-  }
-
-  createDataCorrectionRequest(): void {
-    this.router.navigate(['/create-request'], { 
-      queryParams: { type: 'data-correction' } 
-    });
   }
 }
