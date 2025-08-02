@@ -1,1 +1,207 @@
-<p>navbar works!</p>
+<nav class="client-navbar">
+  <mat-toolbar class="navbar-container">
+    
+    <!-- Left section: Logo and App Title -->
+    <div class="navbar-left">
+      <div class="logo-section" (click)="goToDashboard()">
+        <mat-icon class="app-logo">security</mat-icon>
+        <span class="app-title">GDPR Manager</span>
+      </div>
+    </div>
+
+    <!-- Center section: Navigation Links -->
+    <div class="navbar-center">
+      <div class="nav-links">
+        
+        <!-- Dashboard Link -->
+        <button 
+          mat-button 
+          class="nav-link"
+          [class.active]="isActiveRoute('/dashboard')"
+          (click)="navigateTo('/dashboard')"
+        >
+          <mat-icon>dashboard</mat-icon>
+          <span>Dashboard</span>
+        </button>
+
+        <!-- My Requests Link -->
+        <button 
+          mat-button 
+          class="nav-link"
+          [class.active]="isActiveRoute('/my-requests')"
+          (click)="navigateTo('/my-requests')"
+        >
+          <mat-icon>assignment</mat-icon>
+          <span>My Requests</span>
+        </button>
+
+        <!-- Create Request Link -->
+        <button 
+          mat-button 
+          class="nav-link"
+          [class.active]="isActiveRoute('/create-request')"
+          (click)="navigateTo('/create-request')"
+        >
+          <mat-icon>add_circle_outline</mat-icon>
+          <span>Create Request</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Right section: User Info and Logout -->
+    <div class="navbar-right">
+      
+      <!-- User Info -->
+      <div class="user-info" [matMenuTriggerFor]="userMenu">
+        <div class="user-avatar">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+        <div class="user-details" *ngIf="currentUser">
+          <span class="user-name">{{ getUserDisplayName() }}</span>
+          <span class="user-role">Client</span>
+        </div>
+        <mat-icon class="dropdown-icon">keyboard_arrow_down</mat-icon>
+      </div>
+
+      <!-- User Menu -->
+      <mat-menu #userMenu="matMenu" class="user-menu">
+        <div class="menu-header">
+          <div class="menu-user-info" *ngIf="currentUser">
+            <div class="menu-user-avatar">
+              <mat-icon>account_circle</mat-icon>
+            </div>
+            <div class="menu-user-details">
+              <div class="menu-user-name">{{ getUserDisplayName() }}</div>
+              <div class="menu-user-email">{{ currentUser.email }}</div>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Profile option -->
+        <button mat-menu-item (click)="goToProfile()">
+          <mat-icon>person</mat-icon>
+          <span>My Profile</span>
+        </button>
+
+        <!-- Settings option -->
+        <button mat-menu-item (click)="goToSettings()">
+          <mat-icon>settings</mat-icon>
+          <span>Settings</span>
+        </button>
+
+        <mat-divider></mat-divider>
+
+        <!-- Logout option -->
+        <button mat-menu-item (click)="logout()" class="logout-option">
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button 
+      mat-icon-button 
+      class="mobile-menu-toggle"
+      (click)="toggleMobileMenu()"
+      [class.menu-open]="isMobileMenuOpen"
+    >
+      <mat-icon>{{ isMobileMenuOpen ? 'close' : 'menu' }}</mat-icon>
+    </button>
+
+  </mat-toolbar>
+
+  <!-- Mobile Navigation Menu -->
+  <div class="mobile-nav" [class.mobile-nav-open]="isMobileMenuOpen">
+    <div class="mobile-nav-content">
+      
+      <!-- Mobile User Info -->
+      <div class="mobile-user-info" *ngIf="currentUser">
+        <div class="mobile-user-avatar">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+        <div class="mobile-user-details">
+          <div class="mobile-user-name">{{ getUserDisplayName() }}</div>
+          <div class="mobile-user-email">{{ currentUser.email }}</div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Mobile Navigation Links -->
+      <div class="mobile-nav-links">
+        <button 
+          mat-button 
+          class="mobile-nav-link"
+          [class.active]="isActiveRoute('/dashboard')"
+          (click)="navigateToMobile('/dashboard')"
+        >
+          <mat-icon>dashboard</mat-icon>
+          <span>Dashboard</span>
+        </button>
+
+        <button 
+          mat-button 
+          class="mobile-nav-link"
+          [class.active]="isActiveRoute('/my-requests')"
+          (click)="navigateToMobile('/my-requests')"
+        >
+          <mat-icon>assignment</mat-icon>
+          <span>My Requests</span>
+        </button>
+
+        <button 
+          mat-button 
+          class="mobile-nav-link"
+          [class.active]="isActiveRoute('/create-request')"
+          (click)="navigateToMobile('/create-request')"
+        >
+          <mat-icon>add_circle_outline</mat-icon>
+          <span>Create Request</span>
+        </button>
+
+        <mat-divider></mat-divider>
+
+        <button 
+          mat-button 
+          class="mobile-nav-link"
+          (click)="goToProfileMobile()"
+        >
+          <mat-icon>person</mat-icon>
+          <span>My Profile</span>
+        </button>
+
+        <button 
+          mat-button 
+          class="mobile-nav-link"
+          (click)="goToSettingsMobile()"
+        >
+          <mat-icon>settings</mat-icon>
+          <span>Settings</span>
+        </button>
+
+        <button 
+          mat-button 
+          class="mobile-nav-link logout-mobile"
+          (click)="logoutMobile()"
+        >
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Menu Overlay -->
+  <div 
+    class="mobile-menu-overlay" 
+    *ngIf="isMobileMenuOpen"
+    (click)="closeMobileMenu()"
+  ></div>
+
+</nav>
