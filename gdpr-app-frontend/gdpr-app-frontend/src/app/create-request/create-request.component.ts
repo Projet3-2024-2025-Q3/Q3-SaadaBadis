@@ -21,6 +21,7 @@ import { ClientNavbarComponent } from '../navbar/navbar.component';
 // Services
 import { AuthService, UserInfo } from '../services/auth.service';
 import { RequestService, CreateGDPRRequestDTO } from '../services/request.service';
+import { CompanyService, Company } from '../services/company.service';
 
 // Interfaces
 interface RequestType {
@@ -31,11 +32,7 @@ interface RequestType {
   processingTime: string;
 }
 
-interface Company {
-  idCompany: number;
-  companyName: string;
-  email: string;
-}
+// Removed the duplicate Company interface since we're importing it from the service
 
 @Component({
   selector: 'app-create-request',
@@ -93,6 +90,7 @@ export class CreateRequestComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private requestService: RequestService,
+    private companyService: CompanyService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -133,15 +131,19 @@ export class CreateRequestComponent implements OnInit, OnDestroy {
    * Load companies for the select dropdown
    */
   private loadCompanies(): void {
-    // TODO: Replace with actual company service
-    // For now, simulate company data
-    this.companies = [
-      { idCompany: 1, companyName: 'Google LLC', email: 'contact@google.com' },
-      { idCompany: 2, companyName: 'Microsoft Corporation', email: 'contact@microsoft.com' },
-      { idCompany: 3, companyName: 'Apple Inc.', email: 'contact@apple.com' },
-      { idCompany: 4, companyName: 'Meta Platforms Inc.', email: 'contact@meta.com' },
-      { idCompany: 5, companyName: 'Amazon.com Inc.', email: 'contact@amazon.com' }
-    ];
+    this.companyService.getAllCompanies()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (companies) => {
+          this.companies = companies;
+        },
+        error: (error) => {
+          console.error('Error loading companies:', error);
+          this.errorMessage = 'Failed to load companies. Please try again.';
+          // Fallback to empty array
+          this.companies = [];
+        }
+      });
   }
 
   /**
