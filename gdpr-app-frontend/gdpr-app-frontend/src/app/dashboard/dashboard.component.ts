@@ -16,6 +16,7 @@ import { ClientNavbarComponent } from '../navbar/navbar.component';
 
 // Services
 import { AuthService, UserInfo } from '../services/auth.service';
+import { RequestService } from '../services/request.service';
 
 // Interfaces
 interface DashboardStats {
@@ -57,6 +58,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
+    private requestService: RequestService,
     private router: Router
   ) {}
 
@@ -103,23 +105,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   private loadDashboardStats(): void {
     this.isLoading = true;
-
-    // TODO: Replace with real API call to get user's request statistics
-    // Example API call:
-    // this.requestService.getUserRequestStats(this.currentUser.id).subscribe(stats => {
-    //   this.dashboardStats = stats;
-    //   this.isLoading = false;
-    // });
-
-    // For now, simulate API call with real-looking data
-    setTimeout(() => {
-      this.dashboardStats = {
-        totalRequests: 0, // Will be loaded from API
-        pendingRequests: 0, // Will be loaded from API
-        completedRequests: 0 // Will be loaded from API
-      };
-      this.isLoading = false;
-    }, 500);
+    
+    this.requestService.getMyRequestStatistics()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (stats) => {
+          this.dashboardStats = {
+            totalRequests: stats.totalRequests,
+            pendingRequests: stats.pendingRequests,
+            completedRequests: stats.completedRequests
+          };
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading stats:', error);
+          this.dashboardStats = {
+            totalRequests: 0,
+            pendingRequests: 0,
+            completedRequests: 0
+          };
+          this.isLoading = false;
+        }
+      });
   }
 
   /**
