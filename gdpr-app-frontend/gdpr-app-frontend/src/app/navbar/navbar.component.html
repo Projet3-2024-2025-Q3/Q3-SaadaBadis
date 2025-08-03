@@ -39,8 +39,8 @@
         <button 
           mat-button 
           class="nav-link"
-          [class.active]="isActiveRoute('/create-request')"
-          (click)="navigateTo('/create-request')"
+          [class.active]="isActiveRoute('/create')"
+          (click)="navigateTo('/create')"
         >
           <mat-icon>add_circle_outline</mat-icon>
           <span>Create Request</span>
@@ -157,10 +157,12 @@
         <button 
           mat-button 
           class="mobile-nav-link"
-          [class.active]="isActiveRoute('/create-request')"
-          (click)="navigateToMobile('/create-request')"
+          (click)="navigateTo('create')"
+          (click)="navigateToMobile('/create')"
+          type="button"
         >
           <mat-icon>add_circle_outline</mat-icon>
+          
           <span>Create Request</span>
         </button>
 

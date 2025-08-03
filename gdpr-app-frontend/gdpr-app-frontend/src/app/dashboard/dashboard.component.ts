@@ -133,6 +133,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
    * Navigation methods
    */
   createNewRequest(): void {
-    this.router.navigate(['/create-request']);
+    this.router.navigate(['/create']);
   }
 }
