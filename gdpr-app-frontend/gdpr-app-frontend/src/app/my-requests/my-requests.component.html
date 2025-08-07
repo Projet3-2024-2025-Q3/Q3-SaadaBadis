@@ -48,36 +48,12 @@
 
     <mat-card class="stat-card">
       <mat-card-content>
-        <div class="stat-icon progress">
-          <mat-icon>pending</mat-icon>
-        </div>
-        <div class="stat-info">
-          <h2>{{ statistics.inProgress }}</h2>
-          <p>In Progress</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card">
-      <mat-card-content>
         <div class="stat-icon completed">
           <mat-icon>check_circle</mat-icon>
         </div>
         <div class="stat-info">
           <h2>{{ statistics.completed }}</h2>
           <p>Completed</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card">
-      <mat-card-content>
-        <div class="stat-icon rejected">
-          <mat-icon>cancel</mat-icon>
-        </div>
-        <div class="stat-info">
-          <h2>{{ statistics.rejected }}</h2>
-          <p>Rejected</p>
         </div>
       </mat-card-content>
     </mat-card>
@@ -140,9 +116,6 @@
           <button mat-icon-button (click)="refreshData()" matTooltip="Refresh">
             <mat-icon>refresh</mat-icon>
           </button>
-          <button mat-icon-button (click)="exportData()" matTooltip="Export">
-            <mat-icon>download</mat-icon>
-          </button>
         </div>
       </div>
     </div>
@@ -165,20 +138,8 @@
       </mat-tab>
       <mat-tab>
         <ng-template mat-tab-label>
-          <span>In Progress</span>
-          <span class="tab-badge progress" *ngIf="statistics.inProgress > 0">{{ statistics.inProgress }}</span>
-        </ng-template>
-      </mat-tab>
-      <mat-tab>
-        <ng-template mat-tab-label>
           <span>Completed</span>
           <span class="tab-badge completed" *ngIf="statistics.completed > 0">{{ statistics.completed }}</span>
-        </ng-template>
-      </mat-tab>
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <span>Rejected</span>
-          <span class="tab-badge rejected" *ngIf="statistics.rejected > 0">{{ statistics.rejected }}</span>
         </ng-template>
       </mat-tab>
     </mat-tab-group>
@@ -294,12 +255,6 @@
           </td>
         </tr>
       </table>
-
-      <!-- Paginator -->
-      <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" 
-                     [pageSize]="10"
-                     showFirstLastButtons>
-      </mat-paginator>
     </div>
   </mat-card>
 </div>
