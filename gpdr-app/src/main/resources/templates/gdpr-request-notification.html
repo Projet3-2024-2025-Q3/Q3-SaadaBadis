@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>New GDPR Request Notification</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+<div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 10px 10px 0 0; text-align: center;">
+    <h1 style="margin: 0;">⚠️ New GDPR Request</h1>
+</div>
+
+<div style="background: #f9f9f9; padding: 30px; border: 1px solid #ddd; border-top: none;">
+    <p>Dear <strong th:text="${company.companyName}">Company Name</strong>,</p>
+
+    <p>A new GDPR request has been submitted to your company and requires your attention.</p>
+
+    <div style="background: white; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f5576c;">
+        <h3 style="color: #f5576c; margin-top: 0;">Request Information:</h3>
+        <p><strong>Request ID:</strong> #<span th:text="${request.idRequest}">12345</span></p>
+        <p><strong>Request Type:</strong> <span th:text="${request.requestType}" style="font-weight: bold; color: #f5576c;">MODIFICATION</span></p>
+        <p><strong>Status:</strong> <span style="background: #ffc107; color: #333; padding: 3px 10px; border-radius: 3px; font-weight: bold;">PENDING</span></p>
+        <p><strong>Submitted:</strong> <span th:text="${requestDate}">07/08/2025</span></p>
+
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+            <h4 style="color: #333; margin-bottom: 10px;">Customer Information:</h4>
+            <p><strong>Name:</strong> <span th:text="${user.firstname + ' ' + user.lastname}">John Doe</span></p>
+            <p><strong>Email:</strong> <span th:text="${user.email}">user@example.com</span></p>
+        </div>
+
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+            <h4 style="color: #333; margin-bottom: 10px;">Request Content:</h4>
+            <p style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-style: italic; color: #555;" th:text="${request.requestContent}">Customer's request details...</p>
+        </div>
+    </div>
+
+    <div style="background: #d1ecf1; border-left: 4px solid #0c5460; padding: 15px; margin: 20px 0;">
+        <strong>📋 Action Required:</strong> Please review and process this request within the GDPR-mandated timeframe of <strong>30 days</strong>.
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a th:href="${dashboardUrl}" href="#" style="background: #f5576c; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Process Request</a>
+    </div>
+
+    <p style="color: #666; font-size: 14px;">
+        Please log in to your dashboard to manage this request. Remember that GDPR compliance requires timely processing of all data subject requests.
+    </p>
+</div>
+
+<div style="text-align: center; color: #666; font-size: 12px; margin-top: 20px;">
+    <p>© 2025 <span th:text="${appName}">GDPR App</span> - All rights reserved</p>
+    <p>This is an automated notification. For support, please contact the system administrator.</p>
+</div>
+</body>
+</html>
