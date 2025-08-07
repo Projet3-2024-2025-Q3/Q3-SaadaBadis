@@ -9,7 +9,6 @@ import { takeUntil } from 'rxjs/operators';
 // Angular Material Imports
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -42,7 +41,6 @@ import { CompanyService, Company } from '../services/company.service';
     FormsModule,
     MatCardModule,
     MatTableModule,
-    MatPaginatorModule,
     MatSortModule,
     MatFormFieldModule,
     MatInputModule,
@@ -64,7 +62,6 @@ import { CompanyService, Company } from '../services/company.service';
   styleUrls: ['./my-requests.component.scss']
 })
 export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   // Data
@@ -86,9 +83,7 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
   statistics = {
     total: 0,
     pending: 0,
-    completed: 0,
-    rejected: 0,
-    inProgress: 0
+    completed: 0
   };
   
   // UI State
@@ -99,10 +94,8 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
   statusOptions = [
     { value: 'all', label: 'All Statuses', icon: 'all_inclusive' },
     { value: 'PENDING', label: 'Pending', icon: 'schedule' },
-    { value: 'IN_PROGRESS', label: 'In Progress', icon: 'pending' },
     { value: 'COMPLETED', label: 'Completed', icon: 'check_circle' },
-    { value: 'PROCESSED', label: 'Processed', icon: 'check_circle' },
-    { value: 'REJECTED', label: 'Rejected', icon: 'cancel' }
+    { value: 'PROCESSED', label: 'Processed', icon: 'check_circle' }
   ];
   
   // Request type options
@@ -143,7 +136,6 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     if (this.dataSource) {
-      this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       
       // Custom filter predicate
@@ -226,10 +218,6 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.dataSource.data = filteredData;
-
-    if (this.paginator) {
-      this.paginator.firstPage();
-    }
   }
 
   calculateStatistics(): void {
@@ -238,9 +226,7 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
       pending: this.requests.filter(r => r.status === 'PENDING').length,
       completed: this.requests.filter(r => 
         r.status === 'COMPLETED' || r.status === 'PROCESSED'
-      ).length,
-      rejected: this.requests.filter(r => r.status === 'REJECTED').length,
-      inProgress: this.requests.filter(r => r.status === 'IN_PROGRESS').length
+      ).length
     };
   }
 
@@ -267,13 +253,7 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.selectedStatus = 'PENDING';
         break;
       case 2:
-        this.selectedStatus = 'IN_PROGRESS';
-        break;
-      case 3:
         this.selectedStatus = 'COMPLETED';
-        break;
-      case 4:
-        this.selectedStatus = 'REJECTED';
         break;
     }
     
@@ -320,7 +300,7 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   createNewRequest(): void {
-    this.router.navigate(['/create']);
+    this.router.navigate(['/create-request']);
   }
 
   refreshData(): void {
@@ -328,22 +308,13 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.showSnackBar('Data refreshed', 'success');
   }
 
-  exportData(): void {
-    // TODO: Implement export functionality
-    this.showSnackBar('Export feature coming soon!', 'info');
-  }
-
   getStatusIcon(status: string): string {
     switch (status.toUpperCase()) {
       case 'PENDING':
         return 'schedule';
-      case 'IN_PROGRESS':
-        return 'pending';
       case 'COMPLETED':
       case 'PROCESSED':
         return 'check_circle';
-      case 'REJECTED':
-        return 'cancel';
       default:
         return 'help';
     }
@@ -353,13 +324,9 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
     switch (status.toUpperCase()) {
       case 'PENDING':
         return 'warn';
-      case 'IN_PROGRESS':
-        return 'accent';
       case 'COMPLETED':
       case 'PROCESSED':
         return 'primary';
-      case 'REJECTED':
-        return 'warn';
       default:
         return '';
     }
