@@ -4,6 +4,7 @@ import { SignupComponent } from './sign-up/sign-up.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CreateRequestComponent } from './create-request/create-request.component';
+import { MyRequestsComponent } from './my-requests/my-requests.component';
 
 export const routes: Routes = [
   
@@ -15,6 +16,7 @@ export const routes: Routes = [
   { path: 'forgot', component: ForgotPasswordComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'create', component: CreateRequestComponent },
+  { path: 'myrequests', component: MyRequestsComponent },
   
   
   
