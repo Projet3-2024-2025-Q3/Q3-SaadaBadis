@@ -39,20 +39,30 @@
 }
 
 .header-actions button {
-  background: white;
-  color: #42a5f5;
-  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 600;
   padding: 0 24px;
   height: 48px;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .header-actions button mat-icon {
   margin-right: 8px;
+  color: white;
 }
 
 .header-actions button:hover {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: white;
+  color: #42a5f5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.header-actions button:hover mat-icon {
+  color: #42a5f5;
 }
 
 /* Statistics Section */

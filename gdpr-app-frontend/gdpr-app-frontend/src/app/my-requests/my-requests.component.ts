@@ -362,7 +362,7 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   createNewRequest(): void {
-    this.router.navigate(['/create-request']);
+    this.router.navigate(['/create']);
   }
 
   refreshData(): void {

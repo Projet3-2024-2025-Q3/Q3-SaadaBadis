@@ -109,16 +109,9 @@
 
   <!-- Actions -->
   <mat-dialog-actions class="dialog-actions">
-    <button mat-button (click)="close()">Close</button>
-    <div class="action-buttons" *ngIf="request.status === 'PENDING'">
-      <button mat-button color="primary" (click)="onEdit()">
-        <mat-icon>edit</mat-icon>
-        Edit Request
-      </button>
-      <button mat-button color="warn" (click)="onDelete()">
-        <mat-icon>delete</mat-icon>
-        Delete Request
-      </button>
-    </div>
+    <button mat-raised-button color="primary" (click)="close()" class="close-btn">
+      <mat-icon>close</mat-icon>
+      Close
+    </button>
   </mat-dialog-actions>
 </div>
