@@ -68,12 +68,4 @@ export class RequestDetailsDialogComponent {
   close(): void {
     this.dialogRef.close();
   }
-
-  onEdit(): void {
-    this.dialogRef.close({ action: 'edit', request: this.request });
-  }
-
-  onDelete(): void {
-    this.dialogRef.close({ action: 'delete', request: this.request });
-  }
 }
