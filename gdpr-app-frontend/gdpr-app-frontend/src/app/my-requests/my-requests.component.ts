@@ -71,7 +71,7 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
   dataSource: MatTableDataSource<GDPRRequest>;
   
   // Table columns
-  displayedColumns: string[] = ['id', 'requestType', 'company', 'status', 'createdAt', 'actions'];
+  displayedColumns: string[] = ['id', 'requestType', 'company', 'status'];
   
   // Filter properties
   searchText: string = '';
@@ -162,6 +162,14 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe({
         next: (requests) => {
           this.requests = requests;
+          
+          // Debug: Log the structure of the first request to see how company data is structured
+          if (requests.length > 0) {
+            console.log('Request structure:', requests[0]);
+            console.log('Company data:', requests[0].company);
+            console.log('CompanyId:', requests[0].companyId);
+          }
+          
           this.updateDataSource();
           this.calculateStatistics();
           this.isLoading = false;
@@ -203,15 +211,21 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
       filteredData = filteredData.filter(req => req.requestType === this.selectedType);
     }
 
-    // Filter by company
+    // Filter by company - handle multiple possible structures
     if (this.selectedCompany !== 'all') {
       const companyId = parseInt(this.selectedCompany);
       filteredData = filteredData.filter(req => {
-        // Check both companyId and company.idCompany
-        if (req.companyId) {
-          return req.companyId === companyId;
-        } else if (req.company && req.company.idCompany) {
-          return req.company.idCompany === companyId;
+        // Check all possible company ID locations
+        if (req.companyId === companyId) {
+          return true;
+        }
+        if (req.company) {
+          if (req.company.idCompany === companyId) {
+            return true;
+          }
+          if (req.company.idCompany === companyId) {
+            return true;
+          }
         }
         return false;
       });
@@ -219,12 +233,21 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Apply search filter
     if (this.searchText) {
-      this.dataSource.filter = this.searchText.trim().toLowerCase();
-    } else {
-      this.dataSource.filter = '';
+      const search = this.searchText.toLowerCase();
+      filteredData = filteredData.filter(req => {
+        const companyName = this.getCompanyName(req).toLowerCase();
+        return req.requestContent.toLowerCase().includes(search) ||
+               req.id.toString().includes(search) ||
+               req.requestType.toLowerCase().includes(search) ||
+               req.status.toLowerCase().includes(search) ||
+               companyName.includes(search);
+      });
     }
 
     this.dataSource.data = filteredData;
+    
+    // Reset filter for mat-table internal filtering
+    this.dataSource.filter = '';
   }
 
   calculateStatistics(): void {
