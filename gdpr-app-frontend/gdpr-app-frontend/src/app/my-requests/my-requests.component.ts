@@ -205,9 +205,16 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Filter by company
     if (this.selectedCompany !== 'all') {
-      filteredData = filteredData.filter(req => 
-        req.companyId?.toString() === this.selectedCompany
-      );
+      const companyId = parseInt(this.selectedCompany);
+      filteredData = filteredData.filter(req => {
+        // Check both companyId and company.idCompany
+        if (req.companyId) {
+          return req.companyId === companyId;
+        } else if (req.company && req.company.idCompany) {
+          return req.company.idCompany === companyId;
+        }
+        return false;
+      });
     }
 
     // Apply search filter
@@ -336,9 +343,25 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
     return type === 'MODIFICATION' ? 'edit' : 'delete';
   }
 
-  getCompanyName(companyId: number): string {
-    const company = this.companies.find(c => c.idCompany === companyId);
-    return company ? company.companyName : 'Unknown';
+  getCompanyName(request: any): string {
+    // Check if company object exists with name
+    if (request.company) {
+      return request.company.companyName || request.company.name || 'Unknown';
+    }
+    
+    // Fallback to companyId lookup
+    if (request.companyId) {
+      const company = this.companies.find(c => c.idCompany === request.companyId);
+      return company ? company.companyName : 'Unknown';
+    }
+    
+    // Additional check for direct company reference
+    if (request.idCompany) {
+      const company = this.companies.find(c => c.idCompany === request.idCompany);
+      return company ? company.companyName : 'Unknown';
+    }
+    
+    return 'Unknown';
   }
 
   formatDate(date: string): string {
