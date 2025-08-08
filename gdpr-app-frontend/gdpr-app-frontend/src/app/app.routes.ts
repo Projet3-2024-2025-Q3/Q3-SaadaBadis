@@ -5,6 +5,7 @@ import { ForgotPasswordComponent } from './forgot-password/forgot-password.compo
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CreateRequestComponent } from './create-request/create-request.component';
 import { MyRequestsComponent } from './my-requests/my-requests.component';
+import { RequestDetailsDialogComponent } from './request-details-dialog/request-details-dialog.component';
 
 export const routes: Routes = [
   
@@ -17,6 +18,7 @@ export const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent },
   { path: 'create', component: CreateRequestComponent },
   { path: 'myrequests', component: MyRequestsComponent },
+  { path: 'request-details', component: RequestDetailsDialogComponent },
   
   
   
