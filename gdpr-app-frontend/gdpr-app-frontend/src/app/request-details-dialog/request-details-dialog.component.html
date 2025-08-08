@@ -1,1 +1,124 @@
-<p>request-details-dialog works!</p>
+<!-- src/app/components/request-details-dialog/request-details-dialog.component.html -->
+<div class="dialog-container">
+  <!-- Header -->
+  <div mat-dialog-title class="dialog-header">
+    <div class="header-content">
+      <div class="header-title">
+        <mat-icon class="header-icon">assignment</mat-icon>
+        <h2>GDPR Request Details</h2>
+      </div>
+      <button mat-icon-button (click)="close()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <mat-dialog-content class="dialog-content">
+    <!-- Request ID and Status -->
+    <div class="info-section">
+      <div class="info-row">
+        <div class="info-item">
+          <span class="info-label">Request ID</span>
+          <span class="info-value request-id">#{{ getRequestId() }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Status</span>
+          <mat-chip [class]="'status-chip status-' + request.status.toLowerCase()">
+            <mat-icon>{{ getStatusIcon(request.status) }}</mat-icon>
+            {{ request.status }}
+          </mat-chip>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Request Type and Company -->
+    <div class="info-section">
+      <div class="info-row">
+        <div class="info-item">
+          <span class="info-label">Request Type</span>
+          <div class="type-chip">
+            <mat-icon>{{ getTypeIcon(request.requestType) }}</mat-icon>
+            <span>{{ request.requestType }}</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Company</span>
+          <div class="company-info">
+            <mat-icon>business</mat-icon>
+            <span>{{ companyName }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Dates -->
+    <div class="info-section">
+      <div class="info-row">
+        <div class="info-item">
+          <span class="info-label">Created Date</span>
+          <div class="date-info">
+            <mat-icon>calendar_today</mat-icon>
+            <span>{{ formatDate(request.createdAt || request.requestDate) }}</span>
+          </div>
+        </div>
+        <div class="info-item" *ngIf="request.updatedAt">
+          <span class="info-label">Last Updated</span>
+          <div class="date-info">
+            <mat-icon>update</mat-icon>
+            <span>{{ formatDate(request.updatedAt) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Request Content -->
+    <div class="content-section">
+      <h3 class="section-title">
+        <mat-icon>description</mat-icon>
+        Request Content
+      </h3>
+      <div class="request-content">
+        <p>{{ request.requestContent }}</p>
+      </div>
+    </div>
+
+    <!-- Processing Information -->
+    <div class="info-notice" *ngIf="request.status === 'PENDING'">
+      <mat-icon>info</mat-icon>
+      <div class="notice-content">
+        <strong>Processing Time</strong>
+        <p>This request will be processed within 30 days as required by GDPR regulations.</p>
+      </div>
+    </div>
+
+    <div class="info-notice success" *ngIf="request.status === 'COMPLETED' || request.status === 'PROCESSED'">
+      <mat-icon>check_circle</mat-icon>
+      <div class="notice-content">
+        <strong>Request Completed</strong>
+        <p>This request has been successfully processed.</p>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <!-- Actions -->
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="close()">Close</button>
+    <div class="action-buttons" *ngIf="request.status === 'PENDING'">
+      <button mat-button color="primary" (click)="onEdit()">
+        <mat-icon>edit</mat-icon>
+        Edit Request
+      </button>
+      <button mat-button color="warn" (click)="onDelete()">
+        <mat-icon>delete</mat-icon>
+        Delete Request
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>
