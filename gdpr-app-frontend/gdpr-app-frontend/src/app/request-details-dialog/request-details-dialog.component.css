@@ -61,11 +61,14 @@
   display: flex;
   gap: 32px;
   flex-wrap: wrap;
+  align-items: flex-start;
 }
 
 .info-item {
   flex: 1;
   min-width: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .info-label {
@@ -95,10 +98,11 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 16px;
-  border-radius: 16px;
+  padding: 8px 16px;
+  border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
+  width: fit-content;
 }
 
 .status-chip mat-icon {
@@ -123,11 +127,12 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px;
+  padding: 8px 16px;
   background: #e3f2fd;
-  border-radius: 16px;
+  border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
+  width: fit-content;
 }
 
 .type-chip mat-icon {
@@ -255,17 +260,19 @@
   background: #fafafa;
   border-top: 1px solid #e0e0e0;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
 
-.action-buttons {
+.close-btn {
   display: flex;
+  align-items: center;
   gap: 8px;
+  padding: 8px 24px;
+  font-weight: 500;
 }
 
-.action-buttons button mat-icon {
-  margin-right: 4px;
+.close-btn mat-icon {
   font-size: 18px;
   width: 18px;
   height: 18px;
@@ -307,17 +314,16 @@ mat-divider {
     gap: 16px;
   }
   
+  .info-item {
+    min-width: auto;
+  }
+  
   .dialog-actions {
-    flex-direction: column;
-    gap: 8px;
+    padding: 12px 16px !important;
   }
   
-  .action-buttons {
+  .close-btn {
     width: 100%;
-    flex-direction: column;
-  }
-  
-  .action-buttons button {
-    width: 100%;
+    justify-content: center;
   }
 }
