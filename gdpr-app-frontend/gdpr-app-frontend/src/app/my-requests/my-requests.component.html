@@ -200,7 +200,8 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
             class="request-row"
             [class.clickable]="true"
-            (click)="viewRequest(row)"></tr>
+            (click)="viewRequest(row)"
+            matTooltip="Click to view details"></tr>
 
         <!-- No Data Row -->
         <tr class="mat-row no-data-row" *matNoDataRow>
