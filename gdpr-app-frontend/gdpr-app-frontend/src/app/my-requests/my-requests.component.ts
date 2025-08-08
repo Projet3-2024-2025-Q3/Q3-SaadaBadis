@@ -27,6 +27,7 @@ import { MatDividerModule } from '@angular/material/divider';
 
 // Components
 import { ClientNavbarComponent } from '../navbar/navbar.component';
+import { RequestDetailsDialogComponent } from '../request-details-dialog/request-details-dialog.component';
 
 // Services
 import { AuthService, UserInfo } from '../services/auth.service';
@@ -138,11 +139,22 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.dataSource) {
       this.dataSource.sort = this.sort;
       
+      // Custom sort for ID column
+      this.dataSource.sortingDataAccessor = (item, property) => {
+        switch(property) {
+          case 'id': 
+            return item.id || item.id;
+          default: 
+            return item.id;
+        }
+      };
+      
       // Custom filter predicate
       this.dataSource.filterPredicate = (data: GDPRRequest, filter: string) => {
         const searchStr = filter.toLowerCase();
+        const requestId = (data.id || data.id || '').toString();
         return data.requestContent.toLowerCase().includes(searchStr) ||
-               data.id.toString().includes(searchStr) ||
+               requestId.includes(searchStr) ||
                data.requestType.toLowerCase().includes(searchStr) ||
                data.status.toLowerCase().includes(searchStr);
       };
@@ -236,8 +248,9 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
       const search = this.searchText.toLowerCase();
       filteredData = filteredData.filter(req => {
         const companyName = this.getCompanyName(req).toLowerCase();
+        const requestId = (req.id || req.id || '').toString();
         return req.requestContent.toLowerCase().includes(search) ||
-               req.id.toString().includes(search) ||
+               requestId.includes(search) ||
                req.requestType.toLowerCase().includes(search) ||
                req.status.toLowerCase().includes(search) ||
                companyName.includes(search);
@@ -291,10 +304,26 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   viewRequest(request: GDPRRequest): void {
-    // Navigate to request details or open dialog
-    console.log('View request:', request);
-    // this.router.navigate(['/request-details', request.id]);
-    this.showSnackBar('View details feature coming soon!', 'info');
+    // Open dialog with request details
+    const dialogRef = this.dialog.open(RequestDetailsDialogComponent, {
+      width: '700px',
+      maxWidth: '90vw',
+      data: {
+        request: request,
+        companyName: this.getCompanyName(request)
+      }
+    });
+
+    // Handle dialog result
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        if (result.action === 'edit') {
+          this.editRequest(result.request);
+        } else if (result.action === 'delete') {
+          this.deleteRequest(result.request);
+        }
+      }
+    });
   }
 
   editRequest(request: GDPRRequest): void {
@@ -303,8 +332,9 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     
-    console.log('Edit request:', request);
-    this.showSnackBar('Edit feature coming soon!', 'info');
+    const requestId = request.id || request.id;
+    console.log('Edit request ID:', requestId);
+    this.showSnackBar(`Edit request #${requestId} - Feature coming soon!`, 'info');
   }
 
   deleteRequest(request: GDPRRequest): void {
@@ -313,12 +343,14 @@ export class MyRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    if (confirm('Are you sure you want to delete this request?')) {
-      this.requestService.deleteRequest(request.id)
+    const requestId = request.id || request.id;
+    
+    if (confirm(`Are you sure you want to delete request #${requestId}?`)) {
+      this.requestService.deleteRequest(requestId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            this.showSnackBar('Request deleted successfully', 'success');
+            this.showSnackBar(`Request #${requestId} deleted successfully`, 'success');
             this.loadRequests();
           },
           error: (error) => {
