@@ -78,37 +78,7 @@
       </div>
     </div>
 
-    <!-- Recent Activity Section -->
-    <div class="activity-section">
-      <mat-card class="section-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>history</mat-icon>
-            Recent Activity
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="activity-timeline" *ngIf="recentActivities.length > 0">
-            <div class="activity-item" *ngFor="let activity of recentActivities">
-              <div class="activity-icon">
-                <mat-icon>{{ activity.icon }}</mat-icon>
-              </div>
-              <div class="activity-content">
-                <div class="activity-title">{{ activity.title }}</div>
-                <div class="activity-description">{{ activity.description }}</div>
-                <div class="activity-time">{{ formatTimeAgo(activity.timestamp) }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="empty-state" *ngIf="recentActivities.length === 0">
-            <mat-icon>update</mat-icon>
-            <h3>No Recent Activity</h3>
-            <p>Activities will be shown here</p>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  </div>
+
 
   <!-- Loading Overlay -->
   <div class="loading-overlay" *ngIf="isLoading">
