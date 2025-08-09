@@ -215,7 +215,7 @@ export class LoginComponent {
          this.router.navigate(['/admin/dashboard']);
          break;
        case 'GERANT': // Manager role
-         this.router.navigate(['/manager/dashboard']);
+         this.router.navigate(['/manager-dashboard']);
          break;
        case 'CLIENT':
        default:

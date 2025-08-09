@@ -6,6 +6,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { CreateRequestComponent } from './create-request/create-request.component';
 import { MyRequestsComponent } from './my-requests/my-requests.component';
 import { RequestDetailsDialogComponent } from './request-details-dialog/request-details-dialog.component';
+import { ManagerDashboardComponent } from './manager-dashboard/manager-dashboard.component';
 
 export const routes: Routes = [
   
@@ -19,6 +20,7 @@ export const routes: Routes = [
   { path: 'create', component: CreateRequestComponent },
   { path: 'myrequests', component: MyRequestsComponent },
   { path: 'request-details', component: RequestDetailsDialogComponent },
+  { path: 'manager-dashboard', component: ManagerDashboardComponent },
   
   
   
