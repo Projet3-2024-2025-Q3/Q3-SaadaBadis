@@ -117,21 +117,21 @@
               *ngFor="let request of recentRequests"
               (click)="viewRequestDetails(request.id)"
             >
-              <div class="request-icon" [ngClass]="getRequestTypeClass(request.type)">
-                <mat-icon>{{ getRequestIcon(request.type) }}</mat-icon>
+              <div class="request-icon" [ngClass]="getRequestTypeClass(request.requestType)">
+                <mat-icon>{{ getRequestIcon(request.requestType) }}</mat-icon>
               </div>
               <div class="request-details">
-                <div class="request-title">{{ request.subject }}</div>
+                <div class="request-title">Request #{{ request.id }}</div>
                 <div class="request-meta">
-                  <span class="request-type">{{ request.type }}</span>
+                  <span class="request-type">{{ requestService.getRequestTypeDisplayName(request.requestType) }}</span>
                   <span>•</span>
-                  <span>{{ request.clientName }}</span>
+                  <span>User #{{ request.userId }}</span>
                   <span>•</span>
                   <span>{{ formatDate(request.createdAt) }}</span>
                 </div>
               </div>
-              <div class="status-badge" [ngClass]="request.status.toLowerCase()">
-                {{ request.status }}
+              <div class="status-badge" [ngClass]="requestService.getStatusColorClass(request.status)">
+                {{ requestService.getStatusDisplayName(request.status) }}
               </div>
             </div>
           </div>
