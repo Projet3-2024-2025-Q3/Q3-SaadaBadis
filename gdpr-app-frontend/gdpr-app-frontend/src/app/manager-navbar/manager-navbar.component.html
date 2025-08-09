@@ -1,1 +1,266 @@
-<p>manager-navbar works!</p>
+<!-- src/app/components/manager-navbar/manager-navbar.component.html -->
+<mat-toolbar class="navbar" color="primary">
+  <div class="navbar-container">
+    <!-- Left Section -->
+    <div class="navbar-left">
+      <!-- Logo/Brand -->
+      <button 
+        mat-button 
+        class="navbar-brand"
+        (click)="navigateToHome()"
+      >
+        <mat-icon>security</mat-icon>
+        <span class="brand-text">GDPR Manager</span>
+      </button>
+
+      <!-- Main Navigation -->
+      <nav class="navbar-nav" *ngIf="!isMobile">
+        <button 
+          mat-button 
+          class="nav-link"
+          routerLink="/manager/dashboard"
+          routerLinkActive="active"
+        >
+          <mat-icon>dashboard</mat-icon>
+          Dashboard
+        </button>
+
+        <button 
+          mat-button 
+          class="nav-link"
+          routerLink="/manager/requests"
+          routerLinkActive="active"
+          [matBadge]="pendingCount"
+          [matBadgeHidden]="pendingCount === 0"
+          matBadgeColor="warn"
+          matBadgeSize="small"
+        >
+          <mat-icon>assignment</mat-icon>
+          Requests
+        </button>
+
+        <button 
+          mat-button 
+          class="nav-link"
+          routerLink="/manager/users"
+          routerLinkActive="active"
+        >
+          <mat-icon>group</mat-icon>
+          Users
+        </button>
+
+        <button 
+          mat-button 
+          class="nav-link"
+          routerLink="/manager/reports"
+          routerLinkActive="active"
+        >
+          <mat-icon>analytics</mat-icon>
+          Reports
+        </button>
+
+        <button 
+          mat-button 
+          class="nav-link"
+          routerLink="/manager/settings"
+          routerLinkActive="active"
+        >
+          <mat-icon>settings</mat-icon>
+          Settings
+        </button>
+      </nav>
+    </div>
+
+    <!-- Right Section -->
+    <div class="navbar-right">
+      <!-- Notifications -->
+      <button 
+        mat-icon-button 
+        class="notification-button"
+        [matBadge]="notificationCount"
+        [matBadgeHidden]="notificationCount === 0"
+        matBadgeColor="accent"
+        matBadgeSize="small"
+        [matMenuTriggerFor]="notificationMenu"
+        matTooltip="Notifications"
+      >
+        <mat-icon>notifications</mat-icon>
+      </button>
+
+      <!-- Search Button (Desktop) -->
+      <button 
+        mat-icon-button 
+        class="search-button"
+        *ngIf="!isMobile"
+        (click)="openSearch()"
+        matTooltip="Search"
+      >
+        <mat-icon>search</mat-icon>
+      </button>
+
+      <!-- User Menu -->
+      <button 
+        mat-button 
+        class="user-menu-button"
+        [matMenuTriggerFor]="userMenu"
+      >
+        <mat-icon class="user-avatar">account_circle</mat-icon>
+        <span class="user-name" *ngIf="!isMobile">{{ getUserDisplayName() }}</span>
+        <mat-icon>arrow_drop_down</mat-icon>
+      </button>
+
+      <!-- Mobile Menu Toggle -->
+      <button 
+        mat-icon-button 
+        class="mobile-menu-button"
+        *ngIf="isMobile"
+        (click)="toggleMobileMenu()"
+      >
+        <mat-icon>{{ mobileMenuOpen ? 'close' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav" *ngIf="isMobile && mobileMenuOpen" [@slideDown]>
+    <button 
+      mat-button 
+      class="mobile-nav-link"
+      routerLink="/manager/dashboard"
+      routerLinkActive="active"
+      (click)="closeMobileMenu()"
+    >
+      <mat-icon>dashboard</mat-icon>
+      Dashboard
+    </button>
+
+    <button 
+      mat-button 
+      class="mobile-nav-link"
+      routerLink="/manager/requests"
+      routerLinkActive="active"
+      (click)="closeMobileMenu()"
+    >
+      <mat-icon>assignment</mat-icon>
+      Requests
+      <span class="badge" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
+    </button>
+
+    <button 
+      mat-button 
+      class="mobile-nav-link"
+      routerLink="/manager/users"
+      routerLinkActive="active"
+      (click)="closeMobileMenu()"
+    >
+      <mat-icon>group</mat-icon>
+      Users
+    </button>
+
+    <button 
+      mat-button 
+      class="mobile-nav-link"
+      routerLink="/manager/reports"
+      routerLinkActive="active"
+      (click)="closeMobileMenu()"
+    >
+      <mat-icon>analytics</mat-icon>
+      Reports
+    </button>
+
+    <button 
+      mat-button 
+      class="mobile-nav-link"
+      routerLink="/manager/settings"
+      routerLinkActive="active"
+      (click)="closeMobileMenu()"
+    >
+      <mat-icon>settings</mat-icon>
+      Settings
+    </button>
+  </div>
+</mat-toolbar>
+
+<!-- Notification Menu -->
+<mat-menu #notificationMenu="matMenu" class="notification-menu">
+  <div class="notification-header">
+    <h3>Notifications</h3>
+    <button mat-icon-button (click)="markAllAsRead()" *ngIf="notifications.length > 0">
+      <mat-icon>done_all</mat-icon>
+    </button>
+  </div>
+  
+  <div class="notification-list" *ngIf="notifications.length > 0">
+    <button 
+      mat-menu-item 
+      class="notification-item"
+      *ngFor="let notification of notifications"
+      (click)="handleNotificationClick(notification)"
+      [class.unread]="!notification.read"
+    >
+      <mat-icon [class]="'notification-icon ' + notification.type">
+        {{ getNotificationIcon(notification.type) }}
+      </mat-icon>
+      <div class="notification-content">
+        <div class="notification-title">{{ notification.title }}</div>
+        <div class="notification-message">{{ notification.message }}</div>
+        <div class="notification-time">{{ formatTimeAgo(notification.timestamp) }}</div>
+      </div>
+    </button>
+  </div>
+  
+  <div class="empty-notifications" *ngIf="notifications.length === 0">
+    <mat-icon>notifications_none</mat-icon>
+    <p>No new notifications</p>
+  </div>
+  
+  <div class="notification-footer">
+    <button mat-button color="primary" (click)="viewAllNotifications()">
+      View All Notifications
+    </button>
+  </div>
+</mat-menu>
+
+<!-- User Menu -->
+<mat-menu #userMenu="matMenu" class="user-menu">
+  <div class="user-info">
+    <mat-icon class="user-avatar-large">account_circle</mat-icon>
+    <div class="user-details">
+      <div class="user-fullname">{{ getUserFullName() }}</div>
+      <div class="user-email">{{ getUserEmail() }}</div>
+      <div class="user-role">
+        <mat-icon>manage_accounts</mat-icon>
+        Manager
+      </div>
+    </div>
+  </div>
+  
+  <mat-divider></mat-divider>
+  
+  <button mat-menu-item (click)="navigateToProfile()">
+    <mat-icon>person</mat-icon>
+    <span>My Profile</span>
+  </button>
+  
+  <button mat-menu-item (click)="navigateToAccountSettings()">
+    <mat-icon>settings</mat-icon>
+    <span>Account Settings</span>
+  </button>
+  
+  <button mat-menu-item (click)="navigateToActivityLog()">
+    <mat-icon>history</mat-icon>
+    <span>Activity Log</span>
+  </button>
+  
+  <mat-divider></mat-divider>
+  
+  <button mat-menu-item (click)="navigateToHelp()">
+    <mat-icon>help</mat-icon>
+    <span>Help & Support</span>
+  </button>
+  
+  <button mat-menu-item (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    <span>Logout</span>
+  </button>
+</mat-menu>
