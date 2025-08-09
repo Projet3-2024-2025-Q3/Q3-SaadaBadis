@@ -1,1 +1,253 @@
-<p>manager-dashboard works!</p>
+<!-- src/app/components/manager-dashboard/manager-dashboard.component.html -->
+<div class="dashboard-container">
+  <!-- Manager Navbar -->
+  <app-manager-navbar></app-manager-navbar>
+  
+  <!-- Main Dashboard Content -->
+  <div class="dashboard-content">
+    
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <div class="welcome-content">
+        <div class="welcome-text">
+          <h1 class="welcome-title">Manager Dashboard</h1>
+          <p class="welcome-subtitle">Welcome back, {{ getUserFirstName() }}! Oversee and manage all GDPR requests</p>
+        </div>
+        <div class="welcome-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            class="quick-action-btn"
+            (click)="viewAllRequests()"
+          >
+            <mat-icon>dashboard</mat-icon>
+            View All Requests
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="stats-section">
+      <div class="stats-grid">
+        
+        <!-- Total Requests Card -->
+        <mat-card class="stat-card total-requests" (click)="viewAllRequests()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>assignment</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.totalRequests }}</div>
+                <div class="stat-label">Total Requests</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Pending Requests Card -->
+        <mat-card class="stat-card pending-requests" (click)="viewPendingRequests()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>schedule</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.pendingRequests }}</div>
+                <div class="stat-label">Pending Review</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- In Progress Card -->
+        <mat-card class="stat-card in-progress-requests" (click)="viewInProgressRequests()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>pending_actions</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.inProgressRequests }}</div>
+                <div class="stat-label">In Progress</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Completed Requests Card -->
+        <mat-card class="stat-card completed-requests" (click)="viewCompletedRequests()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>check_circle</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.completedRequests }}</div>
+                <div class="stat-label">Completed</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="main-content-grid">
+      
+      <!-- Recent Requests Section -->
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>access_time</mat-icon>
+            Recent Requests
+          </mat-card-title>
+          <div class="header-actions">
+            <button mat-button color="primary" (click)="viewAllRequests()">
+              View All
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="requests-list" *ngIf="recentRequests.length > 0">
+            <div 
+              class="request-item" 
+              *ngFor="let request of recentRequests"
+              (click)="viewRequestDetails(request.id)"
+            >
+              <div class="request-icon" [ngClass]="getRequestTypeClass(request.type)">
+                <mat-icon>{{ getRequestIcon(request.type) }}</mat-icon>
+              </div>
+              <div class="request-details">
+                <div class="request-title">{{ request.subject }}</div>
+                <div class="request-meta">
+                  <span class="request-type">{{ request.type }}</span>
+                  <span>•</span>
+                  <span>{{ request.clientName }}</span>
+                  <span>•</span>
+                  <span>{{ formatDate(request.createdAt) }}</span>
+                </div>
+              </div>
+              <div class="status-badge" [ngClass]="request.status.toLowerCase()">
+                {{ request.status }}
+              </div>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="recentRequests.length === 0">
+            <mat-icon>inbox</mat-icon>
+            <h3>No Recent Requests</h3>
+            <p>New requests will appear here</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Quick Actions Section -->
+      <div>
+        <!-- Quick Actions Card -->
+        <mat-card class="section-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>flash_on</mat-icon>
+              Quick Actions
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="quick-actions-grid">
+              <button 
+                mat-stroked-button 
+                class="quick-action-item"
+                (click)="viewPendingRequests()"
+              >
+                <div class="action-icon">
+                  <mat-icon>pending</mat-icon>
+                </div>
+                <div class="action-content">
+                  <div class="action-title">Review Pending</div>
+                  <div class="action-description">Process waiting requests</div>
+                </div>
+              </button>
+
+              <button 
+                mat-stroked-button 
+                class="quick-action-item"
+                (click)="viewReports()"
+              >
+                <div class="action-icon">
+                  <mat-icon>analytics</mat-icon>
+                </div>
+                <div class="action-content">
+                  <div class="action-title">View Reports</div>
+                  <div class="action-description">Analytics & insights</div>
+                </div>
+              </button>
+
+              <button 
+                mat-stroked-button 
+                class="quick-action-item"
+                (click)="manageUsers()"
+              >
+                <div class="action-icon">
+                  <mat-icon>group</mat-icon>
+                </div>
+                <div class="action-content">
+                  <div class="action-title">Manage Users</div>
+                  <div class="action-description">User administration</div>
+                </div>
+              </button>
+
+              <button 
+                mat-stroked-button 
+                class="quick-action-item"
+                (click)="exportData()"
+              >
+                <div class="action-icon">
+                  <mat-icon>download</mat-icon>
+                </div>
+                <div class="action-content">
+                  <div class="action-title">Export Data</div>
+                  <div class="action-description">Download reports</div>
+                </div>
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Recent Activity Card -->
+        <mat-card class="section-card" style="margin-top: 24px;">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>history</mat-icon>
+              Recent Activity
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="activity-timeline" *ngIf="recentActivities.length > 0">
+              <div class="activity-item" *ngFor="let activity of recentActivities">
+                <div class="activity-icon">
+                  <mat-icon>{{ activity.icon }}</mat-icon>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">{{ activity.title }}</div>
+                  <div class="activity-description">{{ activity.description }}</div>
+                  <div class="activity-time">{{ formatTimeAgo(activity.timestamp) }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="empty-state" *ngIf="recentActivities.length === 0">
+              <mat-icon>update</mat-icon>
+              <h3>No Recent Activity</h3>
+              <p>Activities will be shown here</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+</div>
