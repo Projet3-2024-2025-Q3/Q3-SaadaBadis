@@ -24,7 +24,6 @@ import { RequestService, GDPRRequest, RequestStatistics } from '../services/requ
 interface DashboardStats {
   totalRequests: number;
   pendingRequests: number;
-  inProgressRequests: number;
   completedRequests: number;
 }
 
@@ -60,11 +59,9 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy {
   dashboardStats: DashboardStats = {
     totalRequests: 0,
     pendingRequests: 0,
-    inProgressRequests: 0,
     completedRequests: 0
   };
 
-  recentRequests: GDPRRequest[] = [];
   recentActivities: Activity[] = [];
 
   // UI state
@@ -126,9 +123,6 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy {
     // Load statistics
     this.loadDashboardStats();
     
-    // Load recent requests
-    this.loadRecentRequests();
-    
     // Load recent activities
     this.loadRecentActivities();
   }
@@ -146,30 +140,12 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy {
           this.dashboardStats = {
             totalRequests: stats.totalRequests,
             pendingRequests: stats.pendingRequests,
-            inProgressRequests: stats.inProgressRequests,
             completedRequests: stats.completedRequests
           };
-        },
-        error: (error) => {
-          console.error('Error loading stats:', error);
-        }
-      });
-  }
-
-  /**
-   * Load recent requests
-   */
-  private loadRecentRequests(): void {
-    this.requestService.getRecentRequests(5)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (requests) => {
-          this.recentRequests = requests;
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading recent requests:', error);
-          this.recentRequests = [];
+          console.error('Error loading stats:', error);
           this.isLoading = false;
         }
       });
@@ -285,12 +261,6 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy {
   viewPendingRequests(): void {
     this.router.navigate(['/manager/requests'], { 
       queryParams: { status: 'pending' } 
-    });
-  }
-
-  viewInProgressRequests(): void {
-    this.router.navigate(['/manager/requests'], { 
-      queryParams: { status: 'in-progress' } 
     });
   }
 
