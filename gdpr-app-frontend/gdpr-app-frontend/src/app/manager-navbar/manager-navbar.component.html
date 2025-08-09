@@ -209,16 +209,7 @@
     </button>
   </div>
   
-  <div class="empty-notifications" *ngIf="notifications.length === 0">
-    <mat-icon>notifications_none</mat-icon>
-    <p>No new notifications</p>
-  </div>
-  
-  <div class="notification-footer">
-    <button mat-button color="primary" (click)="viewAllNotifications()">
-      View All Notifications
-    </button>
-  </div>
+
 </mat-menu>
 
 <!-- User Menu -->
@@ -242,22 +233,7 @@
     <span>My Profile</span>
   </button>
   
-  <button mat-menu-item (click)="navigateToAccountSettings()">
-    <mat-icon>settings</mat-icon>
-    <span>Account Settings</span>
-  </button>
-  
-  <button mat-menu-item (click)="navigateToActivityLog()">
-    <mat-icon>history</mat-icon>
-    <span>Activity Log</span>
-  </button>
-  
-  <mat-divider></mat-divider>
-  
-  <button mat-menu-item (click)="navigateToHelp()">
-    <mat-icon>help</mat-icon>
-    <span>Help & Support</span>
-  </button>
+
   
   <button mat-menu-item (click)="logout()">
     <mat-icon>logout</mat-icon>
