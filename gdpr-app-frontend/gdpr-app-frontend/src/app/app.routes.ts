@@ -21,6 +21,7 @@ export const routes: Routes = [
   { path: 'myrequests', component: MyRequestsComponent },
   { path: 'request-details', component: RequestDetailsDialogComponent },
   { path: 'manager-dashboard', component: ManagerDashboardComponent },
+  { path: 'myrequests-manager', component: MyRequestsComponent },
   
   
   
