@@ -38,66 +38,11 @@
           <mat-icon>assignment</mat-icon>
           Requests
         </button>
-
-        <button 
-          mat-button 
-          class="nav-link"
-          routerLink="/manager/users"
-          routerLinkActive="active"
-        >
-          <mat-icon>group</mat-icon>
-          Users
-        </button>
-
-        <button 
-          mat-button 
-          class="nav-link"
-          routerLink="/manager/reports"
-          routerLinkActive="active"
-        >
-          <mat-icon>analytics</mat-icon>
-          Reports
-        </button>
-
-        <button 
-          mat-button 
-          class="nav-link"
-          routerLink="/manager/settings"
-          routerLinkActive="active"
-        >
-          <mat-icon>settings</mat-icon>
-          Settings
-        </button>
       </nav>
     </div>
 
     <!-- Right Section -->
     <div class="navbar-right">
-      <!-- Notifications -->
-      <button 
-        mat-icon-button 
-        class="notification-button"
-        [matBadge]="notificationCount"
-        [matBadgeHidden]="notificationCount === 0"
-        matBadgeColor="accent"
-        matBadgeSize="small"
-        [matMenuTriggerFor]="notificationMenu"
-        matTooltip="Notifications"
-      >
-        <mat-icon>notifications</mat-icon>
-      </button>
-
-      <!-- Search Button (Desktop) -->
-      <button 
-        mat-icon-button 
-        class="search-button"
-        *ngIf="!isMobile"
-        (click)="openSearch()"
-        matTooltip="Search"
-      >
-        <mat-icon>search</mat-icon>
-      </button>
-
       <!-- User Menu -->
       <button 
         mat-button 
@@ -145,72 +90,8 @@
       Requests
       <span class="badge" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
     </button>
-
-    <button 
-      mat-button 
-      class="mobile-nav-link"
-      routerLink="/manager/users"
-      routerLinkActive="active"
-      (click)="closeMobileMenu()"
-    >
-      <mat-icon>group</mat-icon>
-      Users
-    </button>
-
-    <button 
-      mat-button 
-      class="mobile-nav-link"
-      routerLink="/manager/reports"
-      routerLinkActive="active"
-      (click)="closeMobileMenu()"
-    >
-      <mat-icon>analytics</mat-icon>
-      Reports
-    </button>
-
-    <button 
-      mat-button 
-      class="mobile-nav-link"
-      routerLink="/manager/settings"
-      routerLinkActive="active"
-      (click)="closeMobileMenu()"
-    >
-      <mat-icon>settings</mat-icon>
-      Settings
-    </button>
   </div>
 </mat-toolbar>
-
-<!-- Notification Menu -->
-<mat-menu #notificationMenu="matMenu" class="notification-menu">
-  <div class="notification-header">
-    <h3>Notifications</h3>
-    <button mat-icon-button (click)="markAllAsRead()" *ngIf="notifications.length > 0">
-      <mat-icon>done_all</mat-icon>
-    </button>
-  </div>
-  
-  <div class="notification-list" *ngIf="notifications.length > 0">
-    <button 
-      mat-menu-item 
-      class="notification-item"
-      *ngFor="let notification of notifications"
-      (click)="handleNotificationClick(notification)"
-      [class.unread]="!notification.read"
-    >
-      <mat-icon [class]="'notification-icon ' + notification.type">
-        {{ getNotificationIcon(notification.type) }}
-      </mat-icon>
-      <div class="notification-content">
-        <div class="notification-title">{{ notification.title }}</div>
-        <div class="notification-message">{{ notification.message }}</div>
-        <div class="notification-time">{{ formatTimeAgo(notification.timestamp) }}</div>
-      </div>
-    </button>
-  </div>
-  
-
-</mat-menu>
 
 <!-- User Menu -->
 <mat-menu #userMenu="matMenu" class="user-menu">
@@ -233,7 +114,7 @@
     <span>My Profile</span>
   </button>
   
-
+  <mat-divider></mat-divider>
   
   <button mat-menu-item (click)="logout()">
     <mat-icon>logout</mat-icon>
