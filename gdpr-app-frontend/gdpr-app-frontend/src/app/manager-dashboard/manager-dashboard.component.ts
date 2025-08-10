@@ -255,7 +255,7 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy {
    * Navigation methods
    */
   viewAllRequests(): void {
-    this.router.navigate(['/manager/requests']);
+    this.router.navigate(['/myrequests-manager']);
   }
 
   viewPendingRequests(): void {
