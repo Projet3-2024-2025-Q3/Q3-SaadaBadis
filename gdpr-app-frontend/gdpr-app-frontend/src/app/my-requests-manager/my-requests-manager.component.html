@@ -1,1 +1,318 @@
-<p>my-requests-manager works!</p>
+<!-- src/app/components/manager-requests/manager-requests.component.html -->
+<app-manager-navbar></app-manager-navbar>
+
+<div class="manager-requests-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <mat-card class="header-card manager-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h1>All GDPR Requests</h1>
+          <p>Manage and process all user data protection requests</p>
+        </div>
+        <div class="header-actions">
+          <button mat-raised-button class="export-btn" (click)="exportRequests()">
+            <mat-icon>download</mat-icon>
+            Export CSV
+          </button>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="statistics-section">
+    <mat-card class="stat-card total-stat">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon>folder</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h2>{{ statistics.total }}</h2>
+          <p>Total Requests</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card pending-stat">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h2>{{ statistics.pending }}</h2>
+          <p>Pending</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card completed-stat">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h2>{{ statistics.completed }}</h2>
+          <p>Completed</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card rejected-stat">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon>cancel</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h2>{{ statistics.rejected }}</h2>
+          <p>Rejected</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Content -->
+  <mat-card class="content-card">
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <div class="filter-row">
+        <!-- Search Field -->
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search requests</mat-label>
+          <input matInput [(ngModel)]="searchText" (keyup)="applyFilter()" placeholder="Search by ID, user, content...">
+          <mat-icon matPrefix>search</mat-icon>
+          <button mat-icon-button matSuffix *ngIf="searchText" (click)="searchText=''; applyFilter()">
+            <mat-icon>clear</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!-- Status Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter()">
+            <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+              <span class="option-content">
+                <mat-icon>{{ status.icon }}</mat-icon>
+                {{ status.label }}
+              </span>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Type Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Request Type</mat-label>
+          <mat-select [(ngModel)]="selectedType" (selectionChange)="applyFilter()">
+            <mat-option *ngFor="let type of typeOptions" [value]="type.value">
+              <span class="option-content">
+                <mat-icon>{{ type.icon }}</mat-icon>
+                {{ type.label }}
+              </span>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Date Range Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Date Range</mat-label>
+          <mat-select [(ngModel)]="selectedDateRange" (selectionChange)="applyFilter()">
+            <mat-option value="all">All Time</mat-option>
+            <mat-option value="today">Today</mat-option>
+            <mat-option value="week">This Week</mat-option>
+            <mat-option value="month">This Month</mat-option>
+            <mat-option value="year">This Year</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Action Buttons -->
+        <div class="filter-actions">
+          <button mat-button (click)="clearFilters()">
+            <mat-icon>clear_all</mat-icon>
+            Clear
+          </button>
+          <button mat-icon-button (click)="refreshData()" matTooltip="Refresh">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Tabs Section -->
+    <mat-tab-group (selectedTabChange)="onTabChange($event.index)" [selectedIndex]="selectedTab">
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span>All</span>
+          <span class="tab-badge" *ngIf="statistics.total > 0">{{ statistics.total }}</span>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span>Pending</span>
+          <span class="tab-badge pending" *ngIf="statistics.pending > 0">{{ statistics.pending }}</span>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span>Completed</span>
+          <span class="tab-badge completed" *ngIf="statistics.completed > 0">{{ statistics.completed }}</span>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span>Rejected</span>
+          <span class="tab-badge rejected" *ngIf="statistics.rejected > 0">{{ statistics.rejected }}</span>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading requests...</p>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-container" *ngIf="!isLoading">
+      <table mat-table [dataSource]="dataSource" matSort class="requests-table">
+        
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+          <td mat-cell *matCellDef="let request">
+            <span class="request-id">#{{ request.id }}</span>
+          </td>
+        </ng-container>
+
+        <!-- User Column -->
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef>User</th>
+          <td mat-cell *matCellDef="let request">
+            <div class="user-info">
+              <mat-icon>person</mat-icon>
+              <div class="user-details">
+                <span class="user-name">{{ getUserName(request) }}</span>
+                <span class="user-email">{{ getUserEmail(request) }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Request Type Column -->
+        <ng-container matColumnDef="requestType">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+          <td mat-cell *matCellDef="let request">
+            <div class="type-chip">
+              <mat-icon>{{ getTypeIcon(request.requestType) }}</mat-icon>
+              <span>{{ requestService.getRequestTypeDisplayName(request.requestType) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Company Column -->
+        <ng-container matColumnDef="company">
+          <th mat-header-cell *matHeaderCellDef>Company</th>
+          <td mat-cell *matCellDef="let request">
+            <div class="company-info">
+              <mat-icon>business</mat-icon>
+              <span>{{ getCompanyName(request) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+          <td mat-cell *matCellDef="let request">
+            <span class="date-text">{{ formatDate(request.createdAt) }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let request">
+            <div [class]="'status-chip status-' + requestService.getStatusColorClass(request.status)">
+              <mat-icon>{{ getStatusIcon(request.status) }}</mat-icon>
+              <span>{{ requestService.getStatusDisplayName(request.status) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let request">
+            <div class="action-buttons">
+              <button mat-icon-button color="primary" 
+                      (click)="viewDetails(request)"
+                      matTooltip="View Details">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              
+              <button mat-icon-button color="accent" 
+                      *ngIf="request.status === 'PENDING' || request.status === 'EN_ATTENTE'"
+                      (click)="markAsCompleted(request)"
+                      matTooltip="Mark as Completed">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+              
+              <button mat-icon-button color="warn" 
+                      *ngIf="request.status === 'PENDING' || request.status === 'EN_ATTENTE'"
+                      (click)="rejectRequest(request)"
+                      matTooltip="Reject Request">
+                <mat-icon>cancel</mat-icon>
+              </button>
+
+              <button mat-icon-button 
+                      [matMenuTriggerFor]="menu"
+                      matTooltip="More Options">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="viewUserHistory(request)">
+                  <mat-icon>history</mat-icon>
+                  <span>User History</span>
+                </button>
+                <button mat-menu-item (click)="exportRequest(request)">
+                  <mat-icon>download</mat-icon>
+                  <span>Export Details</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="deleteRequest(request)" 
+                        *ngIf="request.status === 'PENDING' || request.status === 'EN_ATTENTE'">
+                  <mat-icon color="warn">delete</mat-icon>
+                  <span>Delete Request</span>
+                </button>
+              </mat-menu>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Table Rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+            class="request-row"
+            [class.pending-row]="row.status === 'PENDING' || row.status === 'EN_ATTENTE'"></tr>
+
+        <!-- No Data Row -->
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="no-data-message">
+              <mat-icon>inbox</mat-icon>
+              <p>No requests found</p>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Paginator -->
+      <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" 
+                     showFirstLastButtons
+                     aria-label="Select page of requests">
+      </mat-paginator>
+    </div>
+  </mat-card>
+</div>
