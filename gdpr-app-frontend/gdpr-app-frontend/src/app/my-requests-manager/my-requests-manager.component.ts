@@ -103,7 +103,7 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     { value: 'all', label: 'All Statuses', icon: 'all_inclusive' },
     { value: 'PENDING', label: 'Pending', icon: 'schedule' },
     { value: 'IN_PROGRESS', label: 'In Progress', icon: 'autorenew' },
-    { value: 'COMPLETED', label: 'Completed', icon: 'check_circle' },
+    { value: 'PROCESSED', label: 'Processed', icon: 'check_circle' },
     { value: 'REJECTED', label: 'Rejected', icon: 'cancel' }
   ];
   
@@ -183,16 +183,9 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     // Use appropriate method based on role
     let requestObservable;
     
-    if (this.authService.isAdmin()) {
-      // Admin sees all requests
+
       requestObservable = this.requestService.getAllRequests();
-    } else if (this.companyId) {
-      // Manager sees company requests
-      requestObservable = this.requestService.getCompanyRequests(this.companyId);
-    } else {
-      // Fallback to user's own requests
-      requestObservable = this.requestService.getMyRequests();
-    }
+
     
     requestObservable
       .pipe(takeUntil(this.destroy$))
@@ -308,7 +301,7 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
 
   // Helper method to get request ID (handles both id and idGdprRequest)
   private getRequestId(request: GDPRRequest): number {
-    return request.id || (request as any).idGdprRequest || 0;
+    return request.id ;
   }
 
   // Selection methods for batch operations
@@ -424,8 +417,9 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   // Individual actions with validation and proper error handling
-  validateRequest(request: GDPRRequest): void {
-    const requestId = this.getRequestId(request);
+  validateRequest(request: any): void {
+    const requestId = request.idRequest;
+    //alert(request.idRequest)
     
     if (!requestId || requestId <= 0) {
       console.error('Invalid request ID:', request);
@@ -679,7 +673,7 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
 
   getCompanyName(request: GDPRRequest): string {
     if (request.company) {
-      return request.company?.companyName || `Company #${request.companyId}`;
+      return request.company.companyName || `Company #${request.companyId}`;
     }
     return `Company #${request.companyId}`;
   }

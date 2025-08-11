@@ -311,7 +311,7 @@ updateRequestStatus(id: number, status: string): Observable<GDPRRequest> {
  * Manager/Admin only
  */
 validateRequest(id: number): Observable<GDPRRequest> {
-  return this.updateRequestStatus(id, 'COMPLETED');
+  return this.updateRequestStatus(id, 'PROCESSED');
 }
 
 /**
