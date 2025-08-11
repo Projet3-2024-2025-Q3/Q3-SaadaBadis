@@ -10,17 +10,11 @@
           <h1>All GDPR Requests</h1>
           <p>Manage and process all user data protection requests</p>
         </div>
-        <div class="header-actions">
-          <button mat-raised-button class="export-btn" (click)="exportRequests()">
-            <mat-icon>download</mat-icon>
-            Export CSV
-          </button>
-        </div>
       </div>
     </mat-card>
   </div>
 
-  <!-- Statistics Cards - Only Total and Pending -->
+  <!-- Statistics Cards - Changed to Processed -->
   <div class="statistics-section">
     <mat-card class="stat-card total-stat">
       <mat-card-content>
@@ -42,6 +36,18 @@
         <div class="stat-info">
           <h2>{{ statistics.pending }}</h2>
           <p>Pending</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card processed-stat">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h2>{{ statistics.processed }}</h2>
+          <p>Processed</p>
         </div>
       </mat-card-content>
     </mat-card>
@@ -82,7 +88,7 @@
 
     <mat-divider></mat-divider>
 
-    <!-- Simplified Tabs Section - Only All and Pending -->
+    <!-- Tabs Section - Changed to Processed -->
     <mat-tab-group (selectedTabChange)="onTabChange($event.index)" [selectedIndex]="selectedTab">
       <mat-tab>
         <ng-template mat-tab-label>
@@ -94,6 +100,12 @@
         <ng-template mat-tab-label>
           <span>Pending</span>
           <span class="tab-badge pending" *ngIf="statistics.pending > 0">{{ statistics.pending }}</span>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span>Processed</span>
+          <span class="tab-badge processed" *ngIf="statistics.processed > 0">{{ statistics.processed }}</span>
         </ng-template>
       </mat-tab>
     </mat-tab-group>
@@ -169,6 +181,23 @@
           </td>
         </ng-container>
 
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let request">
+            <div class="action-buttons">
+              <!-- Validate - For pending requests only -->
+              <button mat-icon-button color="accent" 
+                      *ngIf="canValidate(request)"
+                      (click)="validateRequest(request)"
+                      [disabled]="isProcessing"
+                      matTooltip="Validate Request">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
         <!-- Table Rows -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
@@ -189,12 +218,6 @@
           </td>
         </tr>
       </table>
-
-      <!-- Paginator -->
-      <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" 
-                     showFirstLastButtons
-                     aria-label="Select page of requests">
-      </mat-paginator>
     </div>
   </mat-card>
 </div>

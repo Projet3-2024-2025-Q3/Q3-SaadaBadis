@@ -67,7 +67,6 @@ import { RequestService, GDPRRequest } from '../services/request.service';
 })
 export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   // Data
   currentUser: UserInfo | null = null;
@@ -75,17 +74,18 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   dataSource: MatTableDataSource<GDPRRequest>;
   selection = new SelectionModel<GDPRRequest>(true, []);
   
-  // Table columns - Removed select, date and actions columns
-  displayedColumns: string[] = ['id', 'user', 'requestType', 'company', 'status'];
+  // Table columns - Include actions column
+  displayedColumns: string[] = ['id', 'user', 'requestType', 'company', 'status', 'actions'];
   
-  // Filter properties - Kept minimal
+  // Filter properties
   selectedStatus: string = 'all';
   selectedType: string = 'all';
   
-  // Statistics - Only total and pending
+  // Statistics
   statistics = {
     total: 0,
-    pending: 0
+    pending: 0,
+    processed: 0
   };
   
   // UI State
@@ -93,10 +93,11 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   isProcessing: boolean = false;
   selectedTab: number = 0;
   
-  // Status options - Only all and pending
+  // Status options
   statusOptions = [
     { value: 'all', label: 'All Statuses', icon: 'all_inclusive' },
-    { value: 'PENDING', label: 'Pending', icon: 'schedule' }
+    { value: 'PENDING', label: 'Pending', icon: 'schedule' },
+    { value: 'PROCESSED', label: 'Processed', icon: 'check_circle' }
   ];
   
   // Request type options
@@ -144,7 +145,6 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   ngAfterViewInit(): void {
     if (this.dataSource) {
       this.dataSource.sort = this.sort;
-      this.dataSource.paginator = this.paginator;
       
       // Custom filter predicate
       this.dataSource.filterPredicate = (data: GDPRRequest, filter: string) => {
@@ -232,6 +232,9 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       total: this.allRequests.length,
       pending: this.allRequests.filter(r => 
         r.status === 'PENDING' || r.status === 'EN_ATTENTE'
+      ).length,
+      processed: this.allRequests.filter(r => 
+        r.status === 'PROCESSED' || r.status === 'COMPLETED' || r.status === 'TERMINE'
       ).length
     };
   }
@@ -251,9 +254,90 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       case 1:
         this.selectedStatus = 'PENDING';
         break;
+      case 2:
+        this.selectedStatus = 'PROCESSED';
+        break;
     }
     
     this.updateDataSource();
+  }
+
+  // Individual actions with validation and proper error handling
+  validateRequest(request: any): void {
+    const requestId = request.idRequest;
+    
+    if (!requestId || requestId <= 0) {
+      console.error('Invalid request ID:', request);
+      this.showSnackBar('Invalid request ID. Please refresh the page.', 'error');
+      return;
+    }
+
+    if (confirm(`Validate request #${requestId}?`)) {
+      this.isProcessing = true;
+      
+      this.requestService.validateRequest(requestId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedRequest) => {
+            this.showSnackBar(`Request #${requestId} validated successfully`, 'success');
+            this.updateLocalRequest(requestId, updatedRequest);
+            this.isProcessing = false;
+          },
+          error: (error) => {
+            console.error('Error validating request:', error);
+            this.showSnackBar('Failed to validate request', 'error');
+            this.isProcessing = false;
+          }
+        });
+    }
+  }
+
+  rejectRequest(request: GDPRRequest): void {
+    const requestId = this.getRequestId(request);
+    
+    if (!requestId || requestId <= 0) {
+      console.error('Invalid request ID:', request);
+      this.showSnackBar('Invalid request ID. Please refresh the page.', 'error');
+      return;
+    }
+
+    const reason = prompt(`Enter rejection reason for request #${requestId}:`);
+    if (reason) {
+      this.isProcessing = true;
+      
+      this.requestService.rejectRequest(requestId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedRequest) => {
+            this.showSnackBar(`Request #${requestId} rejected`, 'info');
+            this.updateLocalRequest(requestId, updatedRequest);
+            this.isProcessing = false;
+          },
+          error: (error) => {
+            console.error('Error rejecting request:', error);
+            this.showSnackBar('Failed to reject request', 'error');
+            this.isProcessing = false;
+          }
+        });
+    }
+  }
+
+  // Helper method to update local request data
+  private updateLocalRequest(requestId: number, updatedRequest: GDPRRequest): void {
+    const index = this.allRequests.findIndex(r => 
+      this.getRequestId(r) === requestId
+    );
+    if (index !== -1) {
+      this.allRequests[index] = updatedRequest;
+      this.updateDataSource();
+      this.calculateStatistics();
+    }
+  }
+
+  // Check if action is available based on status
+  canValidate(request: GDPRRequest): boolean {
+    const status = request.status.toUpperCase();
+    return status === 'PENDING' || status === 'EN_ATTENTE';
   }
 
   // Helper methods
@@ -281,10 +365,7 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       case 'PENDING':
       case 'EN_ATTENTE':
         return 'schedule';
-      case 'IN_PROGRESS':
-      case 'EN_COURS':
-      case 'PROCESSING':
-        return 'autorenew';
+      case 'PROCESSED':
       case 'COMPLETED':
       case 'TERMINE':
       case 'APPROVED':
@@ -312,37 +393,6 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       default:
         return 'assignment';
     }
-  }
-
-  exportRequests(): void {
-    const csvContent = this.convertToCSV(this.dataSource.filteredData);
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `gdpr-requests-${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    window.URL.revokeObjectURL(url);
-    
-    this.showSnackBar('Requests exported successfully', 'success');
-  }
-
-  private convertToCSV(requests: GDPRRequest[]): string {
-    const headers = ['ID', 'User', 'Email', 'Type', 'Status', 'Company', 'Content'];
-    const rows = requests.map(req => [
-      this.getRequestId(req),
-      this.getUserName(req),
-      this.getUserEmail(req),
-      this.requestService.getRequestTypeDisplayName(req.requestType),
-      this.requestService.getStatusDisplayName(req.status),
-      this.getCompanyName(req),
-      `"${req.requestContent.replace(/"/g, '""')}"`
-    ]);
-    
-    return [
-      headers.join(','),
-      ...rows.map(row => row.join(','))
-    ].join('\n');
   }
 
   private showSnackBar(message: string, type: string = 'info'): void {
