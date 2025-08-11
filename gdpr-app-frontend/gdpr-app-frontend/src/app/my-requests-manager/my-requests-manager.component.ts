@@ -30,6 +30,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 
 // Components
 import { ManagerNavbarComponent } from '../manager-navbar/manager-navbar.component';
+import { RequestDetailsDialogComponent } from '../request-details-dialog/request-details-dialog.component';
 
 // Services
 import { AuthService, UserInfo } from '../services/auth.service';
@@ -171,6 +172,8 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
 
   loadAllRequests(): void {
     this.isLoading = true;
+    // Reset processing state when loading new data
+    this.isProcessing = false;
     
     // Use appropriate method based on role
     let requestObservable;
@@ -194,11 +197,13 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
           this.updateDataSource();
           this.calculateStatistics();
           this.isLoading = false;
+          this.isProcessing = false; // Ensure processing is stopped
         },
         error: (error) => {
           console.error('Error loading requests:', error);
           this.showSnackBar('Failed to load requests', 'error');
           this.isLoading = false;
+          this.isProcessing = false; // Ensure processing is stopped on error
         }
       });
   }
@@ -280,58 +285,35 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
         .subscribe({
           next: (updatedRequest) => {
             this.showSnackBar(`Request #${requestId} validated successfully`, 'success');
-            this.updateLocalRequest(requestId, updatedRequest);
-            this.isProcessing = false;
+            // Refresh the entire data to get the latest state
+            this.loadAllRequests();
+            // Note: isProcessing will be set to false in loadAllRequests()
           },
           error: (error) => {
             console.error('Error validating request:', error);
             this.showSnackBar('Failed to validate request', 'error');
-            this.isProcessing = false;
+            this.isProcessing = false; // Stop processing on error
           }
         });
     }
   }
 
-  rejectRequest(request: GDPRRequest): void {
-    const requestId = this.getRequestId(request);
-    
-    if (!requestId || requestId <= 0) {
-      console.error('Invalid request ID:', request);
-      this.showSnackBar('Invalid request ID. Please refresh the page.', 'error');
-      return;
-    }
+  // Dialog for viewing request details
+  viewRequestDetails(request: GDPRRequest): void {
+    const dialogRef = this.dialog.open(RequestDetailsDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      data: {
+        request: request,
+        companyName: this.getCompanyName(request)
+      },
+      panelClass: 'request-details-dialog'
+    });
 
-    const reason = prompt(`Enter rejection reason for request #${requestId}:`);
-    if (reason) {
-      this.isProcessing = true;
-      
-      this.requestService.rejectRequest(requestId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (updatedRequest) => {
-            this.showSnackBar(`Request #${requestId} rejected`, 'info');
-            this.updateLocalRequest(requestId, updatedRequest);
-            this.isProcessing = false;
-          },
-          error: (error) => {
-            console.error('Error rejecting request:', error);
-            this.showSnackBar('Failed to reject request', 'error');
-            this.isProcessing = false;
-          }
-        });
-    }
-  }
-
-  // Helper method to update local request data
-  private updateLocalRequest(requestId: number, updatedRequest: GDPRRequest): void {
-    const index = this.allRequests.findIndex(r => 
-      this.getRequestId(r) === requestId
-    );
-    if (index !== -1) {
-      this.allRequests[index] = updatedRequest;
-      this.updateDataSource();
-      this.calculateStatistics();
-    }
+    dialogRef.afterClosed().subscribe(result => {
+      // Optional: Handle any actions after dialog closes
+      console.log('Request details dialog was closed');
+    });
   }
 
   // Check if action is available based on status

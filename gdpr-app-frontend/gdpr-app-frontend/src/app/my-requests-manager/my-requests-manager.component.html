@@ -186,10 +186,17 @@
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let request">
             <div class="action-buttons">
+              <!-- View Details -->
+              <button mat-icon-button color="primary" 
+                      (click)="viewRequestDetails(request); $event.stopPropagation()"
+                      matTooltip="View Details">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              
               <!-- Validate - For pending requests only -->
               <button mat-icon-button color="accent" 
                       *ngIf="canValidate(request)"
-                      (click)="validateRequest(request)"
+                      (click)="validateRequest(request); $event.stopPropagation()"
                       [disabled]="isProcessing"
                       matTooltip="Validate Request">
                 <mat-icon>check_circle</mat-icon>
@@ -201,7 +208,8 @@
         <!-- Table Rows -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
-            class="request-row"
+            class="request-row clickable-row"
+            (click)="viewRequestDetails(row)"
             [class.pending-row]="row.status === 'PENDING' || row.status === 'EN_ATTENTE'"
             [class.in-progress-row]="row.status === 'IN_PROGRESS' || row.status === 'EN_COURS'"
             [class.completed-row]="row.status === 'COMPLETED' || row.status === 'APPROVED'"
