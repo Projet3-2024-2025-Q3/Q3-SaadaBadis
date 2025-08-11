@@ -20,7 +20,7 @@
     </mat-card>
   </div>
 
-  <!-- Statistics Cards -->
+  <!-- Statistics Cards - Only Total and Pending -->
   <div class="statistics-section">
     <mat-card class="stat-card total-stat">
       <mat-card-content>
@@ -45,59 +45,13 @@
         </div>
       </mat-card-content>
     </mat-card>
-
-    <mat-card class="stat-card in-progress-stat">
-      <mat-card-content>
-        <div class="stat-icon">
-          <mat-icon>autorenew</mat-icon>
-        </div>
-        <div class="stat-info">
-          <h2>{{ statistics.inProgress }}</h2>
-          <p>In Progress</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card completed-stat">
-      <mat-card-content>
-        <div class="stat-icon">
-          <mat-icon>check_circle</mat-icon>
-        </div>
-        <div class="stat-info">
-          <h2>{{ statistics.completed }}</h2>
-          <p>Completed</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="stat-card rejected-stat">
-      <mat-card-content>
-        <div class="stat-icon">
-          <mat-icon>cancel</mat-icon>
-        </div>
-        <div class="stat-info">
-          <h2>{{ statistics.rejected }}</h2>
-          <p>Rejected</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
   </div>
 
   <!-- Main Content -->
   <mat-card class="content-card">
-    <!-- Filters Section -->
+    <!-- Simplified Filters Section - No search, no buttons -->
     <div class="filters-section">
       <div class="filter-row">
-        <!-- Search Field -->
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Search requests</mat-label>
-          <input matInput [(ngModel)]="searchText" (keyup)="applyFilter()" placeholder="Search by ID, user, content...">
-          <mat-icon matPrefix>search</mat-icon>
-          <button mat-icon-button matSuffix *ngIf="searchText" (click)="searchText=''; applyFilter()">
-            <mat-icon>clear</mat-icon>
-          </button>
-        </mat-form-field>
-
         <!-- Status Filter -->
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>Status</mat-label>
@@ -123,68 +77,12 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-
-        <!-- Date Range Filter -->
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Date Range</mat-label>
-          <mat-select [(ngModel)]="selectedDateRange" (selectionChange)="applyFilter()">
-            <mat-option value="all">All Time</mat-option>
-            <mat-option value="today">Today</mat-option>
-            <mat-option value="week">This Week</mat-option>
-            <mat-option value="month">This Month</mat-option>
-            <mat-option value="year">This Year</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <!-- Action Buttons -->
-        <div class="filter-actions">
-          <button mat-button (click)="clearFilters()">
-            <mat-icon>clear_all</mat-icon>
-            Clear
-          </button>
-          <button mat-icon-button (click)="refreshData()" matTooltip="Refresh">
-            <mat-icon>refresh</mat-icon>
-          </button>
-        </div>
-      </div>
-
-      <!-- Batch Actions Bar - Only visible when items are selected -->
-      <div class="batch-actions-bar" *ngIf="selection.hasValue()">
-        <div class="selection-info">
-          <mat-checkbox
-            (change)="$event ? masterToggle() : null"
-            [checked]="selection.hasValue() && isAllSelected()"
-            [indeterminate]="selection.hasValue() && !isAllSelected()">
-          </mat-checkbox>
-          <span class="selection-count">{{ selection.selected.length }} selected</span>
-        </div>
-        
-        <div class="batch-buttons">
-          <button mat-raised-button color="primary" 
-                  (click)="batchValidate()"
-                  [disabled]="isProcessing">
-            <mat-icon>check_circle</mat-icon>
-            Validate Selected
-          </button>
-          
-          <button mat-raised-button color="warn" 
-                  (click)="batchReject()"
-                  [disabled]="isProcessing">
-            <mat-icon>cancel</mat-icon>
-            Reject Selected
-          </button>
-          
-          <button mat-button (click)="selection.clear()">
-            <mat-icon>clear</mat-icon>
-            Clear Selection
-          </button>
-        </div>
       </div>
     </div>
 
     <mat-divider></mat-divider>
 
-    <!-- Tabs Section -->
+    <!-- Simplified Tabs Section - Only All and Pending -->
     <mat-tab-group (selectedTabChange)="onTabChange($event.index)" [selectedIndex]="selectedTab">
       <mat-tab>
         <ng-template mat-tab-label>
@@ -196,24 +94,6 @@
         <ng-template mat-tab-label>
           <span>Pending</span>
           <span class="tab-badge pending" *ngIf="statistics.pending > 0">{{ statistics.pending }}</span>
-        </ng-template>
-      </mat-tab>
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <span>In Progress</span>
-          <span class="tab-badge in-progress" *ngIf="statistics.inProgress > 0">{{ statistics.inProgress }}</span>
-        </ng-template>
-      </mat-tab>
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <span>Completed</span>
-          <span class="tab-badge completed" *ngIf="statistics.completed > 0">{{ statistics.completed }}</span>
-        </ng-template>
-      </mat-tab>
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <span>Rejected</span>
-          <span class="tab-badge rejected" *ngIf="statistics.rejected > 0">{{ statistics.rejected }}</span>
         </ng-template>
       </mat-tab>
     </mat-tab-group>
@@ -234,24 +114,6 @@
     <div class="table-container" *ngIf="!isLoading">
       <table mat-table [dataSource]="dataSource" matSort class="requests-table">
         
-        <!-- Selection Column -->
-        <ng-container matColumnDef="select">
-          <th mat-header-cell *matHeaderCellDef>
-            <mat-checkbox (change)="$event ? masterToggle() : null"
-                          [checked]="selection.hasValue() && isAllSelected()"
-                          [indeterminate]="selection.hasValue() && !isAllSelected()"
-                          [aria-label]="checkboxLabel()">
-            </mat-checkbox>
-          </th>
-          <td mat-cell *matCellDef="let row">
-            <mat-checkbox (click)="$event.stopPropagation()"
-                          (change)="$event ? selection.toggle(row) : null"
-                          [checked]="selection.isSelected(row)"
-                          [aria-label]="checkboxLabel(row)">
-            </mat-checkbox>
-          </td>
-        </ng-container>
-
         <!-- ID Column -->
         <ng-container matColumnDef="id">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
@@ -296,14 +158,6 @@
           </td>
         </ng-container>
 
-        <!-- Date Column -->
-        <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-          <td mat-cell *matCellDef="let request">
-            <span class="date-text">{{ formatDate(request.createdAt) }}</span>
-          </td>
-        </ng-container>
-
         <!-- Status Column -->
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
@@ -311,90 +165,6 @@
             <div [class]="'status-chip status-' + requestService.getStatusColorClass(request.status)">
               <mat-icon>{{ getStatusIcon(request.status) }}</mat-icon>
               <span>{{ requestService.getStatusDisplayName(request.status) }}</span>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Actions Column -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let request">
-            <div class="action-buttons">
-              <!-- View Details - Always available -->
-              <button mat-icon-button color="primary" 
-                      (click)="viewDetails(request)"
-                      matTooltip="View Details">
-                <mat-icon>visibility</mat-icon>
-              </button>
-              
-              <!-- Mark In Progress - For pending requests -->
-              <button mat-icon-button 
-                      *ngIf="canMarkInProgress(request)"
-                      (click)="markAsInProgress(request)"
-                      [disabled]="isProcessing"
-                      matTooltip="Mark as In Progress"
-                      class="in-progress-btn">
-                <mat-icon>autorenew</mat-icon>
-              </button>
-              
-              <!-- Validate/Complete - For pending or in progress -->
-              <button mat-icon-button color="accent" 
-                      *ngIf="canValidate(request)"
-                      (click)="validateRequest(request)"
-                      [disabled]="isProcessing"
-                      matTooltip="Validate Request">
-                <mat-icon>check_circle</mat-icon>
-              </button>
-              
-              <!-- Reject - For non-rejected requests -->
-              <button mat-icon-button color="warn" 
-                      *ngIf="canReject(request)"
-                      (click)="rejectRequest(request)"
-                      [disabled]="isProcessing"
-                      matTooltip="Reject Request">
-                <mat-icon>cancel</mat-icon>
-              </button>
-
-              <!-- More Options Menu -->
-              <button mat-icon-button 
-                      [matMenuTriggerFor]="menu"
-                      matTooltip="More Options">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              
-              <mat-menu #menu="matMenu">
-                <!-- Approve Option (Alternative to Validate) -->
-                <button mat-menu-item 
-                        *ngIf="canValidate(request)"
-                        (click)="approveRequest(request)"
-                        [disabled]="isProcessing">
-                  <mat-icon color="primary">thumb_up</mat-icon>
-                  <span>Approve Request</span>
-                </button>
-                
-                <mat-divider *ngIf="canValidate(request)"></mat-divider>
-                
-                <!-- History and Export -->
-                <button mat-menu-item (click)="viewUserHistory(request)">
-                  <mat-icon>history</mat-icon>
-                  <span>User History</span>
-                </button>
-                <button mat-menu-item (click)="exportRequest(request)">
-                  <mat-icon>download</mat-icon>
-                  <span>Export Details</span>
-                </button>
-                
-                <mat-divider></mat-divider>
-                
-                <!-- Delete - Only for pending -->
-                <button mat-menu-item 
-                        (click)="deleteRequest(request)" 
-                        [disabled]="isProcessing"
-                        *ngIf="request.status === 'PENDING' || request.status === 'EN_ATTENTE'">
-                  <mat-icon color="warn">delete</mat-icon>
-                  <span>Delete Request</span>
-                </button>
-              </mat-menu>
             </div>
           </td>
         </ng-container>
