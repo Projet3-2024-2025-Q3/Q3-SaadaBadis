@@ -24,6 +24,7 @@ import { MatChipsModule } from '@angular/material/chips';
 export class RequestDetailsDialogComponent {
   request: any;
   companyName: string;
+  userRole: string; // Nouvelle propriété pour le rôle
 
   constructor(
     public dialogRef: MatDialogRef<RequestDetailsDialogComponent>,
@@ -31,6 +32,7 @@ export class RequestDetailsDialogComponent {
   ) {
     this.request = data.request;
     this.companyName = data.companyName;
+    this.userRole = data.userRole || 'CLIENT'; // Récupère le rôle depuis les données
   }
 
   getRequestId(): string {
@@ -63,6 +65,19 @@ export class RequestDetailsDialogComponent {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  // Nouvelle méthode pour déterminer la couleur du header
+  getHeaderStyle(): any {
+    return {
+      'background': this.userRole === 'GERANT' 
+        ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)'
+        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'color': 'white',
+      'padding': '20px',
+      'border-radius': '10px 10px 0 0',
+      'margin': '-24px -24px 0 -24px'
+    };
   }
 
   close(): void {

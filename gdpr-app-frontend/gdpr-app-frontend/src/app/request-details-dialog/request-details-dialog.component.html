@@ -1,7 +1,8 @@
 <!-- src/app/components/request-details-dialog/request-details-dialog.component.html -->
 <div class="dialog-container">
-  <!-- Header -->
-  <div mat-dialog-title class="dialog-header">
+  <!-- Header with conditional styling based on user role -->
+  <div mat-dialog-title class="dialog-header" 
+       [style.background]="userRole === 'GERANT' ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'">
     <div class="header-content">
       <div class="header-title">
         <mat-icon class="header-icon">assignment</mat-icon>
@@ -12,7 +13,7 @@
       </button>
     </div>
   </div>
-
+  
   <!-- Content -->
   <mat-dialog-content class="dialog-content">
     <!-- Request ID and Status -->
@@ -31,9 +32,8 @@
         </div>
       </div>
     </div>
-
     <mat-divider></mat-divider>
-
+    
     <!-- Request Type and Company -->
     <div class="info-section">
       <div class="info-row">
@@ -53,9 +53,8 @@
         </div>
       </div>
     </div>
-
     <mat-divider></mat-divider>
-
+    
     <!-- Dates -->
     <div class="info-section">
       <div class="info-row">
@@ -75,9 +74,8 @@
         </div>
       </div>
     </div>
-
     <mat-divider></mat-divider>
-
+    
     <!-- Request Content -->
     <div class="content-section">
       <h3 class="section-title">
@@ -88,7 +86,7 @@
         <p>{{ request.requestContent }}</p>
       </div>
     </div>
-
+    
     <!-- Processing Information -->
     <div class="info-notice" *ngIf="request.status === 'PENDING'">
       <mat-icon>info</mat-icon>
@@ -97,7 +95,6 @@
         <p>This request will be processed within 30 days as required by GDPR regulations.</p>
       </div>
     </div>
-
     <div class="info-notice success" *ngIf="request.status === 'COMPLETED' || request.status === 'PROCESSED'">
       <mat-icon>check_circle</mat-icon>
       <div class="notice-content">
@@ -106,7 +103,7 @@
       </div>
     </div>
   </mat-dialog-content>
-
+  
   <!-- Actions -->
   <mat-dialog-actions class="dialog-actions">
     <button mat-raised-button color="primary" (click)="close()" class="close-btn">

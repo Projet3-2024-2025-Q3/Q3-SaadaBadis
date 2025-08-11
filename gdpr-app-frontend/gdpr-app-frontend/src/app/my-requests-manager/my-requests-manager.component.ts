@@ -305,7 +305,8 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       maxWidth: '90vw',
       data: {
         request: request,
-        companyName: this.getCompanyName(request)
+        companyName: this.getCompanyName(request),
+        userRole: this.currentUser?.role || 'CLIENT' // Passe le rôle de l'utilisateur
       },
       panelClass: 'request-details-dialog'
     });
@@ -320,6 +321,11 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   canValidate(request: GDPRRequest): boolean {
     const status = request.status.toUpperCase();
     return status === 'PENDING' || status === 'EN_ATTENTE';
+  }
+
+  // Check if current user is a manager
+  isManager(): boolean {
+    return this.authService.isManager();
   }
 
   // Helper methods
