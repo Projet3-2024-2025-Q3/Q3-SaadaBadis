@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { forkJoin, Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
 // Interfaces for GDPR requests
@@ -291,6 +291,197 @@ export class RequestService {
         return 'status-default';
     }
   }
+  // Ajouter ces méthodes dans la classe RequestService
+
+/**
+ * Update request status (Manager/Admin only)
+ * Used to validate, reject, or change status of a GDPR request
+ */
+updateRequestStatus(id: number, status: string): Observable<GDPRRequest> {
+  const updateData: UpdateStatusDTO = { status };
+  return this.http.put<GDPRRequest>(`${this.API_URL}/${id}/status`, updateData, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Validate a GDPR request (sets status to COMPLETED/APPROVED)
+ * Manager/Admin only
+ */
+validateRequest(id: number): Observable<GDPRRequest> {
+  return this.updateRequestStatus(id, 'COMPLETED');
+}
+
+/**
+ * Approve a GDPR request (alternative to validate)
+ * Manager/Admin only
+ */
+approveRequest(id: number): Observable<GDPRRequest> {
+  return this.updateRequestStatus(id, 'APPROVED');
+}
+
+/**
+ * Reject a GDPR request
+ * Manager/Admin only
+ */
+rejectRequest(id: number): Observable<GDPRRequest> {
+  return this.updateRequestStatus(id, 'REJECTED');
+}
+
+/**
+ * Mark request as in progress
+ * Manager/Admin only
+ */
+markRequestInProgress(id: number): Observable<GDPRRequest> {
+  return this.updateRequestStatus(id, 'IN_PROGRESS');
+}
+
+/**
+ * Get all GDPR requests (Admin only)
+ */
+getAllRequests(): Observable<GDPRRequest[]> {
+  return this.http.get<GDPRRequest[]>(`${this.API_URL}`, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Get company's GDPR requests (Manager/Admin)
+ */
+getCompanyRequests(companyId: number): Observable<GDPRRequest[]> {
+  return this.http.get<GDPRRequest[]>(`${this.API_URL}/company/${companyId}`, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Get company's pending requests (Manager/Admin)
+ */
+getCompanyPendingRequests(companyId: number): Observable<GDPRRequest[]> {
+  return this.http.get<GDPRRequest[]>(`${this.API_URL}/company/${companyId}/pending`, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Get requests by status (Manager/Admin)
+ */
+getRequestsByStatus(status: string): Observable<GDPRRequest[]> {
+  return this.http.get<GDPRRequest[]>(`${this.API_URL}/status/${status}`, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Get requests by type (Manager/Admin)
+ */
+getRequestsByType(requestType: string): Observable<GDPRRequest[]> {
+  return this.http.get<GDPRRequest[]>(`${this.API_URL}/type/${requestType}`, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Get requests between dates (Manager/Admin)
+ */
+getRequestsBetweenDates(startDate: Date, endDate: Date): Observable<GDPRRequest[]> {
+  const params = {
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString()
+  };
+  
+  return this.http.get<GDPRRequest[]>(`${this.API_URL}/date-range`, {
+    ...this.getAuthHttpOptions(),
+    params
+  }).pipe(
+    catchError(this.handleError)
+  );
+}
+
+/**
+ * Get recent requests for admin/manager dashboard
+ * Different from user's recent requests
+ */
+getRecentRequestsAdmin(): Observable<GDPRRequest[]> {
+  return this.http.get<GDPRRequest[]>(`${this.API_URL}/recent`, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Get request count by status (Manager/Admin)
+ */
+countRequestsByStatus(status: string): Observable<number> {
+  return this.http.get<number>(`${this.API_URL}/count/status/${status}`, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Get request count by company (Manager/Admin)
+ */
+countRequestsByCompany(companyId: number): Observable<number> {
+  return this.http.get<number>(`${this.API_URL}/count/company/${companyId}`, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Get comprehensive GDPR request statistics (Manager/Admin)
+ */
+getGDPRRequestStatistics(): Observable<any> {
+  return this.http.get<any>(`${this.API_URL}/statistics`, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Get valid statuses (Manager/Admin)
+ */
+getValidStatuses(): Observable<string[]> {
+  return this.http.get<string[]>(`${this.API_URL}/valid-statuses`, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Validate status (Manager/Admin)
+ */
+validateStatus(status: string): Observable<boolean> {
+  return this.http.get<boolean>(`${this.API_URL}/validate/status/${status}`, this.getAuthHttpOptions())
+    .pipe(
+      catchError(this.handleError)
+    );
+}
+
+/**
+ * Batch validate multiple requests
+ * Utility method for validating multiple requests at once
+ */
+batchValidateRequests(requestIds: number[]): Observable<GDPRRequest[]> {
+  const updateObservables = requestIds.map(id => this.validateRequest(id));
+  return forkJoin(updateObservables);
+}
+
+/**
+ * Batch update status for multiple requests
+ * Utility method for updating multiple request statuses at once
+ */
+batchUpdateRequestStatus(requestIds: number[], status: string): Observable<GDPRRequest[]> {
+  const updateObservables = requestIds.map(id => this.updateRequestStatus(id, status));
+  return forkJoin(updateObservables);
+}
 
   /**
    * Format date for display
