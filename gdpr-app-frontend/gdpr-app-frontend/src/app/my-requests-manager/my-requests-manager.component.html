@@ -1,4 +1,4 @@
-<!-- src/app/components/manager-requests/manager-requests.component.html -->
+<!-- src/app/components/manager-requests/my-requests-manager.component.html -->
 <app-manager-navbar></app-manager-navbar>
 
 <div class="manager-requests-container">
@@ -256,7 +256,7 @@
         <ng-container matColumnDef="id">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
           <td mat-cell *matCellDef="let request">
-            <span class="request-id">#{{ request.id }}</span>
+            <span class="request-id">#{{ request.idRequest }}</span>
           </td>
         </ng-container>
 

@@ -141,13 +141,7 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       .subscribe(user => {
         this.currentUser = user;
         // Store company ID if manager
-        // Note: You may need to add companyId to UserInfo interface
-        // or fetch it from another source
         if (user && user.role === 'GERANT') {
-          // If UserInfo doesn't have companyId, you might need to:
-          // 1. Add it to the UserInfo interface in auth.service.ts
-          // 2. Or fetch it from a separate endpoint
-          // For now, we'll use a placeholder or fetch from user profile
           this.companyId = (user as any).companyId || null;
         }
       });
@@ -204,6 +198,16 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (requests) => {
+          console.log('Loaded requests:', requests);
+          
+          // Debug: Check if requests have valid IDs
+          requests.forEach((req, index) => {
+            const requestId = this.getRequestId(req);
+            if (!requestId || requestId <= 0) {
+              console.warn(`Request at index ${index} has no valid ID:`, req);
+            }
+          });
+          
           this.allRequests = requests;
           this.updateDataSource();
           this.calculateStatistics();
@@ -215,6 +219,18 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
           this.isLoading = false;
         }
       });
+  }
+
+  applyFilter(): void {
+    this.updateDataSource();
+  }
+
+  clearFilters(): void {
+    this.searchText = '';
+    this.selectedStatus = 'all';
+    this.selectedType = 'all';
+    this.selectedDateRange = 'all';
+    this.updateDataSource();
   }
 
   updateDataSource(): void {
@@ -290,6 +306,11 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     };
   }
 
+  // Helper method to get request ID (handles both id and idGdprRequest)
+  private getRequestId(request: GDPRRequest): number {
+    return request.id || (request as any).idGdprRequest || 0;
+  }
+
   // Selection methods for batch operations
   isAllSelected(): boolean {
     const numSelected = this.selection.selected.length;
@@ -309,7 +330,8 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     if (!row) {
       return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
     }
-    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.id}`;
+    const requestId = this.getRequestId(row);
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${requestId}`;
   }
 
   // Batch operations
@@ -320,9 +342,10 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       return;
     }
 
-    const pendingRequests = selectedRequests.filter(r => 
-      r.status === 'PENDING' || r.status === 'IN_PROGRESS'
-    );
+    const pendingRequests = selectedRequests.filter(r => {
+      const status = r.status?.toUpperCase();
+      return status === 'PENDING' || status === 'IN_PROGRESS';
+    });
 
     if (pendingRequests.length === 0) {
       this.showSnackBar('No pending requests selected', 'warning');
@@ -331,7 +354,17 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
 
     if (confirm(`Validate ${pendingRequests.length} request(s)?`)) {
       this.isProcessing = true;
-      const requestIds = pendingRequests.map(r => r.id);
+      
+      // Extract valid IDs
+      const requestIds = pendingRequests
+        .map(r => this.getRequestId(r))
+        .filter(id => id && id > 0);
+      
+      if (requestIds.length === 0) {
+        this.showSnackBar('No valid request IDs found', 'error');
+        this.isProcessing = false;
+        return;
+      }
       
       this.requestService.batchValidateRequests(requestIds)
         .pipe(takeUntil(this.destroy$))
@@ -361,7 +394,16 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     const reason = prompt(`Enter rejection reason for ${selectedRequests.length} request(s):`);
     if (reason) {
       this.isProcessing = true;
-      const requestIds = selectedRequests.map(r => r.id);
+      
+      const requestIds = selectedRequests
+        .map(r => this.getRequestId(r))
+        .filter(id => id && id > 0);
+      
+      if (requestIds.length === 0) {
+        this.showSnackBar('No valid request IDs found', 'error');
+        this.isProcessing = false;
+        return;
+      }
       
       this.requestService.batchUpdateRequestStatus(requestIds, 'REJECTED')
         .pipe(takeUntil(this.destroy$))
@@ -381,23 +423,25 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     }
   }
 
-  // Individual actions with actual API calls
+  // Individual actions with validation and proper error handling
   validateRequest(request: GDPRRequest): void {
-    if (confirm(`Validate request #${request.id}?`)) {
+    const requestId = this.getRequestId(request);
+    
+    if (!requestId || requestId <= 0) {
+      console.error('Invalid request ID:', request);
+      this.showSnackBar('Invalid request ID. Please refresh the page.', 'error');
+      return;
+    }
+
+    if (confirm(`Validate request #${requestId}?`)) {
       this.isProcessing = true;
       
-      this.requestService.validateRequest(request.id)
+      this.requestService.validateRequest(requestId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (updatedRequest) => {
-            this.showSnackBar(`Request #${request.id} validated successfully`, 'success');
-            // Update local data
-            const index = this.allRequests.findIndex(r => r.id === request.id);
-            if (index !== -1) {
-              this.allRequests[index] = updatedRequest;
-              this.updateDataSource();
-              this.calculateStatistics();
-            }
+            this.showSnackBar(`Request #${requestId} validated successfully`, 'success');
+            this.updateLocalRequest(requestId, updatedRequest);
             this.isProcessing = false;
           },
           error: (error) => {
@@ -410,21 +454,23 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   approveRequest(request: GDPRRequest): void {
-    if (confirm(`Approve request #${request.id}?`)) {
+    const requestId = this.getRequestId(request);
+    
+    if (!requestId || requestId <= 0) {
+      console.error('Invalid request ID:', request);
+      this.showSnackBar('Invalid request ID. Please refresh the page.', 'error');
+      return;
+    }
+
+    if (confirm(`Approve request #${requestId}?`)) {
       this.isProcessing = true;
       
-      this.requestService.approveRequest(request.id)
+      this.requestService.approveRequest(requestId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (updatedRequest) => {
-            this.showSnackBar(`Request #${request.id} approved successfully`, 'success');
-            // Update local data
-            const index = this.allRequests.findIndex(r => r.id === request.id);
-            if (index !== -1) {
-              this.allRequests[index] = updatedRequest;
-              this.updateDataSource();
-              this.calculateStatistics();
-            }
+            this.showSnackBar(`Request #${requestId} approved successfully`, 'success');
+            this.updateLocalRequest(requestId, updatedRequest);
             this.isProcessing = false;
           },
           error: (error) => {
@@ -437,20 +483,22 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   markAsInProgress(request: GDPRRequest): void {
+    const requestId = this.getRequestId(request);
+    
+    if (!requestId || requestId <= 0) {
+      console.error('Invalid request ID:', request);
+      this.showSnackBar('Invalid request ID. Please refresh the page.', 'error');
+      return;
+    }
+
     this.isProcessing = true;
     
-    this.requestService.markRequestInProgress(request.id)
+    this.requestService.markRequestInProgress(requestId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (updatedRequest) => {
-          this.showSnackBar(`Request #${request.id} marked as in progress`, 'info');
-          // Update local data
-          const index = this.allRequests.findIndex(r => r.id === request.id);
-          if (index !== -1) {
-            this.allRequests[index] = updatedRequest;
-            this.updateDataSource();
-            this.calculateStatistics();
-          }
+          this.showSnackBar(`Request #${requestId} marked as in progress`, 'info');
+          this.updateLocalRequest(requestId, updatedRequest);
           this.isProcessing = false;
         },
         error: (error) => {
@@ -462,22 +510,24 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   rejectRequest(request: GDPRRequest): void {
-    const reason = prompt(`Enter rejection reason for request #${request.id}:`);
+    const requestId = this.getRequestId(request);
+    
+    if (!requestId || requestId <= 0) {
+      console.error('Invalid request ID:', request);
+      this.showSnackBar('Invalid request ID. Please refresh the page.', 'error');
+      return;
+    }
+
+    const reason = prompt(`Enter rejection reason for request #${requestId}:`);
     if (reason) {
       this.isProcessing = true;
       
-      this.requestService.rejectRequest(request.id)
+      this.requestService.rejectRequest(requestId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (updatedRequest) => {
-            this.showSnackBar(`Request #${request.id} rejected`, 'info');
-            // Update local data
-            const index = this.allRequests.findIndex(r => r.id === request.id);
-            if (index !== -1) {
-              this.allRequests[index] = updatedRequest;
-              this.updateDataSource();
-              this.calculateStatistics();
-            }
+            this.showSnackBar(`Request #${requestId} rejected`, 'info');
+            this.updateLocalRequest(requestId, updatedRequest);
             this.isProcessing = false;
           },
           error: (error) => {
@@ -490,16 +540,26 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   deleteRequest(request: GDPRRequest): void {
-    if (confirm(`Are you sure you want to delete request #${request.id}? This action cannot be undone.`)) {
+    const requestId = this.getRequestId(request);
+    
+    if (!requestId || requestId <= 0) {
+      console.error('Invalid request ID:', request);
+      this.showSnackBar('Invalid request ID. Please refresh the page.', 'error');
+      return;
+    }
+
+    if (confirm(`Are you sure you want to delete request #${requestId}? This action cannot be undone.`)) {
       this.isProcessing = true;
       
-      this.requestService.deleteRequest(request.id)
+      this.requestService.deleteRequest(requestId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            this.showSnackBar(`Request #${request.id} deleted successfully`, 'success');
+            this.showSnackBar(`Request #${requestId} deleted successfully`, 'success');
             // Remove from local data
-            this.allRequests = this.allRequests.filter(r => r.id !== request.id);
+            this.allRequests = this.allRequests.filter(r => 
+              this.getRequestId(r) !== requestId
+            );
             this.updateDataSource();
             this.calculateStatistics();
             this.isProcessing = false;
@@ -513,8 +573,18 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     }
   }
 
-  // Other existing methods remain the same...
-  
+  // Helper method to update local request data
+  private updateLocalRequest(requestId: number, updatedRequest: GDPRRequest): void {
+    const index = this.allRequests.findIndex(r => 
+      this.getRequestId(r) === requestId
+    );
+    if (index !== -1) {
+      this.allRequests[index] = updatedRequest;
+      this.updateDataSource();
+      this.calculateStatistics();
+    }
+  }
+
   onTabChange(index: number): void {
     this.selectedTab = index;
     
@@ -545,18 +615,21 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   viewDetails(request: GDPRRequest): void {
+    const requestId = this.getRequestId(request);
+    console.log('View details for request:', requestId, request);
     // Implement dialog for viewing full request details
-    console.log('View details for request:', request);
   }
 
   viewUserHistory(request: GDPRRequest): void {
-    console.log('View user history for:', this.getUserEmail(request));
+    const userEmail = this.getUserEmail(request);
+    console.log('View user history for:', userEmail);
     // Navigate to user history or open dialog
   }
 
   exportRequest(request: GDPRRequest): void {
+    const requestId = this.getRequestId(request);
     const data = {
-      id: request.id,
+      id: requestId,
       user: this.getUserName(request),
       email: this.getUserEmail(request),
       type: request.requestType,
@@ -572,7 +645,7 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `request-${request.id}.json`;
+    link.download = `request-${requestId}.json`;
     link.click();
     window.URL.revokeObjectURL(url);
     
@@ -606,7 +679,7 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
 
   getCompanyName(request: GDPRRequest): string {
     if (request.company) {
-      return request.company.name || `Company #${request.companyId}`;
+      return request.company?.companyName || `Company #${request.companyId}`;
     }
     return `Company #${request.companyId}`;
   }
@@ -674,7 +747,7 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   private convertToCSV(requests: GDPRRequest[]): string {
     const headers = ['ID', 'User', 'Email', 'Type', 'Status', 'Company', 'Created Date', 'Content'];
     const rows = requests.map(req => [
-      req.id,
+      this.getRequestId(req),
       this.getUserName(req),
       this.getUserEmail(req),
       this.requestService.getRequestTypeDisplayName(req.requestType),

@@ -20,8 +20,9 @@ export interface GDPRRequest {
     email: string;
   };
   company?: {
+    companyName: string;
     idCompany: number;
-    name: string;
+    
   };
 }
 
