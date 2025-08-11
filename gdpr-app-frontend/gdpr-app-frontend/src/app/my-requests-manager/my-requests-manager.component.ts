@@ -3,7 +3,7 @@ import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject, forkJoin } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 // Angular Material Imports
@@ -25,13 +25,15 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SelectionModel } from '@angular/cdk/collections';
 
 // Components
 import { ManagerNavbarComponent } from '../manager-navbar/manager-navbar.component';
 
 // Services
 import { AuthService, UserInfo } from '../services/auth.service';
-import { RequestService, GDPRRequest, UpdateStatusDTO } from '../services/request.service';
+import { RequestService, GDPRRequest } from '../services/request.service';
 
 @Component({
   selector: 'app-manager-requests',
@@ -57,6 +59,7 @@ import { RequestService, GDPRRequest, UpdateStatusDTO } from '../services/reques
     MatTabsModule,
     MatBadgeModule,
     MatDividerModule,
+    MatCheckboxModule,
     ManagerNavbarComponent
   ],
   templateUrl: './my-requests-manager.component.html',
@@ -70,9 +73,10 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   currentUser: UserInfo | null = null;
   allRequests: GDPRRequest[] = [];
   dataSource: MatTableDataSource<GDPRRequest>;
+  selection = new SelectionModel<GDPRRequest>(true, []);
   
-  // Table columns
-  displayedColumns: string[] = ['id', 'user', 'requestType', 'company', 'date', 'status', 'actions'];
+  // Table columns - Added selection column for batch operations
+  displayedColumns: string[] = ['select', 'id', 'user', 'requestType', 'company', 'date', 'status', 'actions'];
   
   // Filter properties
   searchText: string = '';
@@ -85,17 +89,20 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     total: 0,
     pending: 0,
     completed: 0,
-    rejected: 0
+    rejected: 0,
+    inProgress: 0
   };
   
   // UI State
   isLoading: boolean = true;
+  isProcessing: boolean = false;
   selectedTab: number = 0;
   
-  // Status options
+  // Status options - Updated with IN_PROGRESS
   statusOptions = [
     { value: 'all', label: 'All Statuses', icon: 'all_inclusive' },
     { value: 'PENDING', label: 'Pending', icon: 'schedule' },
+    { value: 'IN_PROGRESS', label: 'In Progress', icon: 'autorenew' },
     { value: 'COMPLETED', label: 'Completed', icon: 'check_circle' },
     { value: 'REJECTED', label: 'Rejected', icon: 'cancel' }
   ];
@@ -110,6 +117,7 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   ];
   
   private destroy$ = new Subject<void>();
+  private companyId: number | null = null;
 
   constructor(
     private authService: AuthService,
@@ -122,8 +130,8 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   ngOnInit(): void {
-    // Check if user is manager
-    if (!this.authService.isManager()) {
+    // Check if user is manager or admin
+    if (!this.authService.isManager() && !this.authService.isAdmin()) {
       this.router.navigate(['/unauthorized']);
       return;
     }
@@ -132,6 +140,16 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         this.currentUser = user;
+        // Store company ID if manager
+        // Note: You may need to add companyId to UserInfo interface
+        // or fetch it from another source
+        if (user && user.role === 'GERANT') {
+          // If UserInfo doesn't have companyId, you might need to:
+          // 1. Add it to the UserInfo interface in auth.service.ts
+          // 2. Or fetch it from a separate endpoint
+          // For now, we'll use a placeholder or fetch from user profile
+          this.companyId = (user as any).companyId || null;
+        }
       });
 
     this.loadAllRequests();
@@ -168,9 +186,21 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   loadAllRequests(): void {
     this.isLoading = true;
     
-    // For manager, we need to get ALL requests, not just user's own
-    // This will require a manager/admin endpoint - for now using the same service
-    this.requestService.getMyRequests()
+    // Use appropriate method based on role
+    let requestObservable;
+    
+    if (this.authService.isAdmin()) {
+      // Admin sees all requests
+      requestObservable = this.requestService.getAllRequests();
+    } else if (this.companyId) {
+      // Manager sees company requests
+      requestObservable = this.requestService.getCompanyRequests(this.companyId);
+    } else {
+      // Fallback to user's own requests
+      requestObservable = this.requestService.getMyRequests();
+    }
+    
+    requestObservable
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (requests) => {
@@ -237,6 +267,9 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     }
 
     this.dataSource.data = filteredData;
+    
+    // Clear selection when updating data
+    this.selection.clear();
   }
 
   calculateStatistics(): void {
@@ -250,22 +283,238 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       ).length,
       rejected: this.allRequests.filter(r => 
         r.status === 'REJECTED' || r.status === 'REFUSE'
+      ).length,
+      inProgress: this.allRequests.filter(r => 
+        r.status === 'IN_PROGRESS' || r.status === 'EN_COURS' || r.status === 'PROCESSING'
       ).length
     };
   }
 
-  applyFilter(): void {
-    this.updateDataSource();
+  // Selection methods for batch operations
+  isAllSelected(): boolean {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
   }
 
-  clearFilters(): void {
-    this.searchText = '';
-    this.selectedStatus = 'all';
-    this.selectedType = 'all';
-    this.selectedDateRange = 'all';
-    this.updateDataSource();
+  masterToggle(): void {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+    } else {
+      this.dataSource.data.forEach(row => this.selection.select(row));
+    }
   }
 
+  checkboxLabel(row?: GDPRRequest): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.id}`;
+  }
+
+  // Batch operations
+  batchValidate(): void {
+    const selectedRequests = this.selection.selected;
+    if (selectedRequests.length === 0) {
+      this.showSnackBar('Please select requests to validate', 'warning');
+      return;
+    }
+
+    const pendingRequests = selectedRequests.filter(r => 
+      r.status === 'PENDING' || r.status === 'IN_PROGRESS'
+    );
+
+    if (pendingRequests.length === 0) {
+      this.showSnackBar('No pending requests selected', 'warning');
+      return;
+    }
+
+    if (confirm(`Validate ${pendingRequests.length} request(s)?`)) {
+      this.isProcessing = true;
+      const requestIds = pendingRequests.map(r => r.id);
+      
+      this.requestService.batchValidateRequests(requestIds)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedRequests) => {
+            this.showSnackBar(`${updatedRequests.length} requests validated successfully`, 'success');
+            this.loadAllRequests();
+            this.selection.clear();
+            this.isProcessing = false;
+          },
+          error: (error) => {
+            console.error('Error validating requests:', error);
+            this.showSnackBar('Failed to validate some requests', 'error');
+            this.isProcessing = false;
+          }
+        });
+    }
+  }
+
+  batchReject(): void {
+    const selectedRequests = this.selection.selected;
+    if (selectedRequests.length === 0) {
+      this.showSnackBar('Please select requests to reject', 'warning');
+      return;
+    }
+
+    const reason = prompt(`Enter rejection reason for ${selectedRequests.length} request(s):`);
+    if (reason) {
+      this.isProcessing = true;
+      const requestIds = selectedRequests.map(r => r.id);
+      
+      this.requestService.batchUpdateRequestStatus(requestIds, 'REJECTED')
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedRequests) => {
+            this.showSnackBar(`${updatedRequests.length} requests rejected`, 'info');
+            this.loadAllRequests();
+            this.selection.clear();
+            this.isProcessing = false;
+          },
+          error: (error) => {
+            console.error('Error rejecting requests:', error);
+            this.showSnackBar('Failed to reject some requests', 'error');
+            this.isProcessing = false;
+          }
+        });
+    }
+  }
+
+  // Individual actions with actual API calls
+  validateRequest(request: GDPRRequest): void {
+    if (confirm(`Validate request #${request.id}?`)) {
+      this.isProcessing = true;
+      
+      this.requestService.validateRequest(request.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedRequest) => {
+            this.showSnackBar(`Request #${request.id} validated successfully`, 'success');
+            // Update local data
+            const index = this.allRequests.findIndex(r => r.id === request.id);
+            if (index !== -1) {
+              this.allRequests[index] = updatedRequest;
+              this.updateDataSource();
+              this.calculateStatistics();
+            }
+            this.isProcessing = false;
+          },
+          error: (error) => {
+            console.error('Error validating request:', error);
+            this.showSnackBar('Failed to validate request', 'error');
+            this.isProcessing = false;
+          }
+        });
+    }
+  }
+
+  approveRequest(request: GDPRRequest): void {
+    if (confirm(`Approve request #${request.id}?`)) {
+      this.isProcessing = true;
+      
+      this.requestService.approveRequest(request.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedRequest) => {
+            this.showSnackBar(`Request #${request.id} approved successfully`, 'success');
+            // Update local data
+            const index = this.allRequests.findIndex(r => r.id === request.id);
+            if (index !== -1) {
+              this.allRequests[index] = updatedRequest;
+              this.updateDataSource();
+              this.calculateStatistics();
+            }
+            this.isProcessing = false;
+          },
+          error: (error) => {
+            console.error('Error approving request:', error);
+            this.showSnackBar('Failed to approve request', 'error');
+            this.isProcessing = false;
+          }
+        });
+    }
+  }
+
+  markAsInProgress(request: GDPRRequest): void {
+    this.isProcessing = true;
+    
+    this.requestService.markRequestInProgress(request.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedRequest) => {
+          this.showSnackBar(`Request #${request.id} marked as in progress`, 'info');
+          // Update local data
+          const index = this.allRequests.findIndex(r => r.id === request.id);
+          if (index !== -1) {
+            this.allRequests[index] = updatedRequest;
+            this.updateDataSource();
+            this.calculateStatistics();
+          }
+          this.isProcessing = false;
+        },
+        error: (error) => {
+          console.error('Error updating request:', error);
+          this.showSnackBar('Failed to update request', 'error');
+          this.isProcessing = false;
+        }
+      });
+  }
+
+  rejectRequest(request: GDPRRequest): void {
+    const reason = prompt(`Enter rejection reason for request #${request.id}:`);
+    if (reason) {
+      this.isProcessing = true;
+      
+      this.requestService.rejectRequest(request.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedRequest) => {
+            this.showSnackBar(`Request #${request.id} rejected`, 'info');
+            // Update local data
+            const index = this.allRequests.findIndex(r => r.id === request.id);
+            if (index !== -1) {
+              this.allRequests[index] = updatedRequest;
+              this.updateDataSource();
+              this.calculateStatistics();
+            }
+            this.isProcessing = false;
+          },
+          error: (error) => {
+            console.error('Error rejecting request:', error);
+            this.showSnackBar('Failed to reject request', 'error');
+            this.isProcessing = false;
+          }
+        });
+    }
+  }
+
+  deleteRequest(request: GDPRRequest): void {
+    if (confirm(`Are you sure you want to delete request #${request.id}? This action cannot be undone.`)) {
+      this.isProcessing = true;
+      
+      this.requestService.deleteRequest(request.id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.showSnackBar(`Request #${request.id} deleted successfully`, 'success');
+            // Remove from local data
+            this.allRequests = this.allRequests.filter(r => r.id !== request.id);
+            this.updateDataSource();
+            this.calculateStatistics();
+            this.isProcessing = false;
+          },
+          error: (error) => {
+            console.error('Error deleting request:', error);
+            this.showSnackBar('Failed to delete request', 'error');
+            this.isProcessing = false;
+          }
+        });
+    }
+  }
+
+  // Other existing methods remain the same...
+  
   onTabChange(index: number): void {
     this.selectedTab = index;
     
@@ -277,9 +526,12 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
         this.selectedStatus = 'PENDING';
         break;
       case 2:
-        this.selectedStatus = 'COMPLETED';
+        this.selectedStatus = 'IN_PROGRESS';
         break;
       case 3:
+        this.selectedStatus = 'COMPLETED';
+        break;
+      case 4:
         this.selectedStatus = 'REJECTED';
         break;
     }
@@ -292,59 +544,9 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     this.showSnackBar('Data refreshed', 'success');
   }
 
-  // Actions
   viewDetails(request: GDPRRequest): void {
-    // Open detail view or dialog
+    // Implement dialog for viewing full request details
     console.log('View details for request:', request);
-    // You can implement a dialog similar to the client version
-  }
-
-  markAsCompleted(request: GDPRRequest): void {
-    if (confirm(`Mark request #${request.id} as completed?`)) {
-      const updateData: UpdateStatusDTO = { status: 'COMPLETED' };
-      
-      // This would require a manager endpoint to update status
-      // For now, showing the intended action
-      console.log('Marking as completed:', request.id);
-      this.showSnackBar(`Request #${request.id} marked as completed`, 'success');
-      
-      // Update local data
-      request.status = 'COMPLETED';
-      this.calculateStatistics();
-      this.updateDataSource();
-    }
-  }
-
-  rejectRequest(request: GDPRRequest): void {
-    const reason = prompt(`Enter rejection reason for request #${request.id}:`);
-    if (reason) {
-      const updateData: UpdateStatusDTO = { status: 'REJECTED' };
-      
-      console.log('Rejecting request:', request.id, 'Reason:', reason);
-      this.showSnackBar(`Request #${request.id} rejected`, 'info');
-      
-      // Update local data
-      request.status = 'REJECTED';
-      this.calculateStatistics();
-      this.updateDataSource();
-    }
-  }
-
-  deleteRequest(request: GDPRRequest): void {
-    if (confirm(`Are you sure you want to delete request #${request.id}?`)) {
-      this.requestService.deleteRequest(request.id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.showSnackBar(`Request #${request.id} deleted successfully`, 'success');
-            this.loadAllRequests();
-          },
-          error: (error) => {
-            console.error('Error deleting request:', error);
-            this.showSnackBar('Failed to delete request', 'error');
-          }
-        });
-    }
   }
 
   viewUserHistory(request: GDPRRequest): void {
@@ -360,6 +562,7 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       type: request.requestType,
       status: request.status,
       content: request.requestContent,
+      company: this.getCompanyName(request),
       createdAt: request.createdAt,
       updatedAt: request.updatedAt
     };
@@ -372,6 +575,8 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     link.download = `request-${request.id}.json`;
     link.click();
     window.URL.revokeObjectURL(url);
+    
+    this.showSnackBar('Request exported', 'success');
   }
 
   exportRequests(): void {
@@ -412,6 +617,10 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       case 'PENDING':
       case 'EN_ATTENTE':
         return 'schedule';
+      case 'IN_PROGRESS':
+      case 'EN_COURS':
+      case 'PROCESSING':
+        return 'autorenew';
       case 'COMPLETED':
       case 'TERMINE':
       case 'APPROVED':
@@ -444,6 +653,22 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   formatDate(date: string): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
+  }
+
+  // Check if action is available based on status
+  canValidate(request: GDPRRequest): boolean {
+    const status = request.status.toUpperCase();
+    return status === 'PENDING' || status === 'EN_ATTENTE' || status === 'IN_PROGRESS';
+  }
+
+  canReject(request: GDPRRequest): boolean {
+    const status = request.status.toUpperCase();
+    return status !== 'REJECTED' && status !== 'REFUSE';
+  }
+
+  canMarkInProgress(request: GDPRRequest): boolean {
+    const status = request.status.toUpperCase();
+    return status === 'PENDING' || status === 'EN_ATTENTE';
   }
 
   private convertToCSV(requests: GDPRRequest[]): string {
