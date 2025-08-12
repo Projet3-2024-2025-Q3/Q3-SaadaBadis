@@ -1,4 +1,3 @@
-
 <!-- src/app/components/manage-users/user-form-dialog/user-form-dialog.component.html -->
 <div class="dialog-container">
   
@@ -76,21 +75,54 @@
           <mat-error>{{ getFieldError('password') }}</mat-error>
         </mat-form-field>
 
+        <!-- Change Password Section (only for editing) -->
+        <div class="password-section" *ngIf="data.isEdit">
+          <div class="password-toggle-button">
+            <button mat-stroked-button 
+                    type="button" 
+                    (click)="togglePasswordField()"
+                    class="change-password-btn">
+              <mat-icon>{{ showPasswordField ? 'lock' : 'lock_open' }}</mat-icon>
+              {{ showPasswordField ? 'Cancel Password Change' : 'Change Password' }}
+            </button>
+          </div>
+          
+          <!-- Password field (shown when requested) -->
+          <mat-form-field appearance="outline" 
+                          class="form-field password-field" 
+                          *ngIf="showPasswordField">
+            <mat-label>New Password</mat-label>
+            <input matInput 
+                   [type]="passwordVisible ? 'text' : 'password'"
+                   formControlName="password" 
+                   placeholder="Enter new password"
+                   maxlength="100">
+            <button mat-icon-button 
+                    matSuffix 
+                    type="button"
+                    (click)="togglePasswordVisibility()"
+                    [attr.aria-label]="'Hide password'"
+                    [attr.aria-pressed]="passwordVisible">
+              <mat-icon>{{ passwordVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-hint align="start">Min 6 characters with letters or numbers</mat-hint>
+            <mat-hint align="end">{{ userForm.get('password')?.value?.length || 0 }}/100</mat-hint>
+            <mat-error>{{ getFieldError('password') }}</mat-error>
+          </mat-form-field>
+        </div>
+
         <!-- Role Selection -->
         <mat-form-field appearance="outline" class="form-field role-field">
           <mat-label>User Role</mat-label>
           <mat-select formControlName="roleId" required>
             <mat-option value="">Select a role</mat-option>
             <mat-option *ngFor="let role of roleOptions" [value]="role.id">
-              <div class="role-option">
-                <span class="role-name">{{ role.label }}</span>
-                <span class="role-desc">{{ role.description }}</span>
-              </div>
+              {{ role.label }}
             </mat-option>
           </mat-select>
           <mat-icon matSuffix>admin_panel_settings</mat-icon>
           <mat-hint *ngIf="userForm.get('roleId')?.value">
-            {{ getRoleDescription(userForm.get('roleId')?.value) }}
+            {{ getRoleName(userForm.get('roleId')?.value) }}
           </mat-hint>
           <mat-error>{{ getFieldError('roleId') }}</mat-error>
         </mat-form-field>

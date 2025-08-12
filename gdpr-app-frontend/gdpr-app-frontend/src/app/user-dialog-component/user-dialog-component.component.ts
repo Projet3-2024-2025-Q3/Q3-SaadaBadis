@@ -45,6 +45,7 @@ export class UserFormDialogComponent implements OnInit {
   userForm!: FormGroup;
   isSubmitting = false;
   passwordVisible = false;
+  showPasswordField = false; // Pour contrôler l'affichage du champ mot de passe en édition
 
   // Role options
   roleOptions = [
@@ -78,7 +79,7 @@ export class UserFormDialogComponent implements OnInit {
       roleId: ['', Validators.required]
     };
 
-    // Add password field only for creation
+    // Add password field for creation OR if editing and password change is requested
     if (!this.data.isEdit) {
       formConfig.password = ['', [
         Validators.required, 
@@ -87,7 +88,7 @@ export class UserFormDialogComponent implements OnInit {
         this.passwordStrengthValidator
       ]];
     } else {
-      // Add active toggle only for editing
+      // Add active toggle for editing
       formConfig.active = [true];
     }
 
@@ -168,6 +169,26 @@ export class UserFormDialogComponent implements OnInit {
   }
 
   /**
+   * Toggle password field visibility for editing
+   */
+  togglePasswordField(): void {
+    this.showPasswordField = !this.showPasswordField;
+    
+    if (this.showPasswordField) {
+      // Add password field to form
+      this.userForm.addControl('password', this.fb.control('', [
+        Validators.minLength(6),
+        Validators.maxLength(100),
+        this.passwordStrengthValidator
+      ]));
+    } else {
+      // Remove password field from form
+      this.userForm.removeControl('password');
+      this.passwordVisible = false; // Reset visibility
+    }
+  }
+
+  /**
    * Toggle password visibility
    */
   togglePasswordVisibility(): void {
@@ -180,6 +201,14 @@ export class UserFormDialogComponent implements OnInit {
   getRoleDescription(roleId: number): string {
     const role = this.roleOptions.find(r => r.id === roleId);
     return role ? role.description : '';
+  }
+
+  /**
+   * Get role name by ID (without description)
+   */
+  getRoleName(roleId: number): string {
+    const role = this.roleOptions.find(r => r.id === roleId);
+    return role ? role.label : '';
   }
 
   /**

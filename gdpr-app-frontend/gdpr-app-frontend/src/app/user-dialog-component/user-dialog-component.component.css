@@ -48,7 +48,8 @@
 .email-field,
 .password-field,
 .role-field,
-.toggle-field {
+.toggle-field,
+.password-section {
   grid-column: 1 / -1;
 }
 
@@ -87,29 +88,53 @@
   background: rgba(211, 47, 47, 0.04);
 }
 
-/* Role Selection */
-.role-option {
+/* Password Section for Edit Mode */
+.password-section {
   display: flex;
   flex-direction: column;
-  padding: 4px 0;
+  gap: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #2196F3;
 }
 
-.role-name {
-  font-weight: 600;
-  color: #333;
-  font-size: 14px;
+.password-toggle-button {
+  display: flex;
+  justify-content: center;
 }
 
-.role-desc {
-  font-size: 12px;
-  color: #666;
-  margin-top: 2px;
+.change-password-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 16px !important;
+  border-radius: 20px !important;
+  border: 2px solid #2196F3 !important;
+  color: #2196F3 !important;
+  background: white !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
 }
 
+.change-password-btn:hover {
+  background: rgba(33, 150, 243, 0.04) !important;
+  border-color: #1976D2 !important;
+  color: #1976D2 !important;
+}
+
+.change-password-btn .mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Role Selection */
 .mat-mdc-option {
   height: auto !important;
   min-height: 48px !important;
-  padding: 8px 16px !important;
+  padding: 12px 16px !important;
+  line-height: 1.4 !important;
 }
 
 .mat-mdc-option:hover {
