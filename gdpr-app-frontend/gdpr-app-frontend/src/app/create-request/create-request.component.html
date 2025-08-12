@@ -1,0 +1,188 @@
+<div class="create-request-container">
+  <!-- Client Navbar -->
+  <app-client-navbar></app-client-navbar>
+
+  <!-- Main Create Request Content -->
+  <div class="create-request-content">
+    
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="page-title">Create GDPR Request</h1>
+          <p class="page-subtitle">Submit a new data protection request</p>
+        </div>
+        <div class="header-actions">
+          <button 
+            mat-stroked-button 
+            color="primary" 
+            (click)="goBack()"
+            class="back-button"
+          >
+            <mat-icon>arrow_back</mat-icon>
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-section">
+      <mat-card class="request-form-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>add_circle_outline</mat-icon>
+            Request Details
+          </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <form class="request-form" (ngSubmit)="onSubmit()" #requestForm="ngForm">
+            
+            <!-- Request Type Field -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Request Type</mat-label>
+              <mat-select 
+                name="requestType"
+                [(ngModel)]="requestType"
+                required
+                #requestTypeInput="ngModel"
+                (selectionChange)="onRequestTypeChange()"
+              >
+                <mat-option value="">Select request type</mat-option>
+                <mat-option 
+                  *ngFor="let type of requestTypes" 
+                  [value]="type.value"
+                >
+                  <div class="request-type-option">
+                    <mat-icon>{{ type.icon }}</mat-icon>
+                    <span>{{ type.label }}</span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>assignment</mat-icon>
+              <mat-error *ngIf="requestTypeInput.hasError('required')">
+                Please select a request type
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Company Field -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Company</mat-label>
+              <mat-select 
+                name="companyId"
+                [(ngModel)]="companyId"
+                required
+                #companyInput="ngModel"
+                (selectionChange)="onCompanyChange()"
+              >
+                <mat-option value="">Select company</mat-option>
+                <mat-option 
+                  *ngFor="let company of companies" 
+                  [value]="company.idCompany"
+                >
+                  {{ company.companyName }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>business</mat-icon>
+              <mat-error *ngIf="companyInput.hasError('required')">
+                Please select a company
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Request Content Field -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Request Description</mat-label>
+              <textarea 
+                matInput 
+                name="requestContent"
+                [(ngModel)]="requestContent"
+                required
+                minlength="10"
+                maxlength="1000"
+                #contentInput="ngModel"
+                placeholder="{{ getPlaceholderText() }}"
+                rows="6"
+                (input)="onContentChange()"
+              ></textarea>
+              <mat-icon matPrefix>description</mat-icon>
+              <mat-hint align="end">{{ requestContent.length }} / 1000</mat-hint>
+              <mat-error *ngIf="contentInput.hasError('required')">
+                Please describe your request
+              </mat-error>
+              <mat-error *ngIf="contentInput.hasError('minlength')">
+                Description must be at least 10 characters
+              </mat-error>
+              <mat-error *ngIf="contentInput.hasError('maxlength')">
+                Description cannot exceed 1000 characters
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Request Type Info -->
+            <div class="request-info" *ngIf="requestType">
+              <mat-card class="info-card">
+                <mat-card-content>
+                  <div class="info-header">
+                    <mat-icon color="primary">{{ getSelectedRequestTypeIcon() }}</mat-icon>
+                    <h3>{{ getSelectedRequestTypeLabel() }}</h3>
+                  </div>
+                  <p class="info-description">{{ getSelectedRequestTypeDescription() }}</p>
+                  <div class="info-timeline" *ngIf="getProcessingTime()">
+                    <mat-icon>schedule</mat-icon>
+                    <span>Typical processing time: {{ getProcessingTime() }}</span>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <!-- Global Error Message -->
+            <mat-error class="global-error" *ngIf="errorMessage">
+              <mat-icon>error</mat-icon>
+              {{ errorMessage }}
+            </mat-error>
+
+            <!-- Success Message -->
+            <div class="success-message" *ngIf="successMessage">
+              <mat-icon>check_circle</mat-icon>
+              {{ successMessage }}
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button 
+                mat-stroked-button 
+                type="button"
+                (click)="resetForm()"
+                [disabled]="isLoading"
+                class="reset-button"
+              >
+                <mat-icon>refresh</mat-icon>
+                Reset Form
+              </button>
+
+              <button 
+                mat-raised-button 
+                color="primary" 
+                type="submit"
+                [disabled]="requestForm.invalid || isLoading"
+                class="submit-button"
+              >
+                <mat-icon *ngIf="isLoading" class="spinning">sync</mat-icon>
+                <mat-icon *ngIf="!isLoading">send</mat-icon>
+                <span>{{ isLoading ? 'Submitting...' : 'Submit Request' }}</span>
+              </button>
+            </div>
+
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+</div>

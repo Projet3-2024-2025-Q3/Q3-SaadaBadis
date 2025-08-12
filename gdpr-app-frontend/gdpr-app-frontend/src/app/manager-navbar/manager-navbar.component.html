@@ -1,0 +1,123 @@
+<!-- src/app/components/manager-navbar/manager-navbar.component.html -->
+<mat-toolbar class="navbar" color="primary">
+  <div class="navbar-container">
+    <!-- Left Section -->
+    <div class="navbar-left">
+      <!-- Logo/Brand -->
+      <button 
+        mat-button 
+        class="navbar-brand"
+        (click)="navigateToHome()"
+      >
+        <mat-icon>security</mat-icon>
+        <span class="brand-text">GDPR Manager</span>
+      </button>
+
+      <!-- Main Navigation -->
+      <nav class="navbar-nav" *ngIf="!isMobile">
+        <button 
+          mat-button 
+          class="nav-link"
+          routerLink="/manager-dashboard"
+          routerLinkActive="active"
+        >
+          <mat-icon>dashboard</mat-icon>
+          Dashboard
+        </button>
+
+        <button 
+          mat-button 
+          class="nav-link"
+          routerLink="/myrequests-manager"
+          routerLinkActive="active"
+          [matBadge]="pendingCount"
+          [matBadgeHidden]="pendingCount === 0"
+          matBadgeColor="warn"
+          matBadgeSize="small"
+        >
+          <mat-icon>assignment</mat-icon>
+          Requests
+        </button>
+      </nav>
+    </div>
+
+    <!-- Right Section -->
+    <div class="navbar-right">
+      <!-- User Menu -->
+      <button 
+        mat-button 
+        class="user-menu-button"
+        [matMenuTriggerFor]="userMenu"
+      >
+        <mat-icon class="user-avatar">account_circle</mat-icon>
+        <span class="user-name" *ngIf="!isMobile">{{ getUserDisplayName() }}</span>
+        <mat-icon>arrow_drop_down</mat-icon>
+      </button>
+
+      <!-- Mobile Menu Toggle -->
+      <button 
+        mat-icon-button 
+        class="mobile-menu-button"
+        *ngIf="isMobile"
+        (click)="toggleMobileMenu()"
+      >
+        <mat-icon>{{ mobileMenuOpen ? 'close' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav" *ngIf="isMobile && mobileMenuOpen" [@slideDown]>
+    <button 
+      mat-button 
+      class="mobile-nav-link"
+      routerLink="/manager/dashboard"
+      routerLinkActive="active"
+      (click)="closeMobileMenu()"
+    >
+      <mat-icon>dashboard</mat-icon>
+      Dashboard
+    </button>
+
+    <button 
+      mat-button 
+      class="mobile-nav-link"
+      routerLink="/requests-manager"
+      routerLinkActive="active"
+      (click)="closeMobileMenu()"
+    >
+      <mat-icon>assignment</mat-icon>
+      Requests
+      <span class="badge" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
+    </button>
+  </div>
+</mat-toolbar>
+
+<!-- User Menu -->
+<mat-menu #userMenu="matMenu" class="user-menu">
+  <div class="user-info">
+    <mat-icon class="user-avatar-large">account_circle</mat-icon>
+    <div class="user-details">
+      <div class="user-fullname">{{ getUserFullName() }}</div>
+      <div class="user-email">{{ getUserEmail() }}</div>
+      <div class="user-role">
+        <mat-icon>manage_accounts</mat-icon>
+        Manager
+      </div>
+    </div>
+  </div>
+  
+  <mat-divider></mat-divider>
+  
+  <button mat-menu-item (click)="navigateToProfile()">
+    <mat-icon>person</mat-icon>
+    <span>My Profile</span>
+  </button>
+  
+  <mat-divider></mat-divider>
+  
+  <button mat-menu-item (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    <span>Logout</span>
+  </button>
+</mat-menu>

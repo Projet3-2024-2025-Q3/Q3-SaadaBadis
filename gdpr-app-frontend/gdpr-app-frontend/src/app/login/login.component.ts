@@ -2,7 +2,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common'; // Provides common directives like *ngIf, *ngFor
 import { FormsModule } from '@angular/forms'; // Enables template-driven forms with ngModel
-import { Router, RouterLink } from '@angular/router'; // For programmatic navigation
+import { Router } from '@angular/router'; // For programmatic navigation
 
 // Angular Material Imports - UI component library
 import { MatCardModule } from '@angular/material/card'; // Card container component
@@ -33,8 +33,7 @@ import { AuthService, LoginRequest } from '../services/auth.service';
    MatCheckboxModule,
    MatProgressSpinnerModule,
    MatDividerModule,
-   MatSnackBarModule,
-   RouterLink
+   MatSnackBarModule
  ],
  templateUrl: './login.component.html', // External template file
  styleUrls: ['./login.component.css'] // External stylesheet
@@ -72,7 +71,7 @@ export class LoginComponent {
 
    // Client-side validation before API call
    if (!this.isFormValid()) {
-     this.showError('Veuillez remplir tous les champs correctement');
+     this.showError('Please fill in all fields correctly');
      return;
    }
 
@@ -86,19 +85,19 @@ export class LoginComponent {
      password: this.password
    };
 
-   console.log('Tentative de connexion pour:', loginData.email);
+   console.log('Login attempt for:', loginData.email);
 
    // Make HTTP request via AuthService
    this.authService.login(loginData).subscribe({
      // Success callback
      next: (response) => {
-       console.log('Connexion réussie:', response);
-       this.showSuccess(`Bienvenue ${response.firstname} !`);
+       console.log('Login successful:', response);
+       this.showSuccess(`Welcome ${response.firstname}!`);
        
        // Handle "Remember Me" functionality
        if (this.rememberMe) {
          // TODO: Implement token persistence logic
-         console.log('Option "Se souvenir de moi" activée');
+         console.log('Remember me option activated');
        }
 
        // Navigate based on user role
@@ -106,9 +105,9 @@ export class LoginComponent {
      },
      // Error callback
      error: (error) => {
-       console.error('Erreur de connexion:', error);
+       console.error('Login error:', error);
        this.isLoading = false; // Reset loading state
-       this.errorMessage = error.message || 'Erreur de connexion';
+       this.errorMessage = error.message || 'Login error';
        this.showError(this.errorMessage);
      },
      // Completion callback (runs after success or error)
@@ -120,19 +119,25 @@ export class LoginComponent {
 
  /**
   * Handler for forgot password link
-  * Currently shows placeholder message
+  * Navigate to forgot password page
   */
  onForgotPassword(): void {
-  this.router.navigate(['forgot']);
+  this.router.navigate(['/forgot-password']);
  }
 
  /**
   * Handler for registration link
-  * Currently shows placeholder message
+  * Navigate to signup page
   */
- onRegister(): void {
-   console.log('Redirection vers la page d\'inscription');
-   this.router.navigate(['signup']);
+ onRegister(event?: Event): void {
+   // Prevent form submission if called from button
+   if (event) {
+     event.preventDefault();
+     event.stopPropagation();
+   }
+   
+   console.log('Redirecting to signup page');
+   this.router.navigate(['/signup']);
  }
 
  /**
@@ -210,13 +215,11 @@ export class LoginComponent {
          this.router.navigate(['/admin/dashboard']);
          break;
        case 'GERANT': // Manager role
-         this.router.navigate(['/manager/dashboard']);
+         this.router.navigate(['/manager-dashboard']);
          break;
        case 'CLIENT':
-         this.router.navigate(['/client/dashboard']);
-         break;
        default:
-         this.router.navigate(['/dashboard']); // Fallback route
+         this.router.navigate(['/dashboard']); // Client dashboard
      }
    }, 1500); // 1.5 second delay
  }
@@ -239,7 +242,7 @@ export class LoginComponent {
   * Green styling with auto-dismiss
   */
  private showSuccess(message: string): void {
-   this.snackBar.open(message, 'Fermer', {
+   this.snackBar.open(message, 'Close', {
      duration: 3000, // Auto-close after 3 seconds
      panelClass: ['success-snackbar'], // CSS class for styling
      horizontalPosition: 'center',
@@ -252,7 +255,7 @@ export class LoginComponent {
   * Red styling with longer duration
   */
  private showError(message: string): void {
-   this.snackBar.open(message, 'Fermer', {
+   this.snackBar.open(message, 'Close', {
      duration: 5000, // Longer duration for errors
      panelClass: ['error-snackbar'],
      horizontalPosition: 'center',
@@ -265,7 +268,7 @@ export class LoginComponent {
   * Blue styling for informational messages
   */
  private showInfo(message: string): void {
-   this.snackBar.open(message, 'Fermer', {
+   this.snackBar.open(message, 'Close', {
      duration: 3000,
      panelClass: ['info-snackbar'],
      horizontalPosition: 'center',

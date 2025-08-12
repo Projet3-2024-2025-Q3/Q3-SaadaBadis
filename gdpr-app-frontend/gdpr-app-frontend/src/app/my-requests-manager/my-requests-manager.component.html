@@ -1,0 +1,231 @@
+<!-- src/app/components/manager-requests/my-requests-manager.component.html -->
+<app-manager-navbar></app-manager-navbar>
+
+<div class="manager-requests-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <mat-card class="header-card manager-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h1>All GDPR Requests</h1>
+          <p>Manage and process all user data protection requests</p>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Statistics Cards - Changed to Processed -->
+  <div class="statistics-section">
+    <mat-card class="stat-card total-stat">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon>folder</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h2>{{ statistics.total }}</h2>
+          <p>Total Requests</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card pending-stat">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h2>{{ statistics.pending }}</h2>
+          <p>Pending</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card processed-stat">
+      <mat-card-content>
+        <div class="stat-icon">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h2>{{ statistics.processed }}</h2>
+          <p>Processed</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Content -->
+  <mat-card class="content-card">
+    <!-- Simplified Filters Section - No search, no buttons -->
+    <div class="filters-section">
+      <div class="filter-row">
+        <!-- Status Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter()">
+            <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+              <span class="option-content">
+                <mat-icon>{{ status.icon }}</mat-icon>
+                {{ status.label }}
+              </span>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Type Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Request Type</mat-label>
+          <mat-select [(ngModel)]="selectedType" (selectionChange)="applyFilter()">
+            <mat-option *ngFor="let type of typeOptions" [value]="type.value">
+              <span class="option-content">
+                <mat-icon>{{ type.icon }}</mat-icon>
+                {{ type.label }}
+              </span>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Tabs Section - Changed to Processed -->
+    <mat-tab-group (selectedTabChange)="onTabChange($event.index)" [selectedIndex]="selectedTab">
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span>All</span>
+          <span class="tab-badge" *ngIf="statistics.total > 0">{{ statistics.total }}</span>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span>Pending</span>
+          <span class="tab-badge pending" *ngIf="statistics.pending > 0">{{ statistics.pending }}</span>
+        </ng-template>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span>Processed</span>
+          <span class="tab-badge processed" *ngIf="statistics.processed > 0">{{ statistics.processed }}</span>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading requests...</p>
+    </div>
+
+    <!-- Processing Overlay -->
+    <div *ngIf="isProcessing" class="processing-overlay">
+      <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+      <p>Processing requests...</p>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-container" *ngIf="!isLoading">
+      <table mat-table [dataSource]="dataSource" matSort class="requests-table">
+        
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+          <td mat-cell *matCellDef="let request">
+            <span class="request-id">#{{ request.idRequest }}</span>
+          </td>
+        </ng-container>
+
+        <!-- User Column -->
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef>User</th>
+          <td mat-cell *matCellDef="let request">
+            <div class="user-info">
+              <mat-icon>person</mat-icon>
+              <div class="user-details">
+                <span class="user-name">{{ getUserName(request) }}</span>
+                <span class="user-email">{{ getUserEmail(request) }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Request Type Column -->
+        <ng-container matColumnDef="requestType">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+          <td mat-cell *matCellDef="let request">
+            <div class="type-chip">
+              <mat-icon>{{ getTypeIcon(request.requestType) }}</mat-icon>
+              <span>{{ requestService.getRequestTypeDisplayName(request.requestType) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Company Column -->
+        <ng-container matColumnDef="company">
+          <th mat-header-cell *matHeaderCellDef>Company</th>
+          <td mat-cell *matCellDef="let request">
+            <div class="company-info">
+              <mat-icon>business</mat-icon>
+              <span>{{ getCompanyName(request) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let request">
+            <div [class]="'status-chip status-' + requestService.getStatusColorClass(request.status)">
+              <mat-icon>{{ getStatusIcon(request.status) }}</mat-icon>
+              <span>{{ requestService.getStatusDisplayName(request.status) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let request">
+            <div class="action-buttons">
+              <!-- View Details -->
+              <button mat-icon-button color="primary" 
+                      (click)="viewRequestDetails(request); $event.stopPropagation()"
+                      matTooltip="View Details">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              
+              <!-- Validate - For pending requests only -->
+              <button mat-icon-button color="accent" 
+                      *ngIf="canValidate(request)"
+                      (click)="validateRequest(request); $event.stopPropagation()"
+                      [disabled]="isProcessing"
+                      matTooltip="Validate Request">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Table Rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+            class="request-row clickable-row"
+            (click)="viewRequestDetails(row)"
+            [class.pending-row]="row.status === 'PENDING' || row.status === 'EN_ATTENTE'"
+            [class.in-progress-row]="row.status === 'IN_PROGRESS' || row.status === 'EN_COURS'"
+            [class.completed-row]="row.status === 'COMPLETED' || row.status === 'APPROVED'"
+            [class.rejected-row]="row.status === 'REJECTED' || row.status === 'REFUSE'">
+        </tr>
+
+        <!-- No Data Row -->
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="no-data-message">
+              <mat-icon>inbox</mat-icon>
+              <p>No requests found</p>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </mat-card>
+</div>

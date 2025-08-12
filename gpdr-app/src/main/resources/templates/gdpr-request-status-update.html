@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>GDPR Request Validated</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+
+<div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 10px 10px 0 0; text-align: center;">
+    <h1 style="margin: 0; font-size: 24px;">✅ GDPR Request Validated</h1>
+</div>
+
+<div style="background: #f9f9f9; padding: 30px; border: 1px solid #ddd; border-top: none;">
+    <p>Hello <strong th:text="${user.firstname + ' ' + user.lastname}">User</strong>,</p>
+
+    <p>Great news! Your GDPR request has been <strong style="color: #28a745;">validated and processed</strong> by our data protection team.</p>
+
+    <div style="background: white; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
+        <h3 style="color: #28a745; margin-top: 0;">✅ Request Successfully Processed</h3>
+        <p><strong>Request ID:</strong> #<span th:text="${request.idRequest}">12345</span></p>
+        <p><strong>Type:</strong> <span th:text="${request.requestType}">MODIFICATION</span></p>
+        <p><strong>Status:</strong> <span style="background: #28a745; color: white; padding: 3px 10px; border-radius: 3px; font-weight: bold;">PROCESSED</span></p>
+        <p><strong>Submitted:</strong> <span th:text="${requestDate}">07/08/2025</span></p>
+        <p><strong>Processed:</strong> <span th:text="${processedDate}">15/08/2025</span></p>
+        <p><strong>Your Request:</strong></p>
+        <p style="font-style: italic; color: #666; background: #f8f9fa; padding: 10px; border-radius: 3px;" th:text="${request.requestContent}">Request content here...</p>
+    </div>
+
+    <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; padding: 20px; margin: 20px 0;">
+        <h4 style="color: #155724; margin-top: 0;">🎉 What happens next?</h4>
+        <div th:switch="${request.requestType}">
+            <div th:case="'ACCESS'">
+                <p style="margin: 0; color: #155724;">Your personal data report has been prepared and will be sent to you separately within the next 24 hours.</p>
+            </div>
+            <div th:case="'DELETION'">
+                <p style="margin: 0; color: #155724;">Your personal data has been permanently deleted from our systems as requested. This action is irreversible.</p>
+            </div>
+            <div th:case="'RECTIFICATION'">
+                <p style="margin: 0; color: #155724;">Your personal data has been corrected according to your request. The changes are now active in our system.</p>
+            </div>
+            <div th:case="'PORTABILITY'">
+                <p style="margin: 0; color: #155724;">Your data export is being prepared in a machine-readable format and will be sent to you within 24 hours.</p>
+            </div>
+            <div th:case="*">
+                <p style="margin: 0; color: #155724;">Your request has been processed successfully according to GDPR regulations.</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="background: #e7f3ff; border-left: 4px solid #0066cc; padding: 15px; margin: 20px 0;">
+        <p style="margin: 0;"><strong>📋 Your Rights:</strong> You have the right to lodge a complaint with your local data protection authority if you are not satisfied with how we handled your request.</p>
+    </div>
+
+    <p>Thank you for exercising your data protection rights. If you have any questions about this decision, please don't hesitate to contact our Data Protection Officer.</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a th:href="${appUrl + '/dashboard'}" href="#" style="background: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">View Dashboard</a>
+    </div>
+
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <h4 style="color: #495057; margin-top: 0;">📞 Need Help?</h4>
+        <p style="margin: 5px 0; color: #6c757d;">Data Protection Officer: <a href="mailto:dpo@company.com" style="color: #0066cc;">dpo@company.com</a></p>
+        <p style="margin: 5px 0; color: #6c757d;">Support Team: <a href="mailto:support@company.com" style="color: #0066cc;">support@company.com</a></p>
+        <p style="margin: 5px 0; color: #6c757d;">Phone: +1 (555) 123-4567</p>
+    </div>
+</div>
+
+<div style="text-align: center; color: #666; font-size: 12px; margin-top: 20px;">
+    <p>© 2025 <span th:text="${appName}">GDPR App</span> - All rights reserved</p>
+    <p>This is an automated message, please do not reply to this email.</p>
+    <p style="margin-top: 10px;">
+        <a href="#" style="color: #999; text-decoration: none;">Privacy Policy</a> |
+        <a href="#" style="color: #999; text-decoration: none;">Terms of Service</a> |
+        <a href="#" style="color: #999; text-decoration: none;">Contact Us</a>
+    </p>
+</div>
+
+</body>
+</html>

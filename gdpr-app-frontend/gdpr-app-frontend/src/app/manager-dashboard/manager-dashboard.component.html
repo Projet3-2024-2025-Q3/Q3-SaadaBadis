@@ -1,0 +1,87 @@
+<!-- src/app/components/manager-dashboard/manager-dashboard.component.html -->
+<div class="dashboard-container">
+  <!-- Manager Navbar -->
+  <app-manager-navbar></app-manager-navbar>
+  
+  <!-- Main Dashboard Content -->
+  <div class="dashboard-content">
+    
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <div class="welcome-content manager-welcome">
+        <div class="welcome-text">
+          <h1 class="welcome-title">Manager Dashboard</h1>
+          <p class="welcome-subtitle">Welcome back, {{ getUserFirstName() }}! Oversee and manage all GDPR requests</p>
+        </div>
+        <div class="welcome-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            class="quick-action-btn"
+            (click)="viewAllRequests()"
+          >
+            <mat-icon>dashboard</mat-icon>
+            View All Requests
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="stats-section">
+      <div class="stats-grid">
+        
+        <!-- Total Requests Card -->
+        <mat-card class="stat-card total-requests-manager" (click)="viewAllRequests()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>assignment</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.totalRequests }}</div>
+                <div class="stat-label">Total Requests</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Pending Requests Card -->
+        <mat-card class="stat-card pending-requests-manager" (click)="viewPendingRequests()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>schedule</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.pendingRequests }}</div>
+                <div class="stat-label">Pending Review</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Completed Requests Card -->
+        <mat-card class="stat-card completed-requests-manager" (click)="viewCompletedRequests()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>check_circle</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.completedRequests }}</div>
+                <div class="stat-label">Completed</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+</div>
