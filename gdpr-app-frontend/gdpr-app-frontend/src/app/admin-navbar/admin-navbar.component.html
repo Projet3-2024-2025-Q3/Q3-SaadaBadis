@@ -68,28 +68,6 @@
   <!-- Right Side Actions -->
   <div class="navbar-actions">
     
-    <!-- Reports -->
-    <button 
-      mat-icon-button 
-      class="action-button"
-      [class.active]="isRouteActive('/admin/reports')"
-      (click)="navigateToReports()"
-      matTooltip="System Reports"
-    >
-      <mat-icon>assessment</mat-icon>
-    </button>
-
-    <!-- Settings -->
-    <button 
-      mat-icon-button 
-      class="action-button"
-      [class.active]="isRouteActive('/admin/settings')"
-      (click)="navigateToSettings()"
-      matTooltip="System Settings"
-    >
-      <mat-icon>settings</mat-icon>
-    </button>
-
     <!-- User Menu -->
     <button 
       mat-button 
@@ -134,16 +112,6 @@
   <button mat-menu-item (click)="navigateToProfile()">
     <mat-icon>person</mat-icon>
     <span>My Profile</span>
-  </button>
-
-  <button mat-menu-item (click)="navigateToSettings()">
-    <mat-icon>settings</mat-icon>
-    <span>System Settings</span>
-  </button>
-
-  <button mat-menu-item (click)="navigateToReports()">
-    <mat-icon>assessment</mat-icon>
-    <span>System Reports</span>
   </button>
 
   <mat-divider></mat-divider>
