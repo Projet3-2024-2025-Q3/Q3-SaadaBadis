@@ -191,9 +191,10 @@ export class UserFormDialogComponent implements OnInit {
       
       const formData = { ...this.userForm.value };
       
-      // Convert roleId to number
+      // Convert roleId to id_role for API compatibility
       if (formData.roleId) {
-        formData.roleId = Number(formData.roleId);
+        formData.id_role = Number(formData.roleId);
+        delete formData.roleId; // Remove the old field
       }
       
       // Remove empty fields
@@ -202,6 +203,8 @@ export class UserFormDialogComponent implements OnInit {
           delete formData[key];
         }
       });
+
+      console.log('Sending data to backend:', formData); // Debug log
 
       // Close dialog with form data
       setTimeout(() => {

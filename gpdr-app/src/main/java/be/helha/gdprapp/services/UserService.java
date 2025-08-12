@@ -47,7 +47,65 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    // Create new user
+    // Create new user avec Map pour gérer id_role
+    public User createUser(Map<String, Object> userDetails) {
+        User user = new User();
+
+        // Set basic fields
+        if (userDetails.containsKey("firstname")) {
+            user.setFirstname((String) userDetails.get("firstname"));
+        }
+        if (userDetails.containsKey("lastname")) {
+            user.setLastname((String) userDetails.get("lastname"));
+        }
+        if (userDetails.containsKey("email")) {
+            user.setEmail((String) userDetails.get("email"));
+        }
+
+        // Handle password
+        if (userDetails.containsKey("password") && userDetails.get("password") != null) {
+            String password = (String) userDetails.get("password");
+            user.setPassword(passwordEncoder.encode(password));
+        } else {
+            throw new RuntimeException("Password is required for user creation");
+        }
+
+        // Handle role via id_role
+        if (userDetails.containsKey("id_role")) {
+            Object roleIdObj = userDetails.get("id_role");
+            Integer roleId;
+
+            if (roleIdObj instanceof Integer) {
+                roleId = (Integer) roleIdObj;
+            } else if (roleIdObj instanceof String) {
+                roleId = Integer.parseInt((String) roleIdObj);
+            } else {
+                roleId = null;
+            }
+
+            if (roleId != null) {
+                Role role = roleRepository.findById(roleId)
+                        .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+                user.setRole(role);
+            }
+        } else {
+            // Set default role if not provided
+            Role defaultRole = roleRepository.findByRole("CLIENT")
+                    .orElseThrow(() -> new RuntimeException("Default role 'CLIENT' not found"));
+            user.setRole(defaultRole);
+        }
+
+        // Set default active status
+        if (userDetails.containsKey("active")) {
+            user.setActive((Boolean) userDetails.get("active"));
+        } else {
+            user.setActive(true);
+        }
+
+        return userRepository.save(user);
+    }
+
+    // Create new user (méthode originale conservée pour compatibilité)
     public User createUser(User user) {
         // Encode password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));

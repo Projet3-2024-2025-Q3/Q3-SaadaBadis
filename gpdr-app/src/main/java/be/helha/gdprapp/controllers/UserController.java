@@ -47,16 +47,21 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Create new user (Admin only)
+    // Create new user (Admin only) - Utilise Map pour gérer id_role
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> createUser(@RequestBody User user) {
+    public ResponseEntity<?> createUser(@RequestBody Map<String, Object> userDetails) {
         try {
-            if (userService.existsByEmail(user.getEmail())) {
-                return ResponseEntity.badRequest()
-                        .body("Error: Email is already in use!");
+            // Vérifier que l'email n'existe pas déjà
+            if (userDetails.containsKey("email") && userDetails.get("email") != null) {
+                String email = (String) userDetails.get("email");
+                if (userService.existsByEmail(email)) {
+                    return ResponseEntity.badRequest()
+                            .body("Error: Email is already in use!");
+                }
             }
-            User savedUser = userService.createUser(user);
+
+            User savedUser = userService.createUser(userDetails);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
