@@ -104,12 +104,14 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
    */
   applyFilter(): void {
     const searchLower = this.searchTerm.toLowerCase();
-    this.filteredUsers = this.users.filter(user =>
-      user.firstname.toLowerCase().includes(searchLower) ||
-      user.lastname.toLowerCase().includes(searchLower) ||
-      user.email.toLowerCase().includes(searchLower) ||
-      user.role?.roleName.toLowerCase().includes(searchLower)
-    );
+    this.filteredUsers = this.users.filter(user => {
+      const roleToSearch = user.role?.roleName || user.role?.roleName || '';
+      
+      return user.firstname.toLowerCase().includes(searchLower) ||
+             user.lastname.toLowerCase().includes(searchLower) ||
+             user.email.toLowerCase().includes(searchLower) ||
+             roleToSearch.toLowerCase().includes(searchLower);
+    });
   }
 
   /**
@@ -159,7 +161,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
           this.showSnackBar('User deleted successfully', 'success');
         },
         error: (error) => {
-          this.showSnackBar('Error deleting user: ' + error.message, 'error');
+          this.showSnackBar('Cannot delete user: This user is linked to existing requests or companies. Please remove all associated data first.', 'error');
         }
       });
   }
@@ -173,10 +175,13 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       this.adminService.deactivateUser(user.idUser) : 
       this.adminService.activateUser(user.idUser);
 
+    // Update UI immediately
+    user.active = !user.active;
+
     service.pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (updatedUser) => {
-          // Update the user in the local arrays immediately
+          // Update the user in the local arrays with server response
           this.updateUserInArrays(updatedUser);
           this.showSnackBar(`User ${action}d successfully`, 'success');
         },
@@ -221,7 +226,13 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
    */
   getRoleDisplayName(role: any): string {
     if (!role) return 'No Role';
-    return role.roleName || 'Unknown';
+    
+    // Handle both nested role object and direct role property
+    if (role.role) {
+      return role.role;
+    }
+    
+    return role.roleName || role.role || 'Unknown';
   }
 
   /**
@@ -230,7 +241,9 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   getRoleColorClass(role: any): string {
     if (!role) return 'role-none';
     
-    const roleName = role.roleName?.toLowerCase();
+    // Get role name from nested structure or direct property
+    const roleName = (role.role || role.roleName || '').toLowerCase();
+    
     switch (roleName) {
       case 'admin':
         return 'role-admin';
@@ -274,7 +287,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
           <div class="user-details">
             <h3>{{ data.user.firstname }} {{ data.user.lastname }}</h3>
             <p class="user-email">{{ data.user.email }}</p>
-            <span class="user-role">{{ data.user.role?.roleName || 'No Role' }}</span>
+            <span class="user-role">{{ data.user.role?.roleName || data.user.role?.roleName || 'No Role' }}</span>
           </div>
         </div>
         
@@ -283,7 +296,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
             Are you sure you want to permanently delete this user?
           </p>
           <p class="warning-subtext">
-            This action cannot be undone. All user data will be permanently removed from the system.
+            This action cannot be undone. If this user is linked to requests or companies, the deletion may fail.
           </p>
         </div>
       </div>
