@@ -22,6 +22,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 // Components
 import { AdminNavbarComponent } from '../admin-navbar/admin-navbar.component';
+import { UserFormDialogComponent, UserFormDialogData } from '../user-dialog-component/user-dialog-component.component';
 
 // Services
 import { AdminService, User, CreateUserDTO, UpdateUserDTO } from '../services/admin.service';
@@ -50,7 +51,7 @@ interface DeleteDialogData {
     MatProgressSpinnerModule,
     MatSlideToggleModule,
     AdminNavbarComponent
-  ],
+],
   templateUrl: './manage-users.component.html',
   styleUrls: ['./manage-users.component.css']
 })
@@ -115,21 +116,44 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Open create user dialog (external component)
+   * Open create user dialog
    */
   openCreateDialog(): void {
-    // This will open the external UserFormDialog component
-    console.log('Opening create dialog - to be implemented with external component');
-    // Example: this.dialog.open(UserFormDialogComponent, { data: { isEdit: false } });
+    const dialogRef = this.dialog.open(UserFormDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: true,
+      data: { 
+        isEdit: false 
+      } as UserFormDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.createUser(result);
+      }
+    });
   }
 
   /**
-   * Open edit user dialog (external component)
+   * Open edit user dialog
    */
   openEditDialog(user: User): void {
-    // This will open the external UserFormDialog component
-    console.log('Opening edit dialog for user:', user);
-    // Example: this.dialog.open(UserFormDialogComponent, { data: { user, isEdit: true } });
+    const dialogRef = this.dialog.open(UserFormDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: true,
+      data: { 
+        user: { ...user }, 
+        isEdit: true 
+      } as UserFormDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.updateUser(user.idUser, result);
+      }
+    });
   }
 
   /**
@@ -149,8 +173,61 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Delete user
+   * Create new user
    */
+  private createUser(userData: CreateUserDTO): void {
+    this.adminService.createUser(userData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (newUser) => {
+          // Add new user to local arrays immediately
+          this.addUserToArrays(newUser);
+          this.showSnackBar('User created successfully', 'success');
+        },
+        error: (error) => {
+          this.showSnackBar('Error creating user: ' + error.message, 'error');
+        }
+      });
+  }
+    /**
+   * Add new user to both arrays
+   */
+  private addUserToArrays(newUser: User): void {
+    // Add to main users array
+    this.users.push(newUser);
+    
+    // Check if user matches current filter and add to filtered array
+    const searchLower = this.searchTerm.toLowerCase();
+    const roleToSearch = newUser.role?.roleName || newUser.role?.roleName || '';
+    
+    const matchesFilter = !searchLower || 
+      newUser.firstname.toLowerCase().includes(searchLower) ||
+      newUser.lastname.toLowerCase().includes(searchLower) ||
+      newUser.email.toLowerCase().includes(searchLower) ||
+      roleToSearch.toLowerCase().includes(searchLower);
+    
+    if (matchesFilter) {
+      this.filteredUsers.push(newUser);
+    }
+  }
+
+  /**
+   * Update user
+   */
+  private updateUser(userId: number, userData: UpdateUserDTO): void {
+    this.adminService.updateUser(userId, userData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedUser) => {
+          // Update user in local arrays immediately
+          this.updateUserInArrays(updatedUser);
+          this.showSnackBar('User updated successfully', 'success');
+        },
+        error: (error) => {
+          this.showSnackBar('Error updating user: ' + error.message, 'error');
+        }
+      });
+  }
   private deleteUser(userId: number): void {
     this.adminService.deleteUser(userId)
       .pipe(takeUntil(this.destroy$))

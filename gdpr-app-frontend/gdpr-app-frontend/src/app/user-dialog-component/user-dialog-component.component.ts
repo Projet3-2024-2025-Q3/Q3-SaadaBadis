@@ -49,8 +49,8 @@ export class UserFormDialogComponent implements OnInit {
   // Role options
   roleOptions = [
     { id: 1, name: 'ADMIN', label: 'Administrator', description: 'Full system access' },
-    { id: 2, name: 'GERANT', label: 'Manager', description: 'Manage users and requests' },
-    { id: 3, name: 'CLIENT', label: 'Client', description: 'Submit and view own requests' }
+    { id: 2, name: 'CLIENT', label: 'Client', description: 'Submit and view own requests' },
+    { id: 3, name: 'GERANT', label: 'Manager', description: 'Manage users and requests' }
   ];
 
   constructor(

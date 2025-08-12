@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -63,10 +64,10 @@ public class UserController {
         }
     }
 
-    // Update user
+    // Update user - accepte un Map pour gérer id_role
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @userService.isCurrentUser(#id)")
-    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody User userDetails) {
+    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody Map<String, Object> userDetails) {
         try {
             Optional<User> existingUser = userService.getUserById(id);
             if (existingUser.isEmpty()) {
@@ -74,10 +75,13 @@ public class UserController {
             }
 
             // Check if email is being changed and if it already exists
-            if (!existingUser.get().getEmail().equals(userDetails.getEmail())
-                    && userService.existsByEmail(userDetails.getEmail())) {
-                return ResponseEntity.badRequest()
-                        .body("Error: Email is already in use!");
+            if (userDetails.containsKey("email") && userDetails.get("email") != null) {
+                String newEmail = (String) userDetails.get("email");
+                if (!existingUser.get().getEmail().equals(newEmail)
+                        && userService.existsByEmail(newEmail)) {
+                    return ResponseEntity.badRequest()
+                            .body("Error: Email is already in use!");
+                }
             }
 
             User updatedUser = userService.updateUser(id, userDetails);
