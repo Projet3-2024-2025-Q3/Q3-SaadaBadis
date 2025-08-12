@@ -9,6 +9,7 @@ import { RequestDetailsDialogComponent } from './request-details-dialog/request-
 import { ManagerDashboardComponent } from './manager-dashboard/manager-dashboard.component';
 import { ManagerRequestsComponent } from './my-requests-manager/my-requests-manager.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
+import { ManageUsersComponent } from './manage-users/manage-users.component';
 
 export const routes: Routes = [
   
@@ -25,6 +26,7 @@ export const routes: Routes = [
   { path: 'manager-dashboard', component: ManagerDashboardComponent },
   { path: 'myrequests-manager', component: ManagerRequestsComponent},
   { path: 'admin-dashboard', component: AdminDashboardComponent},
+  { path: 'manage-users', component: ManageUsersComponent},
   
   
   
