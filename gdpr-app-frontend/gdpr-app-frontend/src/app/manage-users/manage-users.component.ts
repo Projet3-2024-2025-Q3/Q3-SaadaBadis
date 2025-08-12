@@ -8,7 +8,6 @@ import { takeUntil } from 'rxjs/operators';
 // Angular Material Imports
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -40,7 +39,6 @@ interface DeleteDialogData {
     FormsModule,
     MatCardModule,
     MatTableModule,
-    MatPaginatorModule,
     MatSortModule,
     MatButtonModule,
     MatIconModule,
@@ -156,8 +154,9 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
+          // Remove user from local arrays immediately
+          this.removeUserFromArrays(userId);
           this.showSnackBar('User deleted successfully', 'success');
-          this.loadUsers();
         },
         error: (error) => {
           this.showSnackBar('Error deleting user: ' + error.message, 'error');
@@ -169,31 +168,52 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
    * Toggle user active status
    */
   toggleUserStatus(user: User): void {
-    if (user.active) {
-      this.adminService.deactivateUser(user.idUser)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.showSnackBar('User deactivated successfully', 'success');
-            this.loadUsers();
-          },
-          error: (error) => {
-            this.showSnackBar('Error deactivating user: ' + error.message, 'error');
-          }
-        });
-    } else {
-      this.adminService.activateUser(user.idUser)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.showSnackBar('User activated successfully', 'success');
-            this.loadUsers();
-          },
-          error: (error) => {
-            this.showSnackBar('Error activating user: ' + error.message, 'error');
-          }
-        });
+    const action = user.active ? 'deactivate' : 'activate';
+    const service = user.active ? 
+      this.adminService.deactivateUser(user.idUser) : 
+      this.adminService.activateUser(user.idUser);
+
+    service.pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedUser) => {
+          // Update the user in the local arrays immediately
+          this.updateUserInArrays(updatedUser);
+          this.showSnackBar(`User ${action}d successfully`, 'success');
+        },
+        error: (error) => {
+          // Revert the toggle state on error
+          user.active = !user.active;
+          this.showSnackBar(`Error ${action}ing user: ` + error.message, 'error');
+        }
+      });
+  }
+
+  /**
+   * Update user in both users and filteredUsers arrays
+   */
+  private updateUserInArrays(updatedUser: User): void {
+    // Update in main users array
+    const userIndex = this.users.findIndex(u => u.idUser === updatedUser.idUser);
+    if (userIndex !== -1) {
+      this.users[userIndex] = updatedUser;
     }
+
+    // Update in filtered users array
+    const filteredIndex = this.filteredUsers.findIndex(u => u.idUser === updatedUser.idUser);
+    if (filteredIndex !== -1) {
+      this.filteredUsers[filteredIndex] = updatedUser;
+    }
+  }
+
+  /**
+   * Remove user from both arrays after deletion
+   */
+  private removeUserFromArrays(userId: number): void {
+    // Remove from main users array
+    this.users = this.users.filter(u => u.idUser !== userId);
+    
+    // Remove from filtered users array
+    this.filteredUsers = this.filteredUsers.filter(u => u.idUser !== userId);
   }
 
   /**

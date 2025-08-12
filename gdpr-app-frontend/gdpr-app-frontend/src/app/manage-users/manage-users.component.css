@@ -305,12 +305,6 @@
   color: #666;
 }
 
-/* Pagination */
-.mat-mdc-paginator {
-  border-top: 1px solid #e0e0e0;
-  background: #f8f9fa;
-}
-
 /* Snackbar Styles */
 ::ng-deep .snackbar-success {
   --mdc-snackbar-container-color: #4CAF50;
