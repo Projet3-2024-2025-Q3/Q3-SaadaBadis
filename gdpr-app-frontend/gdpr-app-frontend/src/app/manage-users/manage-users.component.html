@@ -1,1 +1,157 @@
-<p>manage-users works!</p>
+<!-- src/app/components/manage-users/manage-users.component.html -->
+<div class="manage-users-container">
+  <!-- Admin Navbar -->
+  <app-admin-navbar></app-admin-navbar>
+
+  <!-- Main Content -->
+  <div class="content">
+    
+    <!-- Header Section -->
+    <div class="page-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h1 class="page-title">
+            <mat-icon>people</mat-icon>
+            User Management
+          </h1>
+          <p class="page-subtitle">Manage system users, roles, and permissions</p>
+        </div>
+        <div class="header-actions">
+          <button mat-raised-button color="primary" (click)="openCreateDialog()" class="create-btn">
+            <mat-icon>person_add</mat-icon>
+            Add New User
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Table Card -->
+    <mat-card class="users-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>list</mat-icon>
+          Users List
+        </mat-card-title>
+        <div class="header-spacer"></div>
+        <div class="search-section">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search users...</mat-label>
+            <input matInput 
+                   [(ngModel)]="searchTerm" 
+                   (input)="applyFilter()"
+                   placeholder="Name, email, or role">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Loading Spinner -->
+        <div class="loading-container" *ngIf="isLoading">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Loading users...</p>
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-container" *ngIf="!isLoading">
+          <table mat-table [dataSource]="filteredUsers" class="users-table" matSort>
+            
+            <!-- ID Column -->
+            <ng-container matColumnDef="idUser">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+              <td mat-cell *matCellDef="let user">{{ user.idUser }}</td>
+            </ng-container>
+
+            <!-- First Name Column -->
+            <ng-container matColumnDef="firstname">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
+              <td mat-cell *matCellDef="let user">{{ user.firstname }}</td>
+            </ng-container>
+
+            <!-- Last Name Column -->
+            <ng-container matColumnDef="lastname">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</th>
+              <td mat-cell *matCellDef="let user">{{ user.lastname }}</td>
+            </ng-container>
+
+            <!-- Email Column -->
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+              <td mat-cell *matCellDef="let user" class="email-cell">{{ user.email }}</td>
+            </ng-container>
+
+            <!-- Role Column -->
+            <ng-container matColumnDef="role">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
+              <td mat-cell *matCellDef="let user">
+                <mat-chip [class]="getRoleColorClass(user.role)">
+                  {{ getRoleDisplayName(user.role) }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Active Status Column -->
+            <ng-container matColumnDef="active">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+              <td mat-cell *matCellDef="let user">
+                <mat-slide-toggle 
+                  [checked]="user.active"
+                  (change)="toggleUserStatus(user)"
+                  [color]="'primary'"
+                  matTooltip="{{ user.active ? 'Deactivate' : 'Activate' }} user">
+                </mat-slide-toggle>
+                <span class="status-text" [class]="user.active ? 'status-active' : 'status-inactive'">
+                  {{ user.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let user">
+                <div class="action-buttons">
+                  <button mat-icon-button 
+                          color="primary" 
+                          (click)="openEditDialog(user)"
+                          matTooltip="Edit user">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button 
+                          color="warn" 
+                          (click)="openDeleteDialog(user)"
+                          matTooltip="Delete user">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="user-row"></tr>
+          </table>
+
+          <!-- No Data Message -->
+          <div class="no-data" *ngIf="filteredUsers.length === 0 && !isLoading">
+            <mat-icon>people_outline</mat-icon>
+            <h3>No users found</h3>
+            <p *ngIf="searchTerm">Try adjusting your search criteria</p>
+            <p *ngIf="!searchTerm">No users have been created yet</p>
+            <button mat-raised-button color="primary" (click)="openCreateDialog()" *ngIf="!searchTerm">
+              <mat-icon>person_add</mat-icon>
+              Add First User
+            </button>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" 
+                       [pageSize]="25"
+                       [showFirstLastButtons]="true"
+                       *ngIf="filteredUsers.length > 0">
+        </mat-paginator>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</div>
