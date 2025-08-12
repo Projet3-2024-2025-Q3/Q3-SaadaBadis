@@ -212,7 +212,7 @@ export class LoginComponent {
    setTimeout(() => {
      switch (role) {
        case 'ADMIN':
-         this.router.navigate(['/admin/dashboard']);
+         this.router.navigate(['/admin-dashboard']);
          break;
        case 'GERANT': // Manager role
          this.router.navigate(['/manager-dashboard']);
