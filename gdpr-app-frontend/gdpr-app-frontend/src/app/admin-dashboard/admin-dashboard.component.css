@@ -181,77 +181,64 @@
   font-weight: 500;
 }
 
-/* User Requests Stats - Red Theme */
-.total-user-requests-admin .stat-icon {
+/* System Stats - Red Theme */
+.total-users-admin .stat-icon {
   background: rgba(211, 47, 47, 0.1);
 }
 
-.total-user-requests-admin .stat-icon .mat-icon {
+.total-users-admin .stat-icon .mat-icon {
   color: #d32f2f;
 }
 
-.total-user-requests-admin .stat-number {
+.total-users-admin .stat-number {
   color: #d32f2f;
 }
 
-.pending-user-requests-admin .stat-icon {
+.total-companies-admin .stat-icon {
+  background: rgba(33, 150, 243, 0.1);
+}
+
+.total-companies-admin .stat-icon .mat-icon {
+  color: #2196F3;
+}
+
+.total-companies-admin .stat-number {
+  color: #2196F3;
+}
+
+.total-requests-admin .stat-icon {
+  background: rgba(156, 39, 176, 0.1);
+}
+
+.total-requests-admin .stat-icon .mat-icon {
+  color: #9C27B0;
+}
+
+.total-requests-admin .stat-number {
+  color: #9C27B0;
+}
+
+.pending-requests-admin .stat-icon {
   background: rgba(255, 152, 0, 0.1);
 }
 
-.pending-user-requests-admin .stat-icon .mat-icon {
+.pending-requests-admin .stat-icon .mat-icon {
   color: #FF9800;
 }
 
-.pending-user-requests-admin .stat-number {
+.pending-requests-admin .stat-number {
   color: #FF9800;
 }
 
-.completed-user-requests-admin .stat-icon {
+.completed-requests-admin .stat-icon {
   background: rgba(76, 175, 80, 0.1);
 }
 
-.completed-user-requests-admin .stat-icon .mat-icon {
+.completed-requests-admin .stat-icon .mat-icon {
   color: #4CAF50;
 }
 
-.completed-user-requests-admin .stat-number {
-  color: #4CAF50;
-}
-
-/* Company Requests Stats - Red Theme */
-.total-company-requests-admin .stat-icon {
-  background: rgba(211, 47, 47, 0.1);
-}
-
-.total-company-requests-admin .stat-icon .mat-icon {
-  color: #d32f2f;
-}
-
-.total-company-requests-admin .stat-number {
-  color: #d32f2f;
-}
-
-.pending-company-requests-admin .stat-icon {
-  background: rgba(255, 152, 0, 0.1);
-}
-
-.pending-company-requests-admin .stat-icon .mat-icon {
-  color: #FF9800;
-}
-
-.pending-company-requests-admin .stat-number {
-  color: #FF9800;
-}
-
-.completed-company-requests-admin .stat-icon {
-  background: rgba(76, 175, 80, 0.1);
-}
-
-.completed-company-requests-admin .stat-icon .mat-icon {
-  color: #4CAF50;
-}
-
-.completed-company-requests-admin .stat-number {
+.completed-requests-admin .stat-number {
   color: #4CAF50;
 }
 
@@ -295,6 +282,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px;
+  max-width: 1000px;
 }
 
 .quick-action-item {

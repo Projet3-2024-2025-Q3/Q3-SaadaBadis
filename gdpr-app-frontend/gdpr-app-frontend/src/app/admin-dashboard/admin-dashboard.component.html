@@ -18,122 +18,94 @@
             mat-raised-button
             color="primary"
             class="quick-action-btn"
-            (click)="viewSystemReports()"
+            (click)="viewAllUsers()"
           >
-            <mat-icon>analytics</mat-icon>
-            System Reports
+            <mat-icon>group</mat-icon>
+            Manage Users
           </button>
         </div>
       </div>
     </div>
 
-    <!-- User Requests Stats Section -->
+    <!-- System Stats Section -->
     <div class="stats-section">
-      <h2 class="section-title">
-        <mat-icon>person</mat-icon>
-        User Requests Statistics
-      </h2>
       <div class="stats-grid">
         
-        <!-- Total User Requests Card -->
-        <mat-card class="stat-card total-user-requests-admin" (click)="viewUserRequests()">
+        <!-- Total Users Card -->
+        <mat-card class="stat-card total-users-admin" (click)="viewAllUsers()">
           <mat-card-content>
             <div class="stat-content">
               <div class="stat-icon">
                 <mat-icon>people</mat-icon>
               </div>
               <div class="stat-details">
-                <div class="stat-number">{{ dashboardStats.totalUserRequests }}</div>
-                <div class="stat-label">Total User Requests</div>
+                <div class="stat-number">{{ dashboardStats.totalUsers }}</div>
+                <div class="stat-label">Total Users</div>
               </div>
             </div>
           </mat-card-content>
         </mat-card>
 
-        <!-- Pending User Requests Card -->
-        <mat-card class="stat-card pending-user-requests-admin" (click)="viewUserRequests()">
+        <!-- Total Companies Card -->
+        <mat-card class="stat-card total-companies-admin" (click)="viewAllCompanies()">
           <mat-card-content>
             <div class="stat-content">
               <div class="stat-icon">
-                <mat-icon>pending_actions</mat-icon>
+                <mat-icon>business</mat-icon>
               </div>
               <div class="stat-details">
-                <div class="stat-number">{{ dashboardStats.pendingUserRequests }}</div>
-                <div class="stat-label">Pending User Requests</div>
+                <div class="stat-number">{{ dashboardStats.totalCompanies }}</div>
+                <div class="stat-label">Total Companies</div>
               </div>
             </div>
           </mat-card-content>
         </mat-card>
 
-        <!-- Completed User Requests Card -->
-        <mat-card class="stat-card completed-user-requests-admin" (click)="viewUserRequests()">
+        <!-- Total Requests Card -->
+        <mat-card class="stat-card total-requests-admin" (click)="manageRequests()">
           <mat-card-content>
             <div class="stat-content">
               <div class="stat-icon">
-                <mat-icon>task_alt</mat-icon>
+                <mat-icon>assignment</mat-icon>
               </div>
               <div class="stat-details">
-                <div class="stat-number">{{ dashboardStats.completedUserRequests }}</div>
-                <div class="stat-label">Completed User Requests</div>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </div>
-
-    <!-- Company Requests Stats Section -->
-    <div class="stats-section">
-      <h2 class="section-title">
-        <mat-icon>business</mat-icon>
-        Company Requests Statistics
-      </h2>
-      <div class="stats-grid">
-        
-        <!-- Total Company Requests Card -->
-        <mat-card class="stat-card total-company-requests-admin" (click)="viewCompanyRequests()">
-          <mat-card-content>
-            <div class="stat-content">
-              <div class="stat-icon">
-                <mat-icon>domain</mat-icon>
-              </div>
-              <div class="stat-details">
-                <div class="stat-number">{{ dashboardStats.totalCompanyRequests }}</div>
-                <div class="stat-label">Total Company Requests</div>
+                <div class="stat-number">{{ dashboardStats.totalRequests }}</div>
+                <div class="stat-label">Total Requests</div>
               </div>
             </div>
           </mat-card-content>
         </mat-card>
 
-        <!-- Pending Company Requests Card -->
-        <mat-card class="stat-card pending-company-requests-admin" (click)="viewCompanyRequests()">
+        <!-- Pending Requests Card -->
+        <mat-card class="stat-card pending-requests-admin" (click)="manageRequests()">
           <mat-card-content>
             <div class="stat-content">
               <div class="stat-icon">
                 <mat-icon>schedule</mat-icon>
               </div>
               <div class="stat-details">
-                <div class="stat-number">{{ dashboardStats.pendingCompanyRequests }}</div>
-                <div class="stat-label">Pending Company Requests</div>
+                <div class="stat-number">{{ dashboardStats.pendingRequests }}</div>
+                <div class="stat-label">Pending Requests</div>
               </div>
             </div>
           </mat-card-content>
         </mat-card>
 
-        <!-- Completed Company Requests Card -->
-        <mat-card class="stat-card completed-company-requests-admin" (click)="viewCompanyRequests()">
+        <!-- Completed Requests Card -->
+        <mat-card class="stat-card completed-requests-admin" (click)="manageRequests()">
           <mat-card-content>
             <div class="stat-content">
               <div class="stat-icon">
-                <mat-icon>verified</mat-icon>
+                <mat-icon>check_circle</mat-icon>
               </div>
               <div class="stat-details">
-                <div class="stat-number">{{ dashboardStats.completedCompanyRequests }}</div>
-                <div class="stat-label">Completed Company Requests</div>
+                <div class="stat-number">{{ dashboardStats.completedRequests }}</div>
+                <div class="stat-label">Completed Requests</div>
               </div>
             </div>
           </mat-card-content>
         </mat-card>
+
       </div>
     </div>
 
@@ -152,14 +124,14 @@
             <button
               mat-stroked-button
               class="quick-action-item"
-              (click)="viewAllUsers()"
+              (click)="manageRequests()"
             >
               <div class="action-icon">
-                <mat-icon>group</mat-icon>
+                <mat-icon>assignment</mat-icon>
               </div>
               <div class="action-content">
-                <div class="action-title">Manage Users</div>
-                <div class="action-description">View and manage all system users</div>
+                <div class="action-title">Manage Requests</div>
+                <div class="action-description">View and manage all GDPR requests</div>
               </div>
             </button>
 
@@ -174,48 +146,6 @@
               <div class="action-content">
                 <div class="action-title">Manage Companies</div>
                 <div class="action-description">View and manage all registered companies</div>
-              </div>
-            </button>
-
-            <button
-              mat-stroked-button
-              class="quick-action-item"
-              (click)="viewSystemReports()"
-            >
-              <div class="action-icon">
-                <mat-icon>assessment</mat-icon>
-              </div>
-              <div class="action-content">
-                <div class="action-title">System Reports</div>
-                <div class="action-description">Generate comprehensive system reports</div>
-              </div>
-            </button>
-
-            <button
-              mat-stroked-button
-              class="quick-action-item"
-              (click)="manageSystem()"
-            >
-              <div class="action-icon">
-                <mat-icon>settings_applications</mat-icon>
-              </div>
-              <div class="action-content">
-                <div class="action-title">System Settings</div>
-                <div class="action-description">Configure system parameters and settings</div>
-              </div>
-            </button>
-
-            <button
-              mat-stroked-button
-              class="quick-action-item"
-              (click)="exportSystemData()"
-            >
-              <div class="action-icon">
-                <mat-icon>download</mat-icon>
-              </div>
-              <div class="action-content">
-                <div class="action-title">Export Data</div>
-                <div class="action-description">Export system data for analysis</div>
               </div>
             </button>
 

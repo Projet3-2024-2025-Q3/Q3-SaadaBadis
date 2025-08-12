@@ -22,12 +22,11 @@ import { AdminService, AdminStatistics } from '../services/admin.service';
 
 // Interfaces
 interface DashboardStats {
-  totalUserRequests: number;
-  totalCompanyRequests: number;
-  pendingUserRequests: number;
-  pendingCompanyRequests: number;
-  completedUserRequests: number;
-  completedCompanyRequests: number;
+  totalUsers: number;
+  totalCompanies: number;
+  totalRequests: number;
+  pendingRequests: number;
+  completedRequests: number;
 }
 
 interface Activity {
@@ -61,12 +60,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // Dashboard data
   dashboardStats: DashboardStats = {
-    totalUserRequests: 0,
-    totalCompanyRequests: 0,
-    pendingUserRequests: 0,
-    pendingCompanyRequests: 0,
-    completedUserRequests: 0,
-    completedCompanyRequests: 0
+    totalUsers: 0,
+    totalCompanies: 0,
+    totalRequests: 0,
+    pendingRequests: 0,
+    completedRequests: 0
   };
 
   recentActivities: Activity[] = [];
@@ -142,13 +140,16 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (stats: AdminStatistics) => {
+          const totalRequests = stats.userRequests.total + stats.companyRequests.total;
+          const totalPending = stats.userRequests.pending + stats.companyRequests.pending;
+          const totalCompleted = stats.userRequests.completed + stats.companyRequests.completed;
+          
           this.dashboardStats = {
-            totalUserRequests: stats.userRequests.total,
-            totalCompanyRequests: stats.companyRequests.total,
-            pendingUserRequests: stats.userRequests.pending,
-            pendingCompanyRequests: stats.companyRequests.pending,
-            completedUserRequests: stats.userRequests.completed,
-            completedCompanyRequests: stats.companyRequests.completed
+            totalUsers: stats.users.total,
+            totalCompanies: stats.companies.total,
+            totalRequests: totalRequests,
+            pendingRequests: totalPending,
+            completedRequests: totalCompleted
           };
           this.isLoading = false;
         },
@@ -222,14 +223,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   /**
    * Navigation methods
    */
-  viewUserRequests(): void {
-    this.router.navigate(['/admin/requests/users']);
-  }
-
-  viewCompanyRequests(): void {
-    this.router.navigate(['/admin/requests/companies']);
-  }
-
   viewAllUsers(): void {
     this.router.navigate(['/admin/users']);
   }
@@ -238,12 +231,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/admin/companies']);
   }
 
-  viewSystemReports(): void {
-    this.router.navigate(['/admin/reports']);
-  }
-
-  manageSystem(): void {
-    this.router.navigate(['/admin/settings']);
+  manageRequests(): void {
+    this.router.navigate(['/admin/requests']);
   }
 
   exportSystemData(): void {
