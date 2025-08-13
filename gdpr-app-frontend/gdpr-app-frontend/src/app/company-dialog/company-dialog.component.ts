@@ -63,71 +63,14 @@ export class CompanyDialogComponent implements OnInit {
       companyName: ['', [
         Validators.required, 
         Validators.minLength(2), 
-        Validators.maxLength(100),
-        this.companyNameValidator
+        Validators.maxLength(100)
       ]],
       email: ['', [
         Validators.required, 
         Validators.email, 
-        Validators.maxLength(100),
-        this.businessEmailValidator
+        Validators.maxLength(100)
       ]]
     });
-  }
-
-  /**
-   * Custom company name validator
-   */
-  private companyNameValidator(control: any) {
-    if (!control.value) return null;
-    
-    const value = control.value.trim();
-    
-    // Check for minimum meaningful length
-    if (value.length < 2) {
-      return { minLength: { requiredLength: 2, actualLength: value.length } };
-    }
-    
-    // Check for valid characters (letters, numbers, spaces, common business symbols)
-    const validPattern = /^[a-zA-Z0-9\s\-\.\&\(\)\'\"]+$/;
-    if (!validPattern.test(value)) {
-      return { invalidCharacters: true };
-    }
-    
-    // Check for consecutive spaces
-    if (/\s{2,}/.test(value)) {
-      return { consecutiveSpaces: true };
-    }
-    
-    // Check if it starts or ends with space
-    if (value !== value.trim()) {
-      return { leadingTrailingSpaces: true };
-    }
-    
-    return null;
-  }
-
-  /**
-   * Custom business email validator
-   */
-  private businessEmailValidator(control: any) {
-    if (!control.value) return null;
-    
-    const email = control.value.toLowerCase();
-    
-    // Basic email format check (already handled by Validators.email)
-    const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-    if (!emailRegex.test(email)) {
-      return { invalidEmail: true };
-    }
-    
-    // Check for common personal email domains (optional warning)
-    const personalDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
-    if (personalDomains.some(domain => email.endsWith(domain))) {
-      return { personalEmail: true }; // Warning, not blocking
-    }
-    
-    return null;
   }
 
   /**
@@ -150,13 +93,9 @@ export class CompanyDialogComponent implements OnInit {
     const errors = field.errors;
     
     if (errors['required']) return `${this.getFieldLabel(fieldName)} is required`;
-    if (errors['email'] || errors['invalidEmail']) return 'Please enter a valid email address';
-    if (errors['personalEmail']) return 'Consider using a business email address';
+    if (errors['email']) return 'Please enter a valid email address';
     if (errors['minlength']) return `${this.getFieldLabel(fieldName)} must be at least ${errors['minlength'].requiredLength} characters`;
     if (errors['maxlength']) return `${this.getFieldLabel(fieldName)} must not exceed ${errors['maxlength'].requiredLength} characters`;
-    if (errors['invalidCharacters']) return 'Company name contains invalid characters';
-    if (errors['consecutiveSpaces']) return 'Company name cannot have consecutive spaces';
-    if (errors['leadingTrailingSpaces']) return 'Company name cannot start or end with spaces';
     
     return 'Invalid value';
   }
@@ -170,39 +109,6 @@ export class CompanyDialogComponent implements OnInit {
       email: 'Email address'
     };
     return labels[fieldName] || fieldName;
-  }
-
-  /**
-   * Check if form field has error
-   */
-  hasFieldError(fieldName: string): boolean {
-    const field = this.companyForm.get(fieldName);
-    return !!(field && field.errors && field.touched);
-  }
-
-  /**
-   * Check if field has warning (like personal email)
-   */
-  hasFieldWarning(fieldName: string): boolean {
-    const field = this.companyForm.get(fieldName);
-    if (!field || !field.errors || !field.touched) return false;
-    
-    // Only show warning for non-blocking errors
-    return !!(field.errors['personalEmail']);
-  }
-
-  /**
-   * Get field warning message
-   */
-  getFieldWarning(fieldName: string): string {
-    const field = this.companyForm.get(fieldName);
-    if (!field || !field.errors || !field.touched) return '';
-    
-    if (field.errors['personalEmail']) {
-      return 'Consider using a business email address for better credibility';
-    }
-    
-    return '';
   }
 
   /**
@@ -229,7 +135,7 @@ export class CompanyDialogComponent implements OnInit {
         }
       });
 
-      console.log('Sending company data to backend:', formData); // Debug log
+      console.log('Sending company data to backend:', formData);
 
       // Close dialog with form data
       setTimeout(() => {
@@ -275,51 +181,5 @@ export class CompanyDialogComponent implements OnInit {
       return this.data.isEdit ? 'Updating...' : 'Creating...';
     }
     return this.data.isEdit ? 'Update Company' : 'Create Company';
-  }
-
-  /**
-   * Check if email field should show domain suggestion
-   */
-  shouldShowEmailSuggestion(): boolean {
-    const emailControl = this.companyForm.get('email');
-    if (!emailControl || !emailControl.value) return false;
-    
-    const email = emailControl.value.toLowerCase();
-    const businessDomains = ['company.com', 'corp.com', 'inc.com', 'ltd.com'];
-    
-    return email.includes('@') && !businessDomains.some(domain => email.endsWith(domain));
-  }
-
-  /**
-   * Get character count for field
-   */
-  getCharacterCount(fieldName: string): number {
-    const field = this.companyForm.get(fieldName);
-    return field?.value?.length || 0;
-  }
-
-  /**
-   * Get max length for field
-   */
-  getMaxLength(fieldName: string): number {
-    const maxLengths: { [key: string]: number } = {
-      companyName: 100,
-      email: 100
-    };
-    return maxLengths[fieldName] || 0;
-  }
-
-  /**
-   * Preview company name formatting
-   */
-  getFormattedCompanyName(): string {
-    const name = this.companyForm.get('companyName')?.value;
-    if (!name) return '';
-    
-    return name.trim()
-      .split(' ')
-      .filter((word: string) => word.length > 0)
-      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
   }
 }

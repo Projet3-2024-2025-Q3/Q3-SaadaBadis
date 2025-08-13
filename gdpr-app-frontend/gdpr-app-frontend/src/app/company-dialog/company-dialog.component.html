@@ -14,7 +14,7 @@
       <div class="form-grid">
         
         <!-- Company Name -->
-        <mat-form-field appearance="outline" class="form-field company-name-field">
+        <mat-form-field appearance="outline" class="form-field">
           <mat-label>Company Name</mat-label>
           <input matInput 
                  formControlName="companyName" 
@@ -22,24 +22,13 @@
                  maxlength="100"
                  required>
           <mat-icon matSuffix>business</mat-icon>
-          <mat-hint align="end">{{ getCharacterCount('companyName') }}/{{ getMaxLength('companyName') }}</mat-hint>
+          <mat-hint align="end">{{ companyForm.get('companyName')?.value?.length || 0 }}/100</mat-hint>
           <mat-error>{{ getFieldError('companyName') }}</mat-error>
         </mat-form-field>
 
-        <!-- Company Name Preview -->
-        <div class="name-preview" *ngIf="companyForm.get('companyName')?.value && companyForm.get('companyName')?.valid">
-          <div class="preview-header">
-            <mat-icon>preview</mat-icon>
-            <span>Formatted Preview</span>
-          </div>
-          <div class="preview-content">
-            {{ getFormattedCompanyName() }}
-          </div>
-        </div>
-
         <!-- Email -->
-        <mat-form-field appearance="outline" class="form-field email-field">
-          <mat-label>Business Email</mat-label>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Email Address</mat-label>
           <input matInput 
                  formControlName="email" 
                  type="email"
@@ -47,50 +36,10 @@
                  maxlength="100"
                  required>
           <mat-icon matSuffix>email</mat-icon>
-          <mat-hint align="end">{{ getCharacterCount('email') }}/{{ getMaxLength('email') }}</mat-hint>
+          <mat-hint align="end">{{ companyForm.get('email')?.value?.length || 0 }}/100</mat-hint>
           <mat-error>{{ getFieldError('email') }}</mat-error>
-          
-          <!-- Warning for personal emails -->
-          <div class="email-warning" *ngIf="hasFieldWarning('email')">
-            <mat-icon>warning</mat-icon>
-            <span>{{ getFieldWarning('email') }}</span>
-          </div>
         </mat-form-field>
 
-        <!-- Email Domain Suggestions -->
-        <div class="email-suggestions" *ngIf="shouldShowEmailSuggestion() && companyForm.get('email')?.value">
-          <div class="suggestion-header">
-            <mat-icon>lightbulb</mat-icon>
-            <span>Suggested Business Domains</span>
-          </div>
-          <div class="suggestion-list">
-            <button type="button" 
-                    mat-chip-listbox 
-                    class="domain-chip"
-                    *ngFor="let domain of ['company.com', 'corp.com', 'inc.com']">
-              {{ domain }}
-            </button>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Form Validation Summary -->
-      <div class="validation-summary" *ngIf="companyForm.invalid && (companyForm.dirty || companyForm.touched)">
-        <div class="summary-header">
-          <mat-icon>error_outline</mat-icon>
-          <span>Please fix the following issues</span>
-        </div>
-        <div class="summary-content">
-          <div class="validation-item" *ngIf="hasFieldError('companyName')">
-            <mat-icon>business</mat-icon>
-            <span>{{ getFieldError('companyName') }}</span>
-          </div>
-          <div class="validation-item" *ngIf="hasFieldError('email')">
-            <mat-icon>email</mat-icon>
-            <span>{{ getFieldError('email') }}</span>
-          </div>
-        </div>
       </div>
 
       <!-- Form Summary (for editing) -->
@@ -109,17 +58,6 @@
           <div class="summary-item">
             <strong>Current Email:</strong> {{ data.company.email }}
           </div>
-        </div>
-      </div>
-
-      <!-- Data Protection Notice -->
-      <div class="data-notice">
-        <div class="notice-header">
-          <mat-icon>security</mat-icon>
-          <span>Data Protection</span>
-        </div>
-        <div class="notice-content">
-          <p>Company information is securely stored and used only for business purposes in compliance with GDPR regulations.</p>
         </div>
       </div>
 
