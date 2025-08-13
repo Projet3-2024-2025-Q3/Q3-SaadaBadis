@@ -228,7 +228,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   viewAllCompanies(): void {
-    this.router.navigate(['/admin/companies']);
+    this.router.navigate(['/manage-companies']);
   }
 
   manageRequests(): void {
