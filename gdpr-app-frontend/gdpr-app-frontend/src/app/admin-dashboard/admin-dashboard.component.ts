@@ -232,7 +232,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   manageRequests(): void {
-    this.router.navigate(['/admin/requests']);
+    this.router.navigate(['/myrequests-manager']);
   }
 
   exportSystemData(): void {

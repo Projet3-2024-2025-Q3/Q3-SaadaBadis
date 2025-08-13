@@ -111,7 +111,7 @@ export class AdminNavbarComponent implements OnInit, OnDestroy {
   }
 
   navigateToRequests(): void {
-    this.router.navigate(['/admin/requests']);
+    this.router.navigate(['/myrequests-manager']);
   }
 
   navigateToProfile(): void {
