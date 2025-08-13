@@ -103,11 +103,11 @@ export class AdminNavbarComponent implements OnInit, OnDestroy {
   }
 
   navigateToUsers(): void {
-    this.router.navigate(['/admin/users']);
+    this.router.navigate(['/manage-users']);
   }
 
   navigateToCompanies(): void {
-    this.router.navigate(['/admin/companies']);
+    this.router.navigate(['/manage-companies']);
   }
 
   navigateToRequests(): void {
