@@ -12,6 +12,7 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
 import { ManageUsersComponent } from './manage-users/manage-users.component';
 import { UserFormDialogComponent } from './user-dialog-component/user-dialog-component.component';
 import { ManageCompaniesComponent } from './manage-companies/manage-companies.component';
+import { ChangePasswordComponent } from './change-password/change-password.component';
 
 export const routes: Routes = [
   
@@ -31,6 +32,7 @@ export const routes: Routes = [
   { path: 'manage-users', component: ManageUsersComponent},
   { path: 'form-user', component: UserFormDialogComponent},
   { path: 'manage-companies', component: ManageCompaniesComponent},
+  { path: 'change-password', component: ChangePasswordComponent},
   
   
   

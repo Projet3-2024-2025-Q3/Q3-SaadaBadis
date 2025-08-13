@@ -99,7 +99,7 @@ export class AdminNavbarComponent implements OnInit, OnDestroy {
    * Navigation methods
    */
   navigateToDashboard(): void {
-    this.router.navigate(['/admin/dashboard']);
+    this.router.navigate(['/admin-dashboard']);
   }
 
   navigateToUsers(): void {
@@ -115,7 +115,7 @@ export class AdminNavbarComponent implements OnInit, OnDestroy {
   }
 
   navigateToProfile(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/change-password']);
   }
 
   /**

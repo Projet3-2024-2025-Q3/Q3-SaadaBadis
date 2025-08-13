@@ -309,7 +309,7 @@ export class ManagerNavbarComponent implements OnInit, OnDestroy {
   }
   
   navigateToProfile(): void {
-    this.router.navigate(['/manager/profile']);
+    this.router.navigate(['/change-password']);
   }
   
   navigateToAccountSettings(): void {

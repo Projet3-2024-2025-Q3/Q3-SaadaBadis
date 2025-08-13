@@ -127,7 +127,7 @@ export class ClientNavbarComponent implements OnInit, OnDestroy {
    * Navigate to profile page
    */
   goToProfile(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/change-password']);
   }
 
   /**
