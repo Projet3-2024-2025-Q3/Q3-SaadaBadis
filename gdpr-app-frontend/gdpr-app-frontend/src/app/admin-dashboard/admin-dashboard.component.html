@@ -1,0 +1,163 @@
+<!-- src/app/components/admin-dashboard/admin-dashboard.component.html -->
+<div class="dashboard-container">
+  <!-- Admin Navbar -->
+  <app-admin-navbar></app-admin-navbar>
+ 
+  <!-- Main Dashboard Content -->
+  <div class="dashboard-content">
+   
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <div class="welcome-content admin-welcome">
+        <div class="welcome-text">
+          <h1 class="welcome-title">Administration Dashboard</h1>
+          <p class="welcome-subtitle">Welcome back, {{ getUserFirstName() }}! Monitor and manage the entire GDPR system</p>
+        </div>
+        <div class="welcome-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            class="quick-action-btn"
+            (click)="viewAllUsers()"
+          >
+            <mat-icon>group</mat-icon>
+            Manage Users
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Stats Section -->
+    <div class="stats-section">
+      <div class="stats-grid">
+        
+        <!-- Total Users Card -->
+        <mat-card class="stat-card total-users-admin" (click)="viewAllUsers()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>people</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.totalUsers }}</div>
+                <div class="stat-label">Total Users</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Total Companies Card -->
+        <mat-card class="stat-card total-companies-admin" (click)="viewAllCompanies()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>business</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.totalCompanies }}</div>
+                <div class="stat-label">Total Companies</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Total Requests Card -->
+        <mat-card class="stat-card total-requests-admin" (click)="manageRequests()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>assignment</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.totalRequests }}</div>
+                <div class="stat-label">Total Requests</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Pending Requests Card -->
+        <mat-card class="stat-card pending-requests-admin" (click)="manageRequests()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>schedule</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.pendingRequests }}</div>
+                <div class="stat-label">Pending Requests</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Completed Requests Card -->
+        <mat-card class="stat-card completed-requests-admin" (click)="manageRequests()">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <mat-icon>check_circle</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-number">{{ dashboardStats.completedRequests }}</div>
+                <div class="stat-label">Completed Requests</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+      </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="quick-actions-section">
+      <mat-card class="section-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>settings</mat-icon>
+            Quick Actions
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="quick-actions-grid">
+            
+            <button
+              mat-stroked-button
+              class="quick-action-item"
+              (click)="manageRequests()"
+            >
+              <div class="action-icon">
+                <mat-icon>assignment</mat-icon>
+              </div>
+              <div class="action-content">
+                <div class="action-title">Manage Requests</div>
+                <div class="action-description">View and manage all GDPR requests</div>
+              </div>
+            </button>
+
+            <button
+              mat-stroked-button
+              class="quick-action-item"
+              (click)="viewAllCompanies()"
+            >
+              <div class="action-icon">
+                <mat-icon>corporate_fare</mat-icon>
+              </div>
+              <div class="action-content">
+                <div class="action-title">Manage Companies</div>
+                <div class="action-description">View and manage all registered companies</div>
+              </div>
+            </button>
+
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+</div>

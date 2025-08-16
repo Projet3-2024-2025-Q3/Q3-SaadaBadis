@@ -1,0 +1,89 @@
+<!-- src/app/components/company-dialog/company-dialog.component.html -->
+<div class="dialog-container">
+  
+  <!-- Dialog Header -->
+  <h2 mat-dialog-title class="dialog-title">
+    <mat-icon class="title-icon">{{ data.isEdit ? 'edit' : 'add_business' }}</mat-icon>
+    {{ getDialogTitle() }}
+  </h2>
+
+  <!-- Dialog Content -->
+  <form [formGroup]="companyForm" (ngSubmit)="onSubmit()" novalidate>
+    <mat-dialog-content class="dialog-content">
+      
+      <div class="form-grid">
+        
+        <!-- Company Name -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Company Name</mat-label>
+          <input matInput 
+                 formControlName="companyName" 
+                 placeholder="Enter company name"
+                 maxlength="100"
+                 required>
+          <mat-icon matSuffix>business</mat-icon>
+          <mat-hint align="end">{{ companyForm.get('companyName')?.value?.length || 0 }}/100</mat-hint>
+          <mat-error>{{ getFieldError('companyName') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Email -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Email Address</mat-label>
+          <input matInput 
+                 formControlName="email" 
+                 type="email"
+                 placeholder="contact@company.com"
+                 maxlength="100"
+                 required>
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-hint align="end">{{ companyForm.get('email')?.value?.length || 0 }}/100</mat-hint>
+          <mat-error>{{ getFieldError('email') }}</mat-error>
+        </mat-form-field>
+
+      </div>
+
+      <!-- Form Summary (for editing) -->
+      <div class="form-summary" *ngIf="data.isEdit && data.company">
+        <div class="summary-header">
+          <mat-icon>info</mat-icon>
+          <span>Current Company Information</span>
+        </div>
+        <div class="summary-content">
+          <div class="summary-item">
+            <strong>Company ID:</strong> #{{ data.company.idCompany }}
+          </div>
+          <div class="summary-item">
+            <strong>Current Name:</strong> {{ data.company.companyName }}
+          </div>
+          <div class="summary-item">
+            <strong>Current Email:</strong> {{ data.company.email }}
+          </div>
+        </div>
+      </div>
+
+    </mat-dialog-content>
+
+    <!-- Dialog Actions -->
+    <mat-dialog-actions align="end" class="dialog-actions">
+      <button mat-button 
+              type="button" 
+              (click)="onCancel()"
+              [disabled]="isSubmitting"
+              class="cancel-btn">
+        Cancel
+      </button>
+      
+      <button mat-raised-button 
+              color="primary" 
+              type="submit" 
+              [disabled]="!companyForm.valid || isSubmitting"
+              class="submit-btn">
+        <mat-spinner diameter="20" *ngIf="isSubmitting" class="button-spinner"></mat-spinner>
+        <mat-icon *ngIf="!isSubmitting">{{ data.isEdit ? 'save' : 'add_business' }}</mat-icon>
+        {{ getSubmitButtonText() }}
+      </button>
+    </mat-dialog-actions>
+
+  </form>
+
+</div>

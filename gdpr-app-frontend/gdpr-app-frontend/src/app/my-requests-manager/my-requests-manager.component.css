@@ -7,7 +7,7 @@
   padding: 24px;
 }
 
-/* Header Section - Manager Green Theme */
+/* Header Section - Base Styles */
 .header-section {
   margin-bottom: 24px;
   max-width: 1400px;
@@ -15,11 +15,22 @@
   margin-right: auto;
 }
 
-.header-card.manager-header {
-  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+.header-card {
   color: white;
   border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Manager Theme (Green) - Default */
+.header-card.manager-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
   box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);
+}
+
+/* Admin Theme (Red) */
+.header-card.admin-header {
+  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+  box-shadow: 0 8px 24px rgba(211, 47, 47, 0.3);
 }
 
 .header-content {
@@ -126,19 +137,63 @@
   font-weight: 500;
 }
 
-/* Stat Card Colors - Manager Green Theme */
-.total-stat .stat-icon {
+/* Stat Card Colors - Manager Theme (Green) - Default */
+.total-stat .stat-icon,
+.total-stat.manager-theme .stat-icon {
   background: rgba(76, 175, 80, 0.1);
 }
 
-.total-stat .stat-icon .mat-icon {
+.total-stat .stat-icon .mat-icon,
+.total-stat.manager-theme .stat-icon .mat-icon {
   color: #4CAF50;
 }
 
-.total-stat .stat-info h2 {
+.total-stat .stat-info h2,
+.total-stat.manager-theme .stat-info h2 {
   color: #4CAF50;
 }
 
+.processed-stat .stat-icon,
+.processed-stat.manager-theme .stat-icon {
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.processed-stat .stat-icon .mat-icon,
+.processed-stat.manager-theme .stat-icon .mat-icon {
+  color: #4CAF50;
+}
+
+.processed-stat .stat-info h2,
+.processed-stat.manager-theme .stat-info h2 {
+  color: #4CAF50;
+}
+
+/* Stat Card Colors - Admin Theme (Red) */
+.total-stat.admin-theme .stat-icon {
+  background: rgba(211, 47, 47, 0.1);
+}
+
+.total-stat.admin-theme .stat-icon .mat-icon {
+  color: #d32f2f;
+}
+
+.total-stat.admin-theme .stat-info h2 {
+  color: #d32f2f;
+}
+
+.processed-stat.admin-theme .stat-icon {
+  background: rgba(211, 47, 47, 0.1);
+}
+
+.processed-stat.admin-theme .stat-icon .mat-icon {
+  color: #d32f2f;
+}
+
+.processed-stat.admin-theme .stat-info h2 {
+  color: #d32f2f;
+}
+
+/* Pending stat always orange */
 .pending-stat .stat-icon {
   background: rgba(255, 152, 0, 0.1);
 }
@@ -149,30 +204,6 @@
 
 .pending-stat .stat-info h2 {
   color: #FF9800;
-}
-
-.completed-stat .stat-icon {
-  background: rgba(76, 175, 80, 0.1);
-}
-
-.completed-stat .stat-icon .mat-icon {
-  color: #4CAF50;
-}
-
-.completed-stat .stat-info h2 {
-  color: #4CAF50;
-}
-
-.rejected-stat .stat-icon {
-  background: rgba(244, 67, 54, 0.1);
-}
-
-.rejected-stat .stat-icon .mat-icon {
-  color: #F44336;
-}
-
-.rejected-stat .stat-info h2 {
-  color: #F44336;
 }
 
 /* Content Card */
@@ -213,13 +244,24 @@
   align-items: center;
 }
 
-/* Material Form Field Overrides - Green Theme */
-.mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
+/* Material Form Field Overrides - Manager Theme (Green) - Default */
+.mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper,
+.mat-mdc-form-field.manager-theme.mat-focused .mat-mdc-text-field-wrapper {
   border-color: #4CAF50 !important;
 }
 
-.mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+.mat-mdc-form-field.mat-focused .mat-mdc-floating-label,
+.mat-mdc-form-field.manager-theme.mat-focused .mat-mdc-floating-label {
   color: #4CAF50 !important;
+}
+
+/* Material Form Field Overrides - Admin Theme (Red) */
+.mat-mdc-form-field.admin-theme.mat-focused .mat-mdc-text-field-wrapper {
+  border-color: #d32f2f !important;
+}
+
+.mat-mdc-form-field.admin-theme.mat-focused .mat-mdc-floating-label {
+  color: #d32f2f !important;
 }
 
 .option-content {
@@ -228,17 +270,28 @@
   gap: 8px;
 }
 
-/* Tabs - Green Theme */
-.mat-mdc-tab-group {
-  margin-top: 24px;
-}
-
-.mat-mdc-tab.mdc-tab--active {
+/* Tabs - Manager Theme (Green) - Default */
+.mat-mdc-tab-group .mat-mdc-tab.mdc-tab--active,
+.mat-mdc-tab-group.manager-theme .mat-mdc-tab.mdc-tab--active {
   color: #4CAF50 !important;
 }
 
-.mat-mdc-tab-indicator .mat-mdc-tab-indicator-active {
+.mat-mdc-tab-group .mat-mdc-tab-indicator .mat-mdc-tab-indicator-active,
+.mat-mdc-tab-group.manager-theme .mat-mdc-tab-indicator .mat-mdc-tab-indicator-active {
   background-color: #4CAF50 !important;
+}
+
+/* Tabs - Admin Theme (Red) */
+.mat-mdc-tab-group.admin-theme .mat-mdc-tab.mdc-tab--active {
+  color: #d32f2f !important;
+}
+
+.mat-mdc-tab-group.admin-theme .mat-mdc-tab-indicator .mat-mdc-tab-indicator-active {
+  background-color: #d32f2f !important;
+}
+
+.mat-mdc-tab-group {
+  margin-top: 24px;
 }
 
 .tab-badge {
@@ -255,13 +308,14 @@
   color: white;
 }
 
-.tab-badge.completed {
+.tab-badge.processed,
+.tab-badge.processed.manager-theme {
   background: #4CAF50;
   color: white;
 }
 
-.tab-badge.rejected {
-  background: #F44336;
+.tab-badge.processed.admin-theme {
+  background: #d32f2f;
   color: white;
 }
 
@@ -274,6 +328,47 @@
 .loading-container p {
   margin-top: 16px;
   color: rgba(0, 0, 0, 0.6);
+}
+
+/* Processing Overlay */
+.processing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.processing-overlay p {
+  margin-top: 16px;
+  color: white;
+  font-size: 16px;
+}
+
+/* Spinner Colors - Manager Theme (Green) - Default */
+.mat-mdc-progress-spinner,
+.mat-mdc-progress-spinner.manager-theme {
+  --mdc-circular-progress-active-indicator-color: #4CAF50;
+}
+
+mat-spinner,
+mat-spinner.manager-theme {
+  --mdc-circular-progress-active-indicator-color: #4CAF50;
+}
+
+/* Spinner Colors - Admin Theme (Red) */
+.mat-mdc-progress-spinner.admin-theme {
+  --mdc-circular-progress-active-indicator-color: #d32f2f;
+}
+
+mat-spinner.admin-theme {
+  --mdc-circular-progress-active-indicator-color: #d32f2f;
 }
 
 /* Table Container */
@@ -294,9 +389,15 @@
 }
 
 /* Table Cells */
-.request-id {
+.request-id,
+.request-id.manager-theme {
   font-weight: 600;
   color: #4CAF50;
+}
+
+.request-id.admin-theme {
+  font-weight: 600;
+  color: #d32f2f;
 }
 
 .user-info {
@@ -327,13 +428,26 @@
   color: #666;
 }
 
-.type-chip {
+.type-chip,
+.type-chip.manager-theme {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 4px 12px;
   background: rgba(76, 175, 80, 0.1);
   color: #4CAF50;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.type-chip.admin-theme {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(211, 47, 47, 0.1);
+  color: #d32f2f;
   border-radius: 16px;
   font-size: 13px;
   font-weight: 500;
@@ -428,6 +542,10 @@
   background: rgba(255, 152, 0, 0.02);
 }
 
+.clickable-row {
+  cursor: pointer;
+}
+
 /* No Data Message */
 .no-data-row {
   height: 200px;
@@ -452,7 +570,7 @@
   font-size: 16px;
 }
 
-/* Paginator - Green Theme */
+/* Paginator - Manager Theme (Green) - Default */
 .mat-mdc-paginator {
   background: #f5f5f5;
   border-radius: 0 0 12px 12px;
@@ -461,6 +579,12 @@
 .mat-mdc-paginator .mat-mdc-button.mat-mdc-paginator-navigation-next:not([disabled]),
 .mat-mdc-paginator .mat-mdc-button.mat-mdc-paginator-navigation-previous:not([disabled]) {
   color: #4CAF50;
+}
+
+/* Paginator - Admin Theme (Red) */
+.admin-theme .mat-mdc-paginator .mat-mdc-button.mat-mdc-paginator-navigation-next:not([disabled]),
+.admin-theme .mat-mdc-paginator .mat-mdc-button.mat-mdc-paginator-navigation-previous:not([disabled]) {
+  color: #d32f2f;
 }
 
 /* Snackbar Styles */

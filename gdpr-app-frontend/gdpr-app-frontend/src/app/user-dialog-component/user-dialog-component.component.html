@@ -1,0 +1,193 @@
+<!-- src/app/components/manage-users/user-form-dialog/user-form-dialog.component.html -->
+<div class="dialog-container">
+  
+  <!-- Dialog Header -->
+  <h2 mat-dialog-title class="dialog-title">
+    <mat-icon class="title-icon">{{ data.isEdit ? 'edit' : 'person_add' }}</mat-icon>
+    {{ getDialogTitle() }}
+  </h2>
+
+  <!-- Dialog Content -->
+  <form [formGroup]="userForm" (ngSubmit)="onSubmit()" novalidate>
+    <mat-dialog-content class="dialog-content">
+      
+      <div class="form-grid">
+        
+        <!-- First Name -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>First Name</mat-label>
+          <input matInput 
+                 formControlName="firstname" 
+                 placeholder="Enter first name"
+                 maxlength="50"
+                 required>
+          <mat-icon matSuffix>person</mat-icon>
+          <mat-hint align="end">{{ userForm.get('firstname')?.value?.length || 0 }}/50</mat-hint>
+          <mat-error>{{ getFieldError('firstname') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Last Name -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Last Name</mat-label>
+          <input matInput 
+                 formControlName="lastname" 
+                 placeholder="Enter last name"
+                 maxlength="50"
+                 required>
+          <mat-icon matSuffix>person_outline</mat-icon>
+          <mat-hint align="end">{{ userForm.get('lastname')?.value?.length || 0 }}/50</mat-hint>
+          <mat-error>{{ getFieldError('lastname') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Email -->
+        <mat-form-field appearance="outline" class="form-field email-field">
+          <mat-label>Email Address</mat-label>
+          <input matInput 
+                 formControlName="email" 
+                 type="email"
+                 placeholder="user@example.com"
+                 maxlength="100"
+                 required>
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-hint align="end">{{ userForm.get('email')?.value?.length || 0 }}/100</mat-hint>
+          <mat-error>{{ getFieldError('email') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Password (only for creation) -->
+        <mat-form-field appearance="outline" class="form-field password-field" *ngIf="!data.isEdit">
+          <mat-label>Password</mat-label>
+          <input matInput 
+                 [type]="passwordVisible ? 'text' : 'password'"
+                 formControlName="password" 
+                 placeholder="Enter secure password"
+                 maxlength="100"
+                 required>
+          <button mat-icon-button 
+                  matSuffix 
+                  type="button"
+                  (click)="togglePasswordVisibility()"
+                  [attr.aria-label]="'Hide password'"
+                  [attr.aria-pressed]="passwordVisible">
+            <mat-icon>{{ passwordVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-hint align="start">Min 6 characters with letters or numbers</mat-hint>
+          <mat-hint align="end">{{ userForm.get('password')?.value?.length || 0 }}/100</mat-hint>
+          <mat-error>{{ getFieldError('password') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Change Password Section (only for editing) -->
+        <div class="password-section" *ngIf="data.isEdit">
+          <div class="password-toggle-button">
+            <button mat-stroked-button 
+                    type="button" 
+                    (click)="togglePasswordField()"
+                    class="change-password-btn">
+              <mat-icon>{{ showPasswordField ? 'lock' : 'lock_open' }}</mat-icon>
+              {{ showPasswordField ? 'Cancel Password Change' : 'Change Password' }}
+            </button>
+          </div>
+          
+          <!-- Password field (shown when requested) -->
+          <mat-form-field appearance="outline" 
+                          class="form-field password-field" 
+                          *ngIf="showPasswordField">
+            <mat-label>New Password</mat-label>
+            <input matInput 
+                   [type]="passwordVisible ? 'text' : 'password'"
+                   formControlName="password" 
+                   placeholder="Enter new password"
+                   maxlength="100">
+            <button mat-icon-button 
+                    matSuffix 
+                    type="button"
+                    (click)="togglePasswordVisibility()"
+                    [attr.aria-label]="'Hide password'"
+                    [attr.aria-pressed]="passwordVisible">
+              <mat-icon>{{ passwordVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-hint align="start">Min 6 characters with letters or numbers</mat-hint>
+            <mat-hint align="end">{{ userForm.get('password')?.value?.length || 0 }}/100</mat-hint>
+            <mat-error>{{ getFieldError('password') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Role Selection -->
+        <mat-form-field appearance="outline" class="form-field role-field">
+          <mat-label>User Role</mat-label>
+          <mat-select formControlName="roleId" required>
+            <mat-option value="">Select a role</mat-option>
+            <mat-option *ngFor="let role of roleOptions" [value]="role.id">
+              {{ role.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>admin_panel_settings</mat-icon>
+          <mat-hint *ngIf="userForm.get('roleId')?.value">
+            {{ getRoleName(userForm.get('roleId')?.value) }}
+          </mat-hint>
+          <mat-error>{{ getFieldError('roleId') }}</mat-error>
+        </mat-form-field>
+
+        <!-- Active Toggle (only for editing) -->
+        <div class="form-field toggle-field" *ngIf="data.isEdit">
+          <div class="toggle-container">
+            <mat-slide-toggle formControlName="active" color="primary">
+              <span class="toggle-label">User Active</span>
+            </mat-slide-toggle>
+            <div class="toggle-description">
+              <span class="toggle-status" [class.active]="userForm.get('active')?.value">
+                {{ userForm.get('active')?.value ? 'Active' : 'Inactive' }}
+              </span>
+              <span class="toggle-hint">
+                {{ userForm.get('active')?.value ? 'User can access the system' : 'User access is disabled' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Form Summary (for editing) -->
+      <div class="form-summary" *ngIf="data.isEdit && data.user">
+        <div class="summary-header">
+          <mat-icon>info</mat-icon>
+          <span>Current User Information</span>
+        </div>
+        <div class="summary-content">
+          <div class="summary-item">
+            <strong>Created:</strong> {{ data.user.createdAt | date:'short' || 'N/A' }}
+          </div>
+          <div class="summary-item">
+            <strong>Last Updated:</strong> {{ data.user.updatedAt | date:'short' || 'N/A' }}
+          </div>
+          <div class="summary-item">
+            <strong>User ID:</strong> #{{ data.user.idUser }}
+          </div>
+        </div>
+      </div>
+
+    </mat-dialog-content>
+
+    <!-- Dialog Actions -->
+    <mat-dialog-actions align="end" class="dialog-actions">
+      <button mat-button 
+              type="button" 
+              (click)="onCancel()"
+              [disabled]="isSubmitting"
+              class="cancel-btn">
+        Cancel
+      </button>
+      
+      <button mat-raised-button 
+              color="primary" 
+              type="submit" 
+              [disabled]="!userForm.valid || isSubmitting"
+              class="submit-btn">
+        <mat-spinner diameter="20" *ngIf="isSubmitting" class="button-spinner"></mat-spinner>
+        <mat-icon *ngIf="!isSubmitting">{{ data.isEdit ? 'save' : 'person_add' }}</mat-icon>
+        {{ getSubmitButtonText() }}
+      </button>
+    </mat-dialog-actions>
+
+  </form>
+
+</div>

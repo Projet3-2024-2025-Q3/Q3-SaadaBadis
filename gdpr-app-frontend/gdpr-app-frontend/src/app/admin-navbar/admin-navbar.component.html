@@ -1,0 +1,124 @@
+<!-- src/app/components/admin-navbar/admin-navbar.component.html -->
+<mat-toolbar class="admin-navbar">
+  
+  <!-- Logo and Brand -->
+  <div class="navbar-brand" (click)="navigateToDashboard()">
+    <mat-icon class="brand-icon">admin_panel_settings</mat-icon>
+    <span class="brand-text">GDPR Admin</span>
+  </div>
+
+  <!-- Navigation Links -->
+  <div class="navbar-nav">
+    
+    <!-- Dashboard -->
+    <button 
+      mat-button 
+      class="nav-item"
+      [class.active]="isRouteActive('/admin-dashboard')"
+      (click)="navigateToDashboard()"
+      matTooltip="Dashboard"
+    >
+      <mat-icon>dashboard</mat-icon>
+      <span class="nav-text">Dashboard</span>
+    </button>
+
+    <!-- Users -->
+    <button 
+      mat-button 
+      class="nav-item"
+      [class.active]="isRouteActive('/manage-users')"
+      (click)="navigateToUsers()"
+      matTooltip="Manage Users"
+    >
+      <mat-icon>people</mat-icon>
+      <span class="nav-text">Users</span>
+    </button>
+
+    <!-- Companies -->
+    <button 
+      mat-button 
+      class="nav-item"
+      [class.active]="isRouteActive('/manage-companies')"
+      (click)="navigateToCompanies()"
+      matTooltip="Manage Companies"
+    >
+      <mat-icon>business</mat-icon>
+      <span class="nav-text">Companies</span>
+    </button>
+
+    <!-- Requests -->
+    <button 
+      mat-button 
+      class="nav-item"
+      [class.active]="isRouteActive('/myrequests-manager')"
+      (click)="navigateToRequests()"
+      matTooltip="Manage GDPR Requests"
+    >
+      <mat-icon [matBadge]="pendingRequestsCount > 0 ? pendingRequestsCount : null" 
+                matBadgeColor="warn" 
+                matBadgeSize="small">assignment</mat-icon>
+      <span class="nav-text">Requests</span>
+    </button>
+
+  </div>
+
+  <!-- Spacer -->
+  <div class="navbar-spacer"></div>
+
+  <!-- Right Side Actions -->
+  <div class="navbar-actions">
+    
+    <!-- User Menu -->
+    <button 
+      mat-button 
+      class="user-menu-trigger"
+      [matMenuTriggerFor]="userMenu"
+      matTooltip="User Menu"
+    >
+      <div class="user-info">
+        <div class="user-avatar">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+        <div class="user-details">
+          <span class="user-name">{{ getUserDisplayName() }}</span>
+          <span class="user-role">Administrator</span>
+        </div>
+        <mat-icon class="dropdown-icon">keyboard_arrow_down</mat-icon>
+      </div>
+    </button>
+
+  </div>
+
+</mat-toolbar>
+
+<!-- User Dropdown Menu -->
+<mat-menu #userMenu="matMenu" class="user-dropdown-menu">
+  
+  <!-- User Info Header -->
+  <div class="user-menu-header" mat-menu-item disabled>
+    <div class="user-avatar-large">
+      <mat-icon>account_circle</mat-icon>
+    </div>
+    <div class="user-info-detailed">
+      <div class="user-name-large">{{ getUserDisplayName() }}</div>
+      <div class="user-email">{{ currentUser?.email }}</div>
+      <div class="user-role-badge">Administrator</div>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Menu Actions -->
+  <button mat-menu-item (click)="navigateToProfile()">
+    <mat-icon>person</mat-icon>
+    <span>My Profile</span>
+  </button>
+
+  <mat-divider></mat-divider>
+
+  <button mat-menu-item (click)="logout()" class="logout-item">
+    <mat-icon>logout</mat-icon>
+    <span>Logout</span>
+  </button>
+
+</mat-menu>

@@ -29,6 +29,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
 
 // Components
+import { AdminNavbarComponent } from '../admin-navbar/admin-navbar.component';
 import { ManagerNavbarComponent } from '../manager-navbar/manager-navbar.component';
 import { RequestDetailsDialogComponent } from '../request-details-dialog/request-details-dialog.component';
 
@@ -61,6 +62,7 @@ import { RequestService, GDPRRequest } from '../services/request.service';
     MatBadgeModule,
     MatDividerModule,
     MatCheckboxModule,
+    AdminNavbarComponent,
     ManagerNavbarComponent
   ],
   templateUrl: './my-requests-manager.component.html',
@@ -93,6 +95,10 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
   isLoading: boolean = true;
   isProcessing: boolean = false;
   selectedTab: number = 0;
+  
+  // Role detection
+  isAdmin: boolean = false;
+  isManager: boolean = false;
   
   // Status options
   statusOptions = [
@@ -134,6 +140,9 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         this.currentUser = user;
+        this.isAdmin = this.authService.isAdmin();
+        this.isManager = this.authService.isManager();
+        
         // Store company ID if manager
         if (user && user.role === 'GERANT') {
           this.companyId = (user as any).companyId || null;
@@ -323,11 +332,6 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     return status === 'PENDING' || status === 'EN_ATTENTE';
   }
 
-  // Check if current user is a manager
-  isManager(): boolean {
-    return this.authService.isManager();
-  }
-
   // Helper methods
   getUserName(request: GDPRRequest): string {
     if (request.user) {
@@ -399,5 +403,10 @@ export class ManagerRequestsComponent implements OnInit, OnDestroy, AfterViewIni
     }
 
     this.snackBar.open(message, 'Close', config);
+  }
+
+  // Get theme class based on user role
+  getThemeClass(): string {
+    return this.isAdmin ? 'admin-theme' : 'manager-theme';
   }
 }
