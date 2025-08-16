@@ -96,13 +96,15 @@ export interface UserStatistics {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root' // Makes service available app-wide as singleton
 })
 export class AdminService {
+  // API endpoint configuration
   private readonly API_URL = 'http://localhost:8080/api';
   private readonly USERS_API = `${this.API_URL}/users`;
   private readonly ADMIN_API = `${this.API_URL}/admin`;
 
+  // Default HTTP headers
   private httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json'
@@ -111,8 +113,8 @@ export class AdminService {
 
   constructor(
     private http: HttpClient,
-    private requestService: RequestService,
-    private companyService: CompanyService
+    private requestService: RequestService, // Inject request service for GDPR operations
+    private companyService: CompanyService  // Inject company service for company data
   ) {}
 
   // ================ USER MANAGEMENT ================
@@ -123,7 +125,7 @@ export class AdminService {
   getAllUsers(): Observable<User[]> {
     return this.http.get<User[]>(`${this.USERS_API}`, this.getAuthHttpOptions())
       .pipe(
-        catchError(this.handleError)
+        catchError(this.handleError) // Handle HTTP errors
       );
   }
 
@@ -141,6 +143,7 @@ export class AdminService {
    * Get user by email
    */
   getUserByEmail(email: string): Observable<User> {
+    // Encode email for URL safety
     return this.http.get<User>(`${this.USERS_API}/email/${encodeURIComponent(email)}`, this.getAuthHttpOptions())
       .pipe(
         catchError(this.handleError)
@@ -171,6 +174,7 @@ export class AdminService {
    * Deactivate user (Admin only)
    */
   deactivateUser(id: number): Observable<User> {
+    // Empty body for status change endpoint
     return this.http.put<User>(`${this.USERS_API}/${id}/deactivate`, {}, this.getAuthHttpOptions())
       .pipe(
         catchError(this.handleError)
@@ -233,11 +237,13 @@ export class AdminService {
    * Get comprehensive system statistics for admin dashboard
    */
   getSystemStatistics(): Observable<AdminStatistics> {
+    // Combine multiple data sources into single observable
     return combineLatest([
       this.getAllRequests(),
       this.getAllUsers(),
       this.companyService.getAllCompanies()
     ]).pipe(
+      // Transform combined data into statistics
       map(([requests, users, companies]) => {
         return this.calculateSystemStatistics(requests, users, companies);
       }),
@@ -250,6 +256,7 @@ export class AdminService {
    */
   getUserStatistics(): Observable<UserStatistics> {
     return this.getAllUsers().pipe(
+      // Calculate stats from user array
       map(users => this.calculateUserStatistics(users)),
       catchError(this.handleError)
     );
@@ -268,6 +275,7 @@ export class AdminService {
   getRequestsByUserType(): Observable<{userRequests: GDPRRequest[], companyRequests: GDPRRequest[]}> {
     return this.getAllRequests().pipe(
       map(requests => {
+        // Filter requests by type
         const userRequests = requests.filter(req => req.user && !req.companyId);
         const companyRequests = requests.filter(req => req.companyId);
         return { userRequests, companyRequests };
@@ -284,6 +292,7 @@ export class AdminService {
     // For now, we'll create activities based on recent requests
     return this.requestService.getRecentRequestsAdmin().pipe(
       map(requests => {
+        // Transform requests into activity objects
         return requests.slice(0, limit).map((request, index) => ({
           id: index,
           title: `GDPR Request #${request.id}`,
@@ -312,7 +321,9 @@ export class AdminService {
       this.companyService.getAllCompanies()
     ]).pipe(
       map(([requests, users, companies]) => {
+        // Flatten all data types into single exportable array
         return [
+          // Map requests to export format
           ...requests.map(req => ({
             type: 'request',
             id: req.id,
@@ -322,6 +333,7 @@ export class AdminService {
             userId: req.userId,
             companyId: req.companyId
           })),
+          // Map users to export format
           ...users.map(user => ({
             type: 'user',
             id: user.idUser,
@@ -331,6 +343,7 @@ export class AdminService {
             role: user.role?.roleName,
             active: user.active
           })),
+          // Map companies to export format
           ...companies.map(company => ({
             type: 'company',
             id: company.idCompany,
@@ -354,19 +367,24 @@ export class AdminService {
   }): Observable<User[]> {
     return this.getAllUsers().pipe(
       map(users => {
+        // Apply client-side filtering
         return users.filter(user => {
+          // Email filter - case insensitive
           if (criteria.email && !user.email.toLowerCase().includes(criteria.email.toLowerCase())) {
             return false;
           }
+          // Name filter - search full name
           if (criteria.name) {
             const fullName = `${user.firstname} ${user.lastname}`.toLowerCase();
             if (!fullName.includes(criteria.name.toLowerCase())) {
               return false;
             }
           }
+          // Role filter - exact match
           if (criteria.role && user.role?.roleName !== criteria.role) {
             return false;
           }
+          // Active status filter
           if (criteria.active !== undefined && user.active !== criteria.active) {
             return false;
           }
@@ -381,7 +399,9 @@ export class AdminService {
    * Batch operations on users
    */
   batchUpdateUsers(userIds: number[], updateData: Partial<UpdateUserDTO>): Observable<User[]> {
+    // Create multiple update observables
     const updateObservables = userIds.map(id => this.updateUser(id, updateData));
+    // Execute all updates in parallel
     return forkJoin(updateObservables);
   }
 
@@ -425,6 +445,7 @@ export class AdminService {
       inProgress: 0
     };
 
+    // Count requests by status
     requests.forEach(request => {
       const status = request.status.toLowerCase();
       switch (status) {
@@ -466,13 +487,16 @@ export class AdminService {
       clients: 0
     };
 
+    // Process each user
     users.forEach(user => {
+      // Count active/inactive
       if (user.active) {
         stats.active++;
       } else {
         stats.inactive++;
       }
 
+      // Count by role
       const role = user.role?.roleName?.toLowerCase();
       switch (role) {
         case 'admin':
@@ -505,6 +529,7 @@ export class AdminService {
     let activeUsers = 0;
     let inactiveUsers = 0;
 
+    // Single pass through users array
     users.forEach(user => {
       if (user.active) {
         activeUsers++;
@@ -546,7 +571,7 @@ export class AdminService {
     return {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}` // JWT Bearer authentication
       })
     };
   }
@@ -555,6 +580,7 @@ export class AdminService {
    * Get authentication token from localStorage
    */
   private getToken(): string | null {
+    // Check for browser environment (SSR compatibility)
     if (typeof window !== 'undefined') {
       return localStorage.getItem('gdpr_auth_token');
     }
@@ -589,12 +615,14 @@ export class AdminService {
           errorMessage = 'Internal server error. Please try again later.';
           break;
         default:
+          // Use server error message if available
           if (error.error?.message) {
             errorMessage = error.error.message;
           }
       }
     }
 
+    // Log error for debugging
     console.error('AdminService Error:', error);
     return throwError(() => new Error(errorMessage));
   }

@@ -5,34 +5,38 @@ import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
-// Interfaces pour typer les données
+// Interface for login request payload
 export interface LoginRequest {
   email: string;
   password: string;
 }
 
+// Interface for user registration payload
 export interface RegisterRequest {
   firstname: string;
   lastname: string;
   email: string;
   password: string;
-  roleId?: number;
+  roleId?: number; // Optional - defaults to client role
 }
 
+// Interface for successful login response from server
 export interface LoginResponse {
-  token: string;
-  type: string;
-  id: number;
+  token: string;    // JWT token
+  type: string;     // Token type (usually "Bearer")
+  id: number;       // User ID
   email: string;
   firstname: string;
   lastname: string;
-  role: string;
+  role: string;     // User role (ADMIN, GERANT, CLIENT)
 }
 
+// Generic message response interface
 export interface MessageResponse {
   message: string;
 }
 
+// Interface for user information stored in app
 export interface UserInfo {
   id: number;
   email: string;
@@ -52,21 +56,24 @@ export interface ForgotPasswordRequest {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root' // Singleton service available app-wide
 })
 export class AuthService {
+  // API configuration
   private readonly API_URL = 'http://localhost:8080/api/auth';
-  private readonly TOKEN_KEY = 'gdpr_auth_token';
-  private readonly USER_KEY = 'gdpr_user_info';
+  private readonly TOKEN_KEY = 'gdpr_auth_token';    // localStorage key for token
+  private readonly USER_KEY = 'gdpr_user_info';     // localStorage key for user info
 
-  // Sujet pour suivre l'état d'authentification
+  // BehaviorSubjects for reactive state management
+  // BehaviorSubject holds current value and emits it to new subscribers
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
   private currentUserSubject = new BehaviorSubject<UserInfo | null>(this.getUserFromStorage());
 
-  // Observables publics
+  // Public observables for components to subscribe to
   public isLoggedIn$ = this.isLoggedInSubject.asObservable();
   public currentUser$ = this.currentUserSubject.asObservable();
 
+  // Default HTTP options for non-authenticated requests
   private httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json'
@@ -75,28 +82,30 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router // For navigation after auth events
   ) {
-    // Vérifier la validité du token au démarrage
+    // Check token validity when service initializes
     this.checkTokenValidity();
   }
 
   /**
-   * Connexion utilisateur
+   * User login method
+   * Uses tap operator to perform side effects (save session) without modifying stream
    */
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.API_URL}/login`, credentials, this.httpOptions)
       .pipe(
         tap(response => {
-          // Sauvegarder le token et les infos utilisateur
+          // Side effect: save session data when login succeeds
           this.setSession(response);
         }),
-        catchError(this.handleError)
+        catchError(this.handleError) // Handle any errors
       );
   }
 
   /**
-   * Inscription utilisateur
+   * User registration method
+   * Returns message response instead of user data for security
    */
   register(userData: RegisterRequest): Observable<MessageResponse> {
     return this.http.post<MessageResponse>(`${this.API_URL}/register`, userData, this.httpOptions)
@@ -106,16 +115,19 @@ export class AuthService {
   }
 
   /**
-   * Déconnexion
+   * Logout method with server-side cleanup
+   * Ensures session is cleared even if server request fails
    */
   logout(): Observable<MessageResponse> {
     return this.http.post<MessageResponse>(`${this.API_URL}/logout`, {}, this.getAuthHttpOptions())
       .pipe(
         tap(() => {
+          // Clear session on successful logout
           this.clearSession();
         }),
         catchError((error) => {
-          // Même en cas d'erreur, on déconnecte localement
+          // Important: clear session even if server request fails
+          // This prevents users from being stuck in logged-in state
           this.clearSession();
           return this.handleError(error);
         })
@@ -123,7 +135,8 @@ export class AuthService {
   }
 
   /**
-   * Rafraîchir le token
+   * Refresh JWT token to extend session
+   * Used to maintain authentication without re-login
    */
   refreshToken(): Observable<{token: string, type: string}> {
     const token = this.getToken();
@@ -135,7 +148,7 @@ export class AuthService {
       { token }, this.httpOptions)
       .pipe(
         tap(response => {
-          // Mettre à jour le token
+          // Update token in storage with new token
           this.setToken(response.token);
         }),
         catchError(this.handleError)
@@ -143,7 +156,8 @@ export class AuthService {
   }
 
   /**
-   * Valider le token
+   * Validate token with server and get updated user info
+   * Used to verify token is still valid and get current user data
    */
   validateToken(token?: string): Observable<UserInfo> {
     const tokenToValidate = token || this.getToken();
@@ -155,7 +169,7 @@ export class AuthService {
       { token: tokenToValidate }, this.httpOptions)
       .pipe(
         tap(userInfo => {
-          // Mettre à jour les infos utilisateur
+          // Update stored user info with server response
           this.setUserInfo(userInfo);
         }),
         catchError(this.handleError)
@@ -163,7 +177,7 @@ export class AuthService {
   }
 
   /**
-   * Changer le mot de passe
+   * Change user password (requires current password)
    */
   changePassword(passwordData: ChangePasswordRequest): Observable<MessageResponse> {
     return this.http.post<MessageResponse>(`${this.API_URL}/change-password`, 
@@ -174,7 +188,8 @@ export class AuthService {
   }
 
   /**
-   * Mot de passe oublié
+   * Forgot password - sends reset email
+   * Public endpoint, doesn't require authentication
    */
   forgotPassword(emailData: ForgotPasswordRequest): Observable<MessageResponse> {
     return this.http.post<MessageResponse>(`${this.API_URL}/forgot-password`, 
@@ -185,7 +200,8 @@ export class AuthService {
   }
 
   /**
-   * Obtenir le token d'authentification
+   * Get current authentication token from localStorage
+   * Handles server-side rendering by checking for window object
    */
   getToken(): string | null {
     if (typeof window !== 'undefined') {
@@ -195,21 +211,24 @@ export class AuthService {
   }
 
   /**
-   * Vérifier si l'utilisateur est connecté
+   * Check if user is currently authenticated
+   * Combines token existence check with expiration validation
    */
   isAuthenticated(): boolean {
     return this.hasToken() && !this.isTokenExpired();
   }
 
   /**
-   * Obtenir les informations de l'utilisateur actuel
+   * Get current user information
+   * Returns the current value from the BehaviorSubject
    */
   getCurrentUser(): UserInfo | null {
     return this.currentUserSubject.value;
   }
 
   /**
-   * Vérifier si l'utilisateur a un rôle spécifique
+   * Check if current user has specific role
+   * Utility method for role-based access control
    */
   hasRole(role: string): boolean {
     const user = this.getCurrentUser();
@@ -217,35 +236,37 @@ export class AuthService {
   }
 
   /**
-   * Vérifier si l'utilisateur est admin
+   * Convenience method to check admin role
    */
   isAdmin(): boolean {
     return this.hasRole('ADMIN');
   }
 
   /**
-   * Vérifier si l'utilisateur est gérant
+   * Convenience method to check manager role
    */
   isManager(): boolean {
-    return this.hasRole('GERANT');
+    return this.hasRole('GERANT'); // French term for manager
   }
 
   /**
-   * Vérifier si l'utilisateur est client
+   * Convenience method to check client role
    */
   isClient(): boolean {
     return this.hasRole('CLIENT');
   }
 
   /**
-   * Déconnexion locale (sans appel API)
+   * Local logout without server call
+   * Used when server is unreachable or for emergency logout
    */
   logoutLocal(): void {
     this.clearSession();
   }
 
   /**
-   * Déconnexion et redirection
+   * Logout and redirect to login page
+   * Combines logout with navigation for better UX
    */
   logoutAndRedirect(): void {
     this.logout().subscribe({
@@ -253,47 +274,52 @@ export class AuthService {
         this.router.navigate(['/login']);
       },
       error: () => {
-        // En cas d'erreur, on redirige quand même
+        // Navigate even if logout request fails
         this.router.navigate(['/login']);
       }
     });
   }
 
-  // ================== MÉTHODES PRIVÉES ==================
+  // ================== PRIVATE METHODS ==================
 
   /**
-   * Configurer la session après connexion
+   * Set up user session after successful login
+   * Stores both token and user info, updates reactive state
    */
   private setSession(authResult: LoginResponse): void {
     this.setToken(authResult.token);
     
+    // Transform login response to user info format
     const userInfo: UserInfo = {
       id: authResult.id,
       email: authResult.email,
       firstname: authResult.firstname,
       lastname: authResult.lastname,
       role: authResult.role,
-      active: true
+      active: true // Assume active if login successful
     };
     
     this.setUserInfo(userInfo);
+    // Notify all subscribers that user is now logged in
     this.isLoggedInSubject.next(true);
   }
 
   /**
-   * Nettoyer la session
+   * Clear all session data and update reactive state
+   * Called on logout, token expiration, or auth errors
    */
   private clearSession(): void {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.USER_KEY);
     }
+    // Notify all subscribers that user is logged out
     this.isLoggedInSubject.next(false);
     this.currentUserSubject.next(null);
   }
 
   /**
-   * Sauvegarder le token
+   * Store JWT token in localStorage
    */
   private setToken(token: string): void {
     if (typeof window !== 'undefined') {
@@ -302,115 +328,135 @@ export class AuthService {
   }
 
   /**
-   * Sauvegarder les infos utilisateur
+   * Store user information and update reactive state
    */
   private setUserInfo(userInfo: UserInfo): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem(this.USER_KEY, JSON.stringify(userInfo));
     }
+    // Update current user subject with new info
     this.currentUserSubject.next(userInfo);
   }
 
   /**
-   * Récupérer les infos utilisateur du localStorage
+   * Retrieve user info from localStorage
+   * Handles JSON parsing errors gracefully
    */
   private getUserFromStorage(): UserInfo | null {
     if (typeof window !== 'undefined') {
       const userJson = localStorage.getItem(this.USER_KEY);
-      return userJson ? JSON.parse(userJson) : null;
+      try {
+        return userJson ? JSON.parse(userJson) : null;
+      } catch {
+        // If JSON is corrupted, return null
+        return null;
+      }
     }
     return null;
   }
 
   /**
-   * Vérifier si un token existe
+   * Check if authentication token exists
    */
   private hasToken(): boolean {
-    return !!this.getToken();
+    return !!this.getToken(); // Double negation converts to boolean
   }
 
   /**
-   * Vérifier si le token est expiré
+   * Check if JWT token is expired
+   * Decodes JWT payload to check expiration timestamp
    */
   private isTokenExpired(): boolean {
     const token = this.getToken();
     if (!token) return true;
 
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const exp = payload.exp * 1000; // Convertir en millisecondes
-      return Date.now() >= exp;
+      // JWT structure: header.payload.signature
+      // Split token and decode the payload (middle part)
+      const payload = JSON.parse(atob(token.split('.')[1])); // atob = base64 decode
+      const exp = payload.exp * 1000; // Convert from seconds to milliseconds
+      return Date.now() >= exp; // Check if current time is past expiration
     } catch {
+      // If token is malformed or can't be decoded, consider it expired
       return true;
     }
   }
 
   /**
-   * Vérifier la validité du token au démarrage
+   * Validate token on service initialization
+   * Ensures user stays logged in across browser sessions
    */
   private checkTokenValidity(): void {
     if (this.hasToken() && !this.isTokenExpired()) {
-      // Valider le token auprès du serveur
+      // Token exists and not expired - validate with server
       this.validateToken().subscribe({
         next: () => {
+          // Token is valid, update login state
           this.isLoggedInSubject.next(true);
         },
         error: () => {
+          // Token is invalid, clear session
           this.clearSession();
         }
       });
     } else if (this.hasToken()) {
-      // Token expiré
+      // Token exists but is expired, clear it
       this.clearSession();
     }
+    // If no token exists, do nothing (user is not logged in)
   }
 
   /**
-   * Obtenir les headers avec authentification
+   * Create HTTP options with Bearer token authentication
+   * Used for all authenticated API requests
    */
   private getAuthHttpOptions(): {headers: HttpHeaders} {
     const token = this.getToken();
     return {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}` // Standard JWT Bearer format
       })
     };
   }
 
   /**
-   * Gestionnaire d'erreurs HTTP
+   * Centralized error handling for HTTP requests
+   * Provides user-friendly error messages based on HTTP status codes
    */
   private handleError = (error: HttpErrorResponse): Observable<never> => {
-    let errorMessage = 'Une erreur inattendue s\'est produite';
+    let errorMessage = 'Une erreur inattendue s\'est produite'; // Default French error message
 
     if (error.error instanceof ErrorEvent) {
-      // Erreur côté client
+      // Client-side error (network, etc.)
       errorMessage = `Erreur: ${error.error.message}`;
     } else {
-      // Erreur côté serveur
+      // Server-side error - handle specific HTTP status codes
       switch (error.status) {
         case 401:
-          errorMessage = 'Email ou mot de passe incorrect';
-          this.clearSession(); // Déconnecter en cas d'erreur 401
+          errorMessage = 'Email ou mot de passe incorrect'; // Invalid credentials
+          this.clearSession(); // Clear session on authentication failure
           break;
         case 403:
-          errorMessage = 'Accès interdit';
+          errorMessage = 'Accès interdit'; // Forbidden access
           break;
         case 404:
-          errorMessage = 'Service non trouvé';
+          errorMessage = 'Service non trouvé'; // Service not found
           break;
         case 500:
-          errorMessage = 'Erreur interne du serveur';
+          errorMessage = 'Erreur interne du serveur'; // Internal server error
           break;
         default:
+          // Use server-provided error message if available
           if (error.error?.message) {
             errorMessage = error.error.message;
           }
       }
     }
 
+    // Log error for debugging (should use proper logging in production)
     console.error('Erreur AuthService:', error);
+    // Return observable error for reactive error handling
     return throwError(() => new Error(errorMessage));
   }
 }
