@@ -165,7 +165,6 @@ export class ManagerNavbarComponent implements OnInit, OnDestroy {
    */
   private loadNotifications(): void {
     // For now, we'll create mock notifications based on recent requests
-    // In a real app, you'd have a separate notifications endpoint
     this.requestService.getRecentRequests(5)
       .pipe(takeUntil(this.destroy$))
       .subscribe({

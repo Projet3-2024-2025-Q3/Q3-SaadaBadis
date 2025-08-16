@@ -1,4 +1,3 @@
-// src/app/components/signup/signup.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -58,15 +57,6 @@ export class SignupComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   successMessage: string = '';
 
-  // Role options for select dropdown (not used anymore but kept for future)
-  // roleOptions = [
-  //   { value: 'dpo', label: 'Data Protection Officer' },
-  //   { value: 'legal', label: 'Legal Counsel' },
-  //   { value: 'compliance', label: 'Compliance Manager' },
-  //   { value: 'it', label: 'IT Manager' },
-  //   { value: 'security', label: 'Security Officer' },
-  //   { value: 'other', label: 'Other' }
-  // ];
 
   // Subject for component cleanup
   private destroy$ = new Subject<void>();
@@ -245,29 +235,7 @@ export class SignupComponent implements OnInit, OnDestroy {
     return emailRegex.test(email);
   }
 
-  /**
-   * Map role string to roleId (not used anymore)
-   */
-  // private getRoleId(role: string): number | undefined {
-  //   const roleMapping: { [key: string]: number } = {
-  //     'dpo': 1,
-  //     'legal': 2,
-  //     'compliance': 3,
-  //     'it': 4,
-  //     'security': 5,
-  //     'other': 6
-  //   };
-  //   
-  //   return roleMapping[role];
-  // }
 
-  /**
-   * Get role label for display (not used anymore)
-   */
-  // getRoleLabel(roleValue: string): string {
-  //   const role = this.roleOptions.find(r => r.value === roleValue);
-  //   return role ? role.label : roleValue;
-  // }
 
   /**
    * Check if form is valid for submission
