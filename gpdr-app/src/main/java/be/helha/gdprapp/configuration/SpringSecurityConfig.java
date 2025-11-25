@@ -39,6 +39,9 @@ public class SpringSecurityConfig {
                     auth.requestMatchers("/h2-console/**").permitAll(); // H2 Console
                     auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll(); // Swagger
 
+                    auth.requestMatchers("/", "/error").permitAll();
+
+
                     // UC1 - CLIENT: GDPR requests management
                     auth.requestMatchers("/api/gdpr/my-requests").hasRole("CLIENT");
                     auth.requestMatchers("/api/gdpr/create").hasRole("CLIENT");
