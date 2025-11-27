@@ -25,7 +25,7 @@ export interface CompanyStatistics {
 })
 export class CompanyService {
   // API endpoint configuration
-  private readonly API_URL = 'http://localhost:8080/api/companies';
+  private readonly API_URL = 'https://q3-saadabadis.onrender.com/api/companies';
 
   // Default HTTP headers for requests
   private httpOptions = {

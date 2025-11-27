@@ -59,7 +59,7 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class RequestService {
-  private readonly API_URL = 'http://localhost:8080/api/gdpr-requests';
+  private readonly API_URL = 'https://q3-saadabadis.onrender.com/api/gdpr-requests';
 
   private httpOptions = {
     headers: new HttpHeaders({

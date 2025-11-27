@@ -60,7 +60,7 @@ export interface ForgotPasswordRequest {
 })
 export class AuthService {
   // API configuration
-  private readonly API_URL = 'http://localhost:8080/api/auth';
+  private readonly API_URL = 'https://q3-saadabadis.onrender.com/api/auth';
   private readonly TOKEN_KEY = 'gdpr_auth_token';    // localStorage key for token
   private readonly USER_KEY = 'gdpr_user_info';     // localStorage key for user info
 

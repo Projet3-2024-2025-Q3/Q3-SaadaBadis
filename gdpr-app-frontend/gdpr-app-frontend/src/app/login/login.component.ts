@@ -122,7 +122,7 @@ export class LoginComponent {
   * Navigate to forgot password page
   */
  onForgotPassword(): void {
-  this.router.navigate(['/forgot-password']);
+  this.router.navigate(['/forgot']);
  }
 
  /**

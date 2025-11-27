@@ -100,7 +100,7 @@ export interface UserStatistics {
 })
 export class AdminService {
   // API endpoint configuration
-  private readonly API_URL = 'http://localhost:8080/api';
+  private readonly API_URL = 'https://q3-saadabadis.onrender.com/api';
   private readonly USERS_API = `${this.API_URL}/users`;
   private readonly ADMIN_API = `${this.API_URL}/admin`;
 
